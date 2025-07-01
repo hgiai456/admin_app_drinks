@@ -1,0 +1,157 @@
+Table User{
+id int [pk]
+email varchar
+password varchar
+name varchar
+role int
+avatar varchar
+phone int
+address text
+create_ad datetime
+update_ad datetime
+}
+
+Table Category{
+  id int [pk]
+  name varchar
+  image text
+}
+
+Table Product{
+  id int [pk]
+  name varchar
+  description text
+  image text
+  brand_id int
+  category_id int
+  create_at datetime
+  update_at datetime
+  
+}
+
+
+Table ProDetail{
+  id int [pk]
+  prouduct_id int
+  size_id int
+  buyturn int
+  specification text
+  price int
+  oldprice int
+  quantity int
+  img1 text
+  img2 text
+  img3 text
+}
+
+Table Size{
+  id int [pk]
+  name varchar
+}
+
+Table Brand{
+  int id [pk]
+  name varchar
+  image text
+}
+
+Table Order{
+  id int [pk]
+  user_id int
+  status int
+  note text
+  total int
+  address text
+  phone int
+  create_at datetime
+  update_at datetime
+}
+
+Table OrderDetail{
+  id int [pk]
+  order_id int
+  product_id int 
+  price int
+  quantity int
+  create_at datetime
+  update_at datetime
+
+}
+
+Table New{
+ id int [pk]
+ title varchar
+ image text
+ content text
+ create_at datetime
+ update_at datetime
+
+}
+
+Table NewDetail{
+  id int [pk]
+  product_id int
+  news_id int
+  create_at datetime
+  update_at datetime
+}
+
+Table Banner{
+  id int [pk]
+  name varchar
+  image text
+  status int
+  create_at datetime
+  update_at datetime
+}
+
+Table BannerDetail{
+  id int [pk]
+  product_id int
+  banner_id int
+  create_at datetime
+  update_at datetime
+  
+}
+
+Table FeedBack{
+  id int [pk]
+  product_id int
+  user_id int
+  content text
+  star int
+  create_at datetime
+  update_at datetime
+}
+
+
+
+
+Ref: "Brand"."int" < "Product"."brand_id"
+
+Ref: "Category"."id" < "Product"."category_id"
+
+
+Ref: "Product"."id" < "ProDetail"."prouduct_id"
+
+Ref: "User"."id" < "Order"."user_id"
+
+Ref: "Order"."id" < "OrderDetail"."order_id"
+
+Ref: "User"."id" < "FeedBack"."user_id"
+
+Ref: "Product"."id" < "FeedBack"."product_id"
+
+
+
+Ref: "Product"."id" < "NewDetail"."product_id"
+
+Ref: "Size"."id" < "ProDetail"."size_id"
+
+Ref: "New"."id" < "NewDetail"."news_id"
+
+Ref: "Banner"."id" < "BannerDetail"."banner_id"
+
+Ref: "Product"."id" < "BannerDetail"."product_id"
+
+Ref: "Product"."id" < "OrderDetail"."product_id"
