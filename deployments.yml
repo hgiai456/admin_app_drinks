@@ -24,6 +24,9 @@ services:
             PMA_HOST: mysql
             PMA_PORT: 3306
             UPLOAD_LIMIT: 500M
+         volumes:
+            - ./db_data:/var/lib/mysql
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql 
         networks:
             - appSdrinks-online
 networks:
