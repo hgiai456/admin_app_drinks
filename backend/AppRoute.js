@@ -12,10 +12,14 @@ import * as BannerController from './controllers/BannerController.js'; // thêm 
 import * as BannerDetailController from './controllers/BannerDetailController.js'; // thêm .js nếu dùng ES Module
 import * as ProductImageController from './controllers/ProductImageController.js';
 import * as ProDetailController from './controllers/ProDetailController.js';
-import * as UserController from './controllers/UserController.js';
+import * as UserController from './controllers/UserController.js'; //CartController
+import * as CartController from './controllers/CartController.js';
+import * as CartItemController from './controllers/CartItemController.js';
 
 import asyncHandle from './middlewares/asyncHandle.js';
 import InsertProductRequest from './dtos/requests/product/InsertProductRequest.js';
+import InsertCartItemRequest from './dtos/requests/cart_item/InserCartItemRequest.js';
+import InsertCartRequest from './dtos/requests/cart/InsertCartRequest.js';
 import InsertProductImageRequest from './dtos/requests/product_image/InsertProductImageRequest.js';
 import UpdateProductRequest from './dtos/requests/product/UpdateProductRequest.js';
 import validate from './middlewares/validate.js';
@@ -205,6 +209,38 @@ export function AppRoute(app) {
     // //     '/product-images/:id',
     // //     asyncHandle(ProductImageController.updateProductImage)
     // // );
+
+    //Routes for CartController
+    router.get('/carts', asyncHandle(CartController.getCarts)); // Lấy danh sách giỏ hàng
+    router.get('/carts/:id', asyncHandle(CartController.getCartById)); // Lấy giỏ hàng theo ID
+    router.post(
+        '/carts',
+        validate(InsertCartItemRequest),
+        asyncHandle(CartController.insertCart)
+    ); // Thêm mới giỏ hàng
+    router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
+    // router.post('/carts/items', asyncHandle(CartController.addCartItem)); // Thêm sản phẩm vào giỏ hàng
+
+    //Routes for CartItemController
+    router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
+    router.get(
+        '/cart-items/:id',
+        asyncHandle(CartItemController.getCartItemById)
+    ); // Lấy item theo ID
+    router.post(
+        '/cart-items',
+        validate(InsertCartItemRequest),
+        asyncHandle(CartItemController.insertCartItem)
+    ); // Thêm item vào giỏ
+    router.put(
+        '/cart-items/:id',
+        asyncHandle(CartItemController.updateCartItem)
+    ); // Cập nhật số lượng item
+    router.delete(
+        '/cart-items/:id',
+        asyncHandle(CartItemController.deleteCartItem)
+    ); // Xoá item khỏi giỏ
+
     // Routes for ProDetailController
     router.get('/prodetails', asyncHandle(ProDetailController.getProDetails)); // Lấy danh sách chi tiết sản phẩm
     router.get(
