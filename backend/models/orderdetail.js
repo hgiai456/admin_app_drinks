@@ -26,7 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'OrderDetail',
-            tableName: 'orderdetails'
+            tableName: 'orderdetails',
+            timestamps: true,
+            createdAt: 'created_at', // Map createdAt -> created_at
+            updatedAt: 'updated_at' // Map updatedAt -> updated_at
         }
     );
     return OrderDetail;

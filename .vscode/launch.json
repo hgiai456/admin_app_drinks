@@ -6,10 +6,16 @@
             "request": "launch",
             "name": "Debug API",
             "skipFiles": ["<node_internals>/**"],
-            "program": "${workspaceFolder}/app.js",
+            "program": "${workspaceFolder}/backend/AppRouter.js", //Muốn terminal biết đường dẫn của AppRoute
+            "cwd": "${workspaceFolder}/backend",
             "env": {
-                "NODE_ENV": "development"
-            }
+                "NODE_ENV": "development",
+                "PORT": "3000"
+            },
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "restart": true,
+            "runtimeExecutable": "nodemon"
         }
     ]
 }

@@ -11,7 +11,7 @@ class InsertCartItemRequest {
         const schema = Joi.object({
             cart_id: Joi.number().integer().required(),
             product_detail_id: Joi.number().integer().required(),
-            quantity: Joi.number().integer().min(1).required()
+            quantity: Joi.number().integer().min(0).required()
         });
 
         return schema.validate(data); // Returns { error, value }

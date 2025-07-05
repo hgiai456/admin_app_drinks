@@ -215,11 +215,11 @@ export function AppRoute(app) {
     router.get('/carts/:id', asyncHandle(CartController.getCartById)); // Lấy giỏ hàng theo ID
     router.post(
         '/carts',
-        validate(InsertCartItemRequest),
+        validate(InsertCartRequest),
         asyncHandle(CartController.insertCart)
     ); // Thêm mới giỏ hàng
+    router.post('/carts/checkout', asyncHandle(CartController.checkoutCart)); //Checkout
     router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
-    // router.post('/carts/items', asyncHandle(CartController.addCartItem)); // Thêm sản phẩm vào giỏ hàng
 
     //Routes for CartItemController
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
@@ -227,6 +227,10 @@ export function AppRoute(app) {
         '/cart-items/:id',
         asyncHandle(CartItemController.getCartItemById)
     ); // Lấy item theo ID
+    router.get(
+        '/cart-items/carts/:cart_id',
+        asyncHandle(CartItemController.getCartItemByCartId)
+    );
     router.post(
         '/cart-items',
         validate(InsertCartItemRequest),

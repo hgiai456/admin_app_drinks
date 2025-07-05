@@ -9,10 +9,12 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             CartItem.belongsTo(models.Cart, {
-                foreignKey: 'cart_id'
+                foreignKey: 'cart_id',
+                as: 'cart'
             });
             CartItem.belongsTo(models.ProDetail, {
-                foreignKey: 'product_detail_id'
+                foreignKey: 'product_detail_id',
+                as: 'prodetail'
             });
         }
     }

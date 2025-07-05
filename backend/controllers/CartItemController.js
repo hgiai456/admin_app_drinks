@@ -1,5 +1,5 @@
-import db from '../models/index.js';
-import { Sequelize } from 'sequelize';
+import db from '../models';
+import { Sequelize, where } from 'sequelize';
 const { Op } = Sequelize;
 
 export async function getCartItems(req, res) {
@@ -21,43 +21,80 @@ export async function getCartItems(req, res) {
     });
 }
 
-export async function getCartItemById(req, res) {
-    const { id } = req.params;
+export async function getCartItemByCartId(req, res) {
+    const { cart_id } = req.params;
 
-    const item = await db.CartItem.findByPk(id, {
-        include: db.ProDetail
+    const cartItems = await db.CartItem.findAll({
+        where: { cart_id: cart_id }
     });
-
-    if (!item) {
-        return res.status(404).json({
-            message: 'Không tìm thấy sản phẩm trong giỏ hàng'
-        });
-    }
 
     res.status(200).json({
         message: 'Lấy sản phẩm trong giỏ hàng thành công',
-        data: item
+        data: cartItems
     });
 }
 
 export async function insertCartItem(req, res) {
+    //check if produ
     const { cart_id, product_detail_id, quantity } = req.body;
 
-    const item = await db.CartItem.create({
-        cart_id,
-        product_detail_id,
-        quantity
-    });
-
-    if (item) {
-        return res.status(201).json({
-            message: 'Thêm sản phẩm vào giỏ thành công',
-            data: item
-        });
+    const cart = await db.Cart.findByPk(cart_id);
+    if (!cart) {
+        return res.status(404).json({ message: 'Giỏ hàng không tồn tại' });
     }
 
-    return res.status(400).json({
-        message: 'Thêm sản phẩm vào giỏ thất bại'
+    const productDetailExists = await db.ProDetail.findByPk(product_detail_id);
+    if (!productDetailExists) {
+        return res
+            .status(404)
+            .json({ message: 'Sản phẩm chi tiết không tồn tại' });
+    }
+    if (productDetailExists.quantity < quantity) {
+        return res.status(400).json({
+            message: `Số lượng trong kho không đủ. Chỉ còn lại ${productDetailExists.quantity} sản phẩm.`
+        });
+    }
+    // check if productDetailExists.quantity < quantity => send error
+    const existingItem = await db.CartItem.findOne({
+        where: {
+            cart_id: cart_id,
+            product_detail_id: product_detail_id
+        }
+    });
+    if (existingItem) {
+        if (quantity === 0) {
+            // Nếu số lượng = 0, xóa CartItem
+            await existingItem.destroy();
+            return res
+                .status(200)
+                .json({ message: 'Đã xóa sản phẩm khỏi giỏ hàng' });
+        } else {
+            // Nếu đã tồn tại, cập nhật số lượng
+            existingItem.quantity = quantity;
+            await existingItem.save();
+            return res.status(200).json({
+                message: 'Cập nhật số lượng sản phẩm trong giỏ hàng thành công',
+                data: existingItem
+            });
+        }
+    } else {
+        if (quantity > 0) {
+            const newItem = await db.CartItem.create({
+                cart_id,
+                product_detail_id,
+                quantity
+            });
+
+            return res.status(201).json({
+                message: 'Thêm sản phẩm vào giỏ hàng thành công',
+                data: newItem
+            });
+        }
+        // Nếu chưa tồn tại, tạo mới
+    }
+    return res.status(201).json({
+        message: 'Thêm sản phẩm vào giỏ thành công',
+        data: cartItem
     });
 }
 
