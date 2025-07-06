@@ -1,11 +1,10 @@
-import { Sequelize, where } from 'sequelize';
-import db from '../models/index.js';
-import InsertProductRequest from '../dtos/requests/product/InsertProductRequest.js';
+import { col, fn, Sequelize, literal } from 'sequelize';
+import db from '../models';
 const { Op } = Sequelize;
 
 export async function getProducts(req, res) {
     const { search = '', page = 1 } = req.query;
-    const pageSize = 5;
+    const pageSize = 8;
     const offset = (page - 1) * pageSize;
 
     let whereClause = {};
@@ -22,7 +21,15 @@ export async function getProducts(req, res) {
         db.Product.findAll({
             where: whereClause,
             limit: pageSize,
-            offset: offset
+            offset: offset,
+            include: [
+                {
+                    model: db.ProDetail,
+                    attributes: ['price'],
+                    limit: 1,
+                    order: [['price', 'ASC']]
+                }
+            ]
         }),
         db.Product.count({
             where: whereClause
@@ -43,11 +50,23 @@ export async function getProductsById(req, res) {
     const product = await db.Product.findByPk(id, {
         include: [
             {
-                model: db.ProductImage,
-                as: 'product_images',
-                required: true
+                model: db.ProDetail,
+                attributes: ['id', 'size_id', 'price', 'oldprice', 'quantity'],
+                include: [
+                    {
+                        model: db.Size,
+                        attributes: ['name'] //Lay ten size (S,M,L)
+                    }
+                ]
             }
         ]
+        // include: [
+        //     {
+        //         model: db.ProductImage,
+        //         as: 'product_images',
+        //         required: true
+        //     }
+        // ]
     }); //Tìm sản phẩm theo Id
 
     if (!product) {
@@ -55,9 +74,23 @@ export async function getProductsById(req, res) {
             message: 'Sản phẩm không tìm thấy'
         });
     }
+
+    const formattedSizes = product.ProDetails.map((detail) => ({
+        product_detail: detail.id,
+        size_id: detail.size_id,
+        size_name: detail.Size?.name,
+        price: detail.price,
+        oldprice: detail.oldprice,
+        quantity: detail.quantity
+    }));
+
     res.status(200).json({
         message: 'Lấy thông tin sản phẩm thành công.',
-        data: product
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        image: product.image,
+        sizes: formattedSizes
     });
 }
 

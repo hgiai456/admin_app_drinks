@@ -24,9 +24,9 @@ class UpdateProDetailRequest {
             store_id: Joi.number().integer().min(1),
             buyturn: Joi.number().integer().min(0),
             specification: Joi.string(),
-            price: Joi.number().integer().min(0).required(),
+            price: Joi.number().integer().min(0),
             oldprice: Joi.number().integer().min(0).allow(null),
-            quantity: Joi.number().integer().min(0).required(),
+            quantity: Joi.number().integer().min(0),
             img1: Joi.string().allow(''),
             img2: Joi.string().allow(''),
             img3: Joi.string().allow('')

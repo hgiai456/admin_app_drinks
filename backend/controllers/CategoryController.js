@@ -4,7 +4,7 @@ const { Op } = Sequelize;
 
 export async function getCategories(req, res) {
     const { search = '', page = 1 } = req.query;
-    const pageSize = 5;
+    const pageSize = 8;
     const offset = (page - 1) * pageSize;
 
     let whereClause = {};

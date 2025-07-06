@@ -1,8 +1,6 @@
 import { Sequelize, where } from 'sequelize';
-import db from '../models/index.js';
+import db from '../models';
 const { Op } = Sequelize;
-import fs from 'fs';
-import path from 'path';
 
 // Lấy danh sách banner (phân trang + tìm kiếm)
 export async function getBanners(req, res) {
