@@ -13,7 +13,7 @@ class InsertOrderRequest {
 
     static validate(data) {
         const schema = Joi.object({
-            user_id: Joi.number().integer().min(1).required(),
+            user_id: Joi.number().integer(),
             status: Joi.number().integer().min(1).required(),
             note: Joi.string().allow('').optional(),
             total: Joi.number().precision(2).min(0).required(),
