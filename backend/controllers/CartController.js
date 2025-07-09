@@ -1,6 +1,7 @@
 import { required, when } from 'joi';
 import db from '../models';
 import { Sequelize } from 'sequelize';
+import { OrderStatus } from '../constants';
 const { Op } = Sequelize;
 
 export async function getCarts(req, res) {
@@ -136,6 +137,7 @@ export async function checkoutCart(req, res) {
                         0
                     ),
                 note: note,
+                status: OrderStatus.PENDING,
                 phone: phone,
                 address: address
             },

@@ -17,6 +17,9 @@ module.exports = {
                     key: 'id'
                 }
             },
+            session_id: {
+                type: Sequelize.TEXT
+            },
             status: {
                 type: Sequelize.INTEGER
             },

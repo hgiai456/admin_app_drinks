@@ -47,7 +47,7 @@ app.use(function (req, res, next) {
 
 app.get('/', (req, res) => {
     //http://localhost:3000/
-    res.send('I am a project manager,My salary is 100 million. ');
+    res.send('Bạn đã truy cập thành công Backend với port 3000');
 });
 
 const port = process?.env?.PORT ?? 3000;
