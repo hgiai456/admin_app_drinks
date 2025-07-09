@@ -1,6 +1,7 @@
 import { Sequelize, where } from 'sequelize';
 import db from '../models';
 const { Op } = Sequelize;
+import { BannerStatus } from '../constants';
 
 // Lấy danh sách banner (phân trang + tìm kiếm)
 export async function getBanners(req, res) {
@@ -66,8 +67,11 @@ export async function insertBanner(req, res) {
             message: 'Tên banner đã tồn tại, vui lòng chọn tên khác.'
         });
     }
-
-    const banner = await db.Banner.create(req.body);
+    const bannerData = {
+        ...req.body,
+        status: BannerStatus.ACTIVE
+    };
+    const banner = await db.Banner.create(bannerData);
 
     if (banner) {
         return res.status(200).json({

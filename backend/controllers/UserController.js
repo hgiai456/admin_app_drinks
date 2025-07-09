@@ -1,8 +1,9 @@
 import { Sequelize, where } from 'sequelize';
-import db from '../models/index.js';
+import db from '../models';
 const { Op } = Sequelize;
 import ResponseUser from '../dtos/responses/user/ReponseUser.js';
 import argon2 from 'argon2';
+import { UserRole } from '../constants'; //Hãy nhớ nếu export 1 const thì phải có ngoặc ví dụ {UserRole}
 // Lấy danh sách người dùng với tìm kiếm và phân trang
 export async function getUsers(req, res) {
     const { search = '', page = 1 } = req.query;
@@ -56,31 +57,88 @@ export async function getUserById(req, res) {
     });
 }
 
-// Thêm người dùng mới
-export async function insertUser(req, res) {
-    //Kiểm tra email đã tồn tại chưa
-    const existingUser = await db.User.findOne({
-        where: { email: req.body.email }
-    });
-    if (existingUser) {
-        return res.status(409).json({
-            message: 'Email đã tồn tại.'
+export async function registerUser(req, res) {
+    //allow user register by phone and email
+    //at least phone or email must be not null
+
+    const { email, phone, password, name } = req.body;
+
+    // 1. Kiểm tra ít nhất 1 trong 2: email hoặc phone
+    if (!email && !phone) {
+        return res.status(400).json({
+            message: 'Phải cung cấp ít nhất email hoặc số điện thoại.'
         });
     }
-    const hashedPassword = await argon2.hash('password');
+
+    const condition = {};
+    if (email) condition.email = email;
+    if (phone) condition.phone = phone;
+    const existingUser = await db.User.findOne({
+        where: condition
+    });
+
+    if (existingUser) {
+        return res.status(409).json({
+            message: 'Email hoặc số điện thoại đã tồn tại.'
+        });
+    }
+    const hashedPassword = password ? await argon2.hash(password) : null;
+    // 4. Tạo người dùng
     const user = await db.User.create({
         ...req.body,
-        password: hashedPassword
+        email,
+        phone,
+        name,
+        password: hashedPassword,
+        role: UserRole.USER
     });
     if (user) {
         return res.status(201).json({
-            message: 'Thêm mới người dùng thành công.',
+            message: 'Đã đăng ký người dùng thành công.',
             data: new ResponseUser(user)
         });
     }
 
     return res.status(400).json({
         message: 'Lỗi khi thêm người dùng.'
+    });
+}
+
+export async function login(req, res) {
+    const { email, phone, password } = req.body;
+
+    // 1. Kiểm tra email hoặc phone phải có ít nhất 1
+    if (!email && !phone) {
+        return res.status(400).json({
+            message: 'Cần cung cấp email hoặc số điện thoại.'
+        });
+    }
+
+    // 2. Tìm user theo email hoặc phone
+    const condition = {};
+    if (email) condition.email = email;
+    if (phone) condition.phone = phone;
+
+    const user = await db.User.findOne({ where: condition });
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'Tên hoặc mật khẩu không chính xác.'
+        });
+    }
+
+    // 3. Kiểm tra mật khẩu
+    const isPasswordValid = await argon2.verify(user.password, password);
+    if (!isPasswordValid) {
+        return res.status(401).json({
+            message: 'Tên hoặc mật khẩu không chính xác.'
+        });
+    }
+
+    // 4. Trả về thông tin người dùng nếu hợp lệ
+    return res.status(200).json({
+        message: 'Đăng nhập thành công.',
+        data: new ResponseUser(user)
     });
 }
 

@@ -15,13 +15,15 @@ module.exports = (sequelize, DataTypes) => {
 
             //Khóa chính của bảng order có khóa phụ order_id trong bảng OrderDetail
             Order.hasMany(models.OrderDetail, {
-                foreignKey: 'order_id'
+                foreignKey: 'order_id',
+                as: 'order_details'
             });
         }
     }
     Order.init(
         {
             user_id: DataTypes.INTEGER,
+            session_id: DataTypes.TEXT,
             status: DataTypes.INTEGER,
             note: DataTypes.TEXT,
             total: DataTypes.INTEGER,
