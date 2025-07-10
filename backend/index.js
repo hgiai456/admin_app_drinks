@@ -47,7 +47,7 @@ app.use(function (req, res, next) {
 
 app.get('/', (req, res) => {
     //http://localhost:3000/
-    res.send('Bạn đã truy cập thành công Backend với port 3000');
+    res.send('I am a project manager,My salary is 100 million. ');
 });
 
 const port = process?.env?.PORT ?? 3000;
@@ -97,4 +97,5 @@ app.get('/api/healthcheck', async (req, res) => {
 AppRoute(app);
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
+    console.log('DB_PORT:', process.env.DB_PORT);
 });
