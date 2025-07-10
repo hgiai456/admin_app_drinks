@@ -23,8 +23,8 @@ import InsertCartRequest from './dtos/requests/cart/InsertCartRequest.js';
 import InsertProductImageRequest from './dtos/requests/product_image/InsertProductImageRequest.js';
 import UpdateProductRequest from './dtos/requests/product/UpdateProductRequest.js';
 import validate from './middlewares/validate.js';
-import InsertOrderRequest from './dtos/requests/order/InsertOrderRequest.js';
 import InsertUserRequest from './dtos/requests/user/InsertUserRequest.js';
+import LoginUserRequest from './dtos/requests/user/LoginUserRequest.js';
 import uploadImageMiddleware from './middlewares/imageUpload.js';
 import InsertBannerRequest from './dtos/requests/banner/InsertBannerRequest.js';
 import InsertBannerDetailRequest from './dtos/requests/banner_detail/InsertBannerDetailRequest.js';
@@ -32,6 +32,7 @@ import InsertProDetailRequest from './dtos/requests/prodetail/InsertProDetailReq
 import UpdateProDetailRequest from './dtos/requests/prodetail/UpdateProDetailRequest.js';
 import validateImageExists from './middlewares/validateImageExists.js';
 import uploadImageGoogleMiddleware from './middlewares/imageGoogleUpload.js';
+import UpdateOrderRequest from './dtos/requests/order/UpdateOrderRequest.js';
 export function AppRoute(app) {
     //Product
     // http://localhost:3000/products
@@ -57,10 +58,16 @@ export function AppRoute(app) {
     router.get('/users', asyncHandle(UserController.getUsers));
     router.get('/users/:id', asyncHandle(UserController.getUserById));
     router.post(
-        '/users',
+        '/users/register',
         validate(InsertUserRequest),
-        asyncHandle(UserController.insertUser)
+        asyncHandle(UserController.registerUser)
     );
+    router.post(
+        '/users/login',
+        validate(LoginUserRequest),
+        asyncHandle(UserController.login)
+    );
+
     router.put('/users/:id', asyncHandle(UserController.updateUser));
     router.delete('/users/:id', asyncHandle(UserController.deleteUser));
 
@@ -88,13 +95,17 @@ export function AppRoute(app) {
 
     router.get('/orders', asyncHandle(OrderController.getOrders));
     router.get('/orders/:id', asyncHandle(OrderController.getOrderById));
-    router.post(
-        '/orders',
-        validate(InsertOrderRequest),
-        asyncHandle(OrderController.insertOrder)
-    );
+    // router.post(
+    //     '/orders',
+    //     validate(InsertOrderRequest),
+    //     asyncHandle(OrderController.insertOrder)
+    // );
     router.delete('/orders/:id', asyncHandle(OrderController.deleteOrder));
-    router.put('/orders/:id', asyncHandle(OrderController.updateOrder));
+    router.put(
+        '/orders/:id',
+        validate(UpdateOrderRequest),
+        asyncHandle(OrderController.updateOrder)
+    );
 
     router.get('/brands', asyncHandle(BrandController.getBrands));
     router.get('/brands/:id', asyncHandle(BrandController.getBrandById));
@@ -215,11 +226,11 @@ export function AppRoute(app) {
     router.get('/carts/:id', asyncHandle(CartController.getCartById)); // Lấy giỏ hàng theo ID
     router.post(
         '/carts',
-        validate(InsertCartItemRequest),
+        validate(InsertCartRequest),
         asyncHandle(CartController.insertCart)
     ); // Thêm mới giỏ hàng
+    router.post('/carts/checkout', asyncHandle(CartController.checkoutCart)); //Checkout
     router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
-    // router.post('/carts/items', asyncHandle(CartController.addCartItem)); // Thêm sản phẩm vào giỏ hàng
 
     //Routes for CartItemController
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
@@ -227,6 +238,10 @@ export function AppRoute(app) {
         '/cart-items/:id',
         asyncHandle(CartItemController.getCartItemById)
     ); // Lấy item theo ID
+    router.get(
+        '/cart-items/carts/:cart_id',
+        asyncHandle(CartItemController.getCartItemByCartId)
+    );
     router.post(
         '/cart-items',
         validate(InsertCartItemRequest),
