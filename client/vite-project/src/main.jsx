@@ -11,6 +11,7 @@ import UserComponent from "./usercomponent.jsx";
 import ProductComponent from "./productcomponent.jsx";
 import SizeComponent from "./sizecomponent.jsx";
 import OrderComponent from "./ordercomponent.jsx";
+import ImageComponent from "./imagecomponent.jsx";
 
 // Wrapper component để áp dụng styling cho các component của bạn
 function StyledComponentWrapper({ children, title, description }) {
@@ -49,6 +50,7 @@ function Header({ currentPage, setCurrentPage }) {
     { name: "Size", icon: "📏" },
     { name: "Banner", icon: "🎨" },
     { name: "Product Detail", icon: "📄" },
+    { name: "Image", icon: "🖼️" }, // Thêm tab Image
   ];
 
   return (
@@ -251,6 +253,15 @@ function App() {
             description="Detailed product information and specifications"
           >
             <ProdetailComponent />
+          </StyledComponentWrapper>
+        );
+      case "Image":
+        return (
+          <StyledComponentWrapper
+            title="Image Upload"
+            description="Upload và quản lý ảnh"
+          >
+            <ImageComponent />
           </StyledComponentWrapper>
         );
       default:
