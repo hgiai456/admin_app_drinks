@@ -38,6 +38,10 @@ export function AppRoute(app) {
     // http://localhost:3000/products
     router.get('/products', asyncHandle(ProductController.getProducts));
     router.get('/products/:id', asyncHandle(ProductController.getProductsById));
+    router.get(
+        '/products-by-category',
+        asyncHandle(ProductController.getAllProductsByCategory)
+    );
     router.post(
         '/products',
         validate(InsertProductRequest),
@@ -101,11 +105,7 @@ export function AppRoute(app) {
     //     asyncHandle(OrderController.insertOrder)
     // );
     router.delete('/orders/:id', asyncHandle(OrderController.deleteOrder));
-    router.put(
-        '/orders/:id',
-        validate(UpdateOrderRequest),
-        asyncHandle(OrderController.updateOrder)
-    );
+    router.put('/orders/:id', asyncHandle(OrderController.updateOrder));
 
     router.get('/brands', asyncHandle(BrandController.getBrands));
     router.get('/brands/:id', asyncHandle(BrandController.getBrandById));

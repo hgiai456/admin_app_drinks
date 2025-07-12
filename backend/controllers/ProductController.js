@@ -45,6 +45,33 @@ export async function getProducts(req, res) {
     });
 }
 
+export async function getAllProductsByCategory(req, res) {
+    const { category_id } = req.query;
+    if (!category_id) {
+        return res.status(400).json({ message: 'Thiếu category_id' });
+    }
+
+    const whereClause = { category_id: category_id };
+    console.log('category_id:', category_id, 'whereClause:', whereClause);
+    const products = await db.Product.findAll({
+        where: whereClause,
+        include: [
+            {
+                model: db.ProDetail,
+                attributes: ['price'],
+                limit: 1,
+                order: [['price', 'ASC']]
+            }
+        ]
+    });
+
+    res.status(200).json({
+        message: 'Lấy toàn bộ sản phẩm theo danh mục thành công',
+        data: products,
+        totalProducts: products.length
+    });
+}
+
 export async function getProductsById(req, res) {
     const { id } = req.params;
     const product = await db.Product.findByPk(id, {

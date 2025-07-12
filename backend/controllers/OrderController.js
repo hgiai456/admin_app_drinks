@@ -116,13 +116,17 @@ export async function getOrderById(req, res) {
 
 export async function updateOrder(req, res) {
     const { id } = req.params;
-
-    const [updated] = await db.Order.update(req.body, { where: { id } });
+    const { status } = req.body;
+    // 3. Tiến hành cập nhật
+    const [updated] = await db.Order.update(
+        { status: status },
+        { where: { id } }
+    );
 
     if (updated) {
         const updatedOrder = await db.Order.findByPk(id);
         return res.status(200).json({
-            message: 'Cập nhật đơn hàng thành công.',
+            message: 'Cập nhật trạng thái đơn hàng thành công.',
             data: updatedOrder
         });
     } else {
