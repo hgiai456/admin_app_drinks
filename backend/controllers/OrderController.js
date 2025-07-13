@@ -59,7 +59,13 @@ export async function getOrderById(req, res) {
         include: [
             {
                 model: db.OrderDetail,
-                as: 'order_details'
+                as: 'order_details',
+                include: [
+                    {
+                        model: db.ProDetail,
+                        as: 'prodetails'
+                    }
+                ]
                 // Đúng alias trong associate
             }
         ]

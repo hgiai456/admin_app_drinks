@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'order_id'
             });
             OrderDetail.belongsTo(models.ProDetail, {
-                foreignKey: 'product_detail_id'
+                foreignKey: 'product_detail_id',
+                as: 'prodetails'
             });
         }
     }

@@ -21,6 +21,7 @@
         "express": "^5.1.0",
         "firebase": "^11.9.1",
         "joi": "^17.13.3",
+        "jsonwebtoken": "^9.0.2",
         "knex": "^3.1.0",
         "module-alias": "^2.2.3",
         "multer": "^2.0.1",

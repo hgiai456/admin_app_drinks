@@ -30,6 +30,11 @@ module.exports = {
             address: {
                 type: Sequelize.TEXT
             },
+            is_locked: {
+                type: Sequelize.INTEGER,
+                defaultValue: 0
+            },
+
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

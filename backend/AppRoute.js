@@ -32,7 +32,9 @@ import InsertProDetailRequest from './dtos/requests/prodetail/InsertProDetailReq
 import UpdateProDetailRequest from './dtos/requests/prodetail/UpdateProDetailRequest.js';
 import validateImageExists from './middlewares/validateImageExists.js';
 import uploadImageGoogleMiddleware from './middlewares/imageGoogleUpload.js';
-import UpdateOrderRequest from './dtos/requests/order/UpdateOrderRequest.js';
+import { requireRoles } from './middlewares/jwtMiddleware.js';
+import UserRole from './constants/UserRole.js';
+
 export function AppRoute(app) {
     //Product
     // http://localhost:3000/products
@@ -44,18 +46,21 @@ export function AppRoute(app) {
     );
     router.post(
         '/products',
+        requireRoles([UserRole.ADMIN]), //Quyền Admin thì mới có quyền thêm sản phẩm
         validate(InsertProductRequest),
         validateImageExists,
         asyncHandle(ProductController.insertProducts)
     );
     router.put(
         '/products/:id',
+        requireRoles([UserRole.ADMIN]),
         validate(UpdateProductRequest),
         validateImageExists,
         asyncHandle(ProductController.updateProducts)
     );
     router.delete(
         '/products/:id',
+        requireRoles([UserRole.ADMIN]),
         asyncHandle(ProductController.deleteProducts)
     );
     //User
@@ -83,16 +88,18 @@ export function AppRoute(app) {
     );
     router.post(
         '/categories',
+        requireRoles([UserRole.ADMIN]),
         validateImageExists,
         asyncHandle(CategoryController.insertCategory)
     );
     router.delete(
         '/categories/:id',
-
+        requireRoles([UserRole.ADMIN]),
         asyncHandle(CategoryController.deleteCategory)
     );
     router.put(
         '/categories/:id',
+        requireRoles([UserRole.ADMIN]),
         validateImageExists,
         asyncHandle(CategoryController.updateCategory)
     );
@@ -104,8 +111,16 @@ export function AppRoute(app) {
     //     validate(InsertOrderRequest),
     //     asyncHandle(OrderController.insertOrder)
     // );
-    router.delete('/orders/:id', asyncHandle(OrderController.deleteOrder));
-    router.put('/orders/:id', asyncHandle(OrderController.updateOrder));
+    router.delete(
+        '/orders/:id',
+        requireRoles([UserRole.ADMIN]),
+        asyncHandle(OrderController.deleteOrder)
+    );
+    router.put(
+        '/orders/:id',
+        requireRoles([UserRole.ADMIN]),
+        asyncHandle(OrderController.updateOrder)
+    );
 
     router.get('/brands', asyncHandle(BrandController.getBrands));
     router.get('/brands/:id', asyncHandle(BrandController.getBrandById));
@@ -123,10 +138,12 @@ export function AppRoute(app) {
     );
     router.post(
         '/orderDetails',
+        requireRoles([UserRole.ADMIN]),
         asyncHandle(OrderDetailController.insertOrderDetail)
     );
     router.delete(
         '/orderDetails/:id',
+        requireRoles([UserRole.ADMIN]),
         asyncHandle(OrderDetailController.deleteOrderDetail)
     );
     router.put(
@@ -160,16 +177,22 @@ export function AppRoute(app) {
     router.get('/banners/:id', asyncHandle(BannerController.getBannerById)); // Lấy banner theo ID
     router.post(
         '/banners',
+        requireRoles([UserRole.ADMIN]),
         validate(InsertBannerRequest),
         validateImageExists,
         asyncHandle(BannerController.insertBanner)
     ); // Thêm mới banner
     router.put(
         '/banners/:id',
+        requireRoles([UserRole.ADMIN]),
         validateImageExists,
         asyncHandle(BannerController.updateBanner)
     ); // Cập nhật banner theo ID
-    router.delete('/banners/:id', asyncHandle(BannerController.deleteBanner)); // Xóa banner theo ID
+    router.delete(
+        '/banners/:id',
+        requireRoles([UserRole.ADMIN]),
+        asyncHandle(BannerController.deleteBanner)
+    ); // Xóa banner theo ID
 
     //Routes for BannerDetailController
     router.get(
@@ -207,12 +230,14 @@ export function AppRoute(app) {
 
     router.post(
         '/product-images',
+        requireRoles([UserRole.ADMIN]),
         validate(InsertProductImageRequest),
         asyncHandle(ProductImageController.insertProductImage)
     );
 
     router.delete(
         '/product-images/:id',
+        requireRoles([UserRole.ADMIN]),
         asyncHandle(ProductImageController.deleteProductImage)
     );
 
@@ -230,7 +255,11 @@ export function AppRoute(app) {
         asyncHandle(CartController.insertCart)
     ); // Thêm mới giỏ hàng
     router.post('/carts/checkout', asyncHandle(CartController.checkoutCart)); //Checkout
-    router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
+    router.delete(
+        '/carts/:id',
+        requireRoles([UserRole.USER]),
+        asyncHandle(CartController.deleteCart)
+    ); // Xoá giỏ hàng theo ID
 
     //Routes for CartItemController
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
@@ -244,15 +273,18 @@ export function AppRoute(app) {
     );
     router.post(
         '/cart-items',
+        requireRoles([UserRole.USER]),
         validate(InsertCartItemRequest),
         asyncHandle(CartItemController.insertCartItem)
     ); // Thêm item vào giỏ
     router.put(
         '/cart-items/:id',
+        requireRoles([UserRole.USER]),
         asyncHandle(CartItemController.updateCartItem)
     ); // Cập nhật số lượng item
     router.delete(
         '/cart-items/:id',
+        requireRoles([UserRole.ADMIN, UserRole.USER]),
         asyncHandle(CartItemController.deleteCartItem)
     ); // Xoá item khỏi giỏ
 
@@ -282,12 +314,14 @@ export function AppRoute(app) {
     //ImageController
     router.post(
         '/images/upload',
+        requireRoles([UserRole.ADMIN, UserRole.USER]),
         uploadImageMiddleware.array('images', 5), //upload images
         ImageController.uploadImages
     );
 
     router.post(
         '/images/google/upload',
+        requireRoles([UserRole.ADMIN, UserRole.USER]),
         uploadImageGoogleMiddleware.single('image'), //upload a image
         ImageController.uploadImagesToGoogleStorage
     );
