@@ -4,9 +4,9 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Debug API",
+            "name": "Debug JavaScript API",
             "skipFiles": ["<node_internals>/**"],
-            "program": "${workspaceFolder}/backend/AppRouter.js", //Muốn terminal biết đường dẫn của AppRoute
+            "program": "${workspaceFolder}/backend/index.js",
             "cwd": "${workspaceFolder}/backend",
             "env": {
                 "NODE_ENV": "development",
@@ -15,7 +15,8 @@
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
             "restart": true,
-            "runtimeExecutable": "nodemon"
+            "runtimeExecutable": "nodemon",
+            "runtimeArgs": ["--inspect"] // 👈 Để bật debug
         }
     ]
 }
