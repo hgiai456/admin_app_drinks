@@ -11,6 +11,7 @@ function ProdetailComponent() {
     quantity: "",
   });
   const [editingId, setEditingId] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     fetchProdetails();
@@ -34,6 +35,7 @@ function ProdetailComponent() {
     }
     setForm({ name: "", price: "", oldprice: "", quantity: "" });
     setEditingId(null);
+    setShowDialog(false);
     fetchProdetails();
   };
 
@@ -50,49 +52,159 @@ function ProdetailComponent() {
       quantity: item.quantity || "",
     });
     setEditingId(item.id);
+    setShowDialog(true);
+  };
+
+  const handleAddNew = () => {
+    setForm({ name: "", price: "", oldprice: "", quantity: "" });
+    setEditingId(null);
+    setShowDialog(true);
   };
 
   const handleCancel = () => {
     setForm({ name: "", price: "", oldprice: "", quantity: "" });
     setEditingId(null);
+    setShowDialog(false);
+  };
+
+  // Dialog styles
+  const dialogOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: showDialog ? "flex" : "none",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  };
+
+  const dialogStyle = {
+    backgroundColor: "white",
+    padding: "30px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    maxWidth: "400px",
+    width: "90%",
+  };
+
+  const inputStyle = {
+    width: "100%",
+    padding: "10px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    fontSize: "14px",
+    marginBottom: "15px",
+  };
+
+  const buttonGroupStyle = {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
+    marginTop: "10px",
+  };
+
+  const buttonStyle = {
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "14px",
+  };
+
+  const primaryButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#007bff",
+    color: "white",
+  };
+
+  const secondaryButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#6c757d",
+    color: "white",
   };
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
-      <h2>Quản lý sản phẩm chi tiết</h2>
-      <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
-        <input
-          name="name"
-          placeholder="Tên chi tiết"
-          value={form.name}
-          onChange={handleChange}
-          required
-        />
-        <input
-          name="price"
-          placeholder="Giá"
-          value={form.price}
-          onChange={handleChange}
-        />
-        <input
-          name="oldprice"
-          placeholder="Giá cũ"
-          value={form.oldprice}
-          onChange={handleChange}
-        />
-        <input
-          name="quantity"
-          placeholder="Số lượng"
-          value={form.quantity}
-          onChange={handleChange}
-        />
-        <button type="submit">{editingId ? "Cập nhật" : "Thêm mới"}</button>
-        {editingId && (
-          <button type="button" onClick={handleCancel}>
-            Hủy
-          </button>
-        )}
-      </form>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <h2>Quản lý sản phẩm chi tiết</h2>
+        <button
+          onClick={handleAddNew}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          + Thêm chi tiết mới
+        </button>
+      </div>
+
+      {/* Dialog */}
+      <div style={dialogOverlayStyle} onClick={handleCancel}>
+        <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
+          <h3 style={{ marginTop: 0, marginBottom: 20 }}>
+            {editingId ? "Cập nhật chi tiết" : "Thêm chi tiết mới"}
+          </h3>
+          <form onSubmit={handleSubmit}>
+            <input
+              name="name"
+              placeholder="Tên chi tiết"
+              value={form.name}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+            <input
+              name="price"
+              placeholder="Giá"
+              value={form.price}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <input
+              name="oldprice"
+              placeholder="Giá cũ"
+              value={form.oldprice}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <input
+              name="quantity"
+              placeholder="Số lượng"
+              value={form.quantity}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <div style={buttonGroupStyle}>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={secondaryButtonStyle}
+              >
+                Hủy
+              </button>
+              <button type="submit" style={primaryButtonStyle}>
+                {editingId ? "Cập nhật" : "Thêm mới"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <table border="1" cellPadding="8" style={{ width: "100%" }}>
         <thead>
           <tr>

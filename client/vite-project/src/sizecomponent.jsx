@@ -8,6 +8,7 @@ function SizeComponent() {
     name: "",
   });
   const [editingId, setEditingId] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     fetchSizes();
@@ -28,49 +29,26 @@ function SizeComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form
     if (!form.name.trim()) {
       alert("Tên size là bắt buộc!");
       return;
     }
-
-    // Tạo plain object
     const sizeData = {
       name: form.name.trim(),
     };
-
-    console.log("Submitting data:", sizeData);
-    console.log("Editing ID:", editingId);
-
     try {
       let result;
       if (editingId) {
-        console.log("Updating size with data:", sizeData);
         result = await SizeAPI.update(editingId, sizeData);
-        console.log("Update result:", result);
       } else {
-        console.log("Creating new size with data:", sizeData);
         result = await SizeAPI.create(sizeData);
-        console.log("Create result:", result);
       }
-
-      // Reset form
-      setForm({
-        name: "",
-      });
+      setForm({ name: "" });
       setEditingId(null);
-
-      // Reload sizes
+      setShowDialog(false);
       await fetchSizes();
-
       alert(editingId ? "Cập nhật thành công!" : "Tạo size thành công!");
     } catch (error) {
-      console.error("Detailed error:", error);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
-
-      // Hiển thị lỗi chi tiết hơn
       let errorMessage =
         "Có lỗi xảy ra khi " + (editingId ? "cập nhật" : "tạo") + " size";
       if (error.message.includes("400")) {
@@ -83,7 +61,6 @@ function SizeComponent() {
         errorMessage += "\nLỗi: Cấu trúc response từ server không đúng";
       }
       errorMessage += "\nChi tiết: " + error.message;
-
       alert(errorMessage);
     }
   };
@@ -92,65 +69,151 @@ function SizeComponent() {
     if (!confirm("Bạn có chắc chắn muốn xóa size này?")) {
       return;
     }
-
     try {
       await SizeAPI.delete(id);
       fetchSizes();
       alert("Xóa thành công!");
     } catch (error) {
-      console.error("Error deleting size:", error);
       alert("Có lỗi xảy ra khi xóa size: " + error.message);
     }
   };
 
   const handleEdit = (size) => {
-    console.log("Editing size:", size);
     setForm({
       name: size.getName(),
     });
     setEditingId(size.getId());
-    console.log("Form after edit:", form);
-    console.log("Editing ID set to:", size.getId());
+    setShowDialog(true);
+  };
+
+  const handleAddNew = () => {
+    setForm({ name: "" });
+    setEditingId(null);
+    setShowDialog(true);
   };
 
   const handleCancel = () => {
-    setForm({
-      name: "",
-    });
+    setForm({ name: "" });
     setEditingId(null);
+    setShowDialog(false);
+  };
+
+  // Dialog styles
+  const dialogOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: showDialog ? "flex" : "none",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  };
+
+  const dialogStyle = {
+    backgroundColor: "white",
+    padding: "30px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    maxWidth: "400px",
+    width: "90%",
+  };
+
+  const inputStyle = {
+    width: "100%",
+    padding: "10px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    fontSize: "14px",
+    marginBottom: "15px",
+  };
+
+  const buttonGroupStyle = {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
+    marginTop: "10px",
+  };
+
+  const buttonStyle = {
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "14px",
+  };
+
+  const primaryButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#007bff",
+    color: "white",
+  };
+
+  const secondaryButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#6c757d",
+    color: "white",
   };
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: 20 }}>
-      <h2>Quản lý Size</h2>
-
-      {/* Debug info */}
-      <div style={{ background: "#f0f0f0", padding: 10, marginBottom: 20 }}>
-        <strong>Debug Info:</strong>
-        <p>Editing ID: {editingId}</p>
-        <p>Form data: {JSON.stringify(form, null, 2)}</p>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <h2>Quản lý Size</h2>
+        <button
+          onClick={handleAddNew}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          + Thêm size mới
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
-        <div style={{ marginBottom: 10 }}>
-          <input
-            name="name"
-            placeholder="Tên size (VD: S, M, L, XL, 38, 39, 40...)"
-            value={form.name}
-            onChange={handleChange}
-            required
-            style={{ padding: 8, width: 300, marginRight: 10 }}
-          />
-          <button type="submit" style={{ padding: 8, marginRight: 10 }}>
-            {editingId ? "Cập nhật" : "Thêm mới"}
-          </button>
-          {editingId && (
-            <button type="button" onClick={handleCancel} style={{ padding: 8 }}>
-              Hủy
-            </button>
-          )}
+      {/* Dialog */}
+      <div style={dialogOverlayStyle} onClick={handleCancel}>
+        <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
+          <h3 style={{ marginTop: 0, marginBottom: 20 }}>
+            {editingId ? "Cập nhật size" : "Thêm size mới"}
+          </h3>
+          <form onSubmit={handleSubmit}>
+            <input
+              name="name"
+              placeholder="Tên size (VD: S, M, L, XL, 38, 39, 40...)"
+              value={form.name}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+            <div style={buttonGroupStyle}>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={secondaryButtonStyle}
+              >
+                Hủy
+              </button>
+              <button type="submit" style={primaryButtonStyle}>
+                {editingId ? "Cập nhật" : "Thêm mới"}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
 
       <table
         border="1"

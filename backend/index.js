@@ -50,7 +50,7 @@ app.get("/", (req, res) => {
   res.send("I am a project manager,My salary is 100 million. ");
 });
 
-const port = process?.env?.PORT ?? 3000;
+const port = process?.env?.PORT ?? 3001;
 
 // Healthcheck API toàn diện
 app.get("/api/healthcheck", async (req, res) => {

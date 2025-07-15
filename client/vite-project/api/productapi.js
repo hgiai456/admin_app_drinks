@@ -3,36 +3,44 @@ import Product from "../models/productmodel";
 class ProductAPI {
   static baseUrl = "http://localhost:3001/api/products";
 
-  static async getAll() {
+  static async getAll({ page = 1 } = {}) {
     try {
-      const res = await fetch(this.baseUrl);
+      // Gọi API với tham số page
+      const res = await fetch(`${this.baseUrl}?page=${page}`);
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       const data = await res.json();
       console.log("Raw response from getAll:", data);
 
-      // Kiểm tra cấu trúc response
-      const products = data.data || data.products || data;
-      if (!Array.isArray(products)) {
-        console.error("Expected array but got:", products);
-        return [];
-      }
+      // Lấy mảng sản phẩm và thông tin phân trang
+      const productsArr = data.products || data.data || [];
+      const currentPage = data.currentPage || 1;
+      const totalPage = data.totalPage || 1;
 
       // Chuyển thành instance Product
-      return products.map(
-        (p) =>
-          new Product(
-            p.id,
-            p.name,
-            p.description,
-            p.image,
-            p.brand_id,
-            p.category_id,
-            p.createdAt,
-            p.updatedAt
+      const products = Array.isArray(productsArr)
+        ? productsArr.map(
+            (p) =>
+              new Product(
+                p.id,
+                p.name,
+                p.description,
+                p.image,
+                p.brand_id,
+                p.category_id,
+                p.createdAt,
+                p.updatedAt
+              )
           )
-      );
+        : [];
+
+      // Trả về đúng cấu trúc cho component
+      return {
+        products,
+        currentPage,
+        totalPage,
+      };
     } catch (error) {
       console.error("Error fetching products:", error);
       throw error;

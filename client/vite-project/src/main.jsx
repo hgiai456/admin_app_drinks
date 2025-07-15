@@ -17,10 +17,6 @@ import ImageComponent from "./imagecomponent.jsx";
 function StyledComponentWrapper({ children, title, description }) {
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
       <div className="component-wrapper">{children}</div>
     </div>
   );
@@ -74,7 +70,7 @@ function Header({ currentPage, setCurrentPage }) {
             textShadow: "0 2px 4px rgba(0,0,0,0.1)",
           }}
         >
-          🍹 Admin Dashboard
+          Admin Dashboard
         </h1>
         <nav
           style={{
@@ -163,7 +159,7 @@ function Footer() {
           opacity: 0.9,
         }}
       >
-        © 2025 Admin App Drinks | Made with ❤️
+        © 2025 Admin App Drinks | Made with ❤️Hieu
       </p>
     </footer>
   );
