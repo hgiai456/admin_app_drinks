@@ -1,13 +1,14 @@
 {
-    "devDependencies": {
-        "concurrently": "^9.2.0"
-    },
-    "scripts": {
-        "start": "concurrently \"npm run server\" \"npm run client\"",
-        "server": "cd backend && npm start",
-        "client": "cd client/vite-project && npm run dev"
-    },
-    "dependencies": {
-        "lucide-react": "^0.525.0"
-    }
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm start",
+    "client": "cd client/vite-project && npm run dev"
+  },
+  "dependencies": {
+    "lucide-react": "^0.525.0",
+    "module-alias": "^2.2.3"
+  }
 }

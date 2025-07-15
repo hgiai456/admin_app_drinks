@@ -142,47 +142,6 @@ class OrderAPI {
     }
   }
 
-  // Tạo đơn hàng mới
-  static async create(orderData) {
-    try {
-      console.log("Creating order with data:", orderData);
-      const res = await fetch(this.baseUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(orderData),
-      });
-
-      console.log("Create order response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Create order error response:", errorText);
-        throw new Error(
-          `HTTP error! status: ${res.status}, message: ${errorText}`
-        );
-      }
-
-      const data = await res.json();
-      console.log("Raw response from create order:", data);
-
-      const o = data.data || data.order || data;
-      return new Order(
-        o.id,
-        o.user_id,
-        o.status,
-        o.total,
-        o.note,
-        o.address,
-        o.phone,
-        o.createdAt,
-        o.updatedAt
-      );
-    } catch (error) {
-      console.error("Error creating order:", error);
-      throw error;
-    }
-  }
-
   // Cập nhật đơn hàng
   static async update(id, orderData) {
     try {
@@ -239,31 +198,21 @@ class OrderAPI {
   // Cập nhật trạng thái đơn hàng
   static async updateStatus(id, newStatus) {
     try {
-      console.log("Updating order status ID:", id, "to status:", newStatus);
-
-      const res = await fetch(`${this.baseUrl}/${id}/status`, {
-        method: "PATCH",
+      // Đổi PATCH thành PUT, đổi endpoint
+      const res = await fetch(`${this.baseUrl}/${id}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-
-      console.log("Update status response status:", res.status);
-
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("Update status error response:", errorText);
         throw new Error(
           `HTTP error! status: ${res.status}, message: ${errorText}`
         );
       }
-
       const data = await res.json();
-      console.log("Raw response from update status:", data);
-
-      // Fetch lại order để có dữ liệu mới nhất
       return await this.getById(id);
     } catch (error) {
-      console.error("Error updating order status:", error);
       throw error;
     }
   }
