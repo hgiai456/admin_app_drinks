@@ -16,7 +16,7 @@ class InsertUserRequest {
             password: Joi.string().min(6).optional(), // Đảm bảo phải gọi mã hoá trước khi lưu!
             name: Joi.string().required(),
             avatar: Joi.string().uri().allow('').optional(),
-            phone: Joi.string().required(),
+            phone: Joi.string().optional(),
             address: Joi.string().optional()
         });
 

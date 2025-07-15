@@ -1,9 +1,13 @@
-import { Sequelize, where } from 'sequelize';
+import { Sequelize } from 'sequelize';
 import db from '../models';
 const { Op } = Sequelize;
 import ResponseUser from '../dtos/responses/user/ReponseUser.js';
 import argon2 from 'argon2';
 import { UserRole } from '../constants'; //Hãy nhớ nếu export 1 const thì phải có ngoặc ví dụ {UserRole}
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+dotenv.config();
+
 // Lấy danh sách người dùng với tìm kiếm và phân trang
 export async function getUsers(req, res) {
     const { search = '', page = 1 } = req.query;
@@ -69,19 +73,27 @@ export async function registerUser(req, res) {
             message: 'Phải cung cấp ít nhất email hoặc số điện thoại.'
         });
     }
-
-    const condition = {};
-    if (email) condition.email = email;
-    if (phone) condition.phone = phone;
-    const existingUser = await db.User.findOne({
-        where: condition
-    });
-
-    if (existingUser) {
-        return res.status(409).json({
-            message: 'Email hoặc số điện thoại đã tồn tại.'
+    if (email) {
+        const existing_user_email = await db.User.findOne({
+            where: { email }
         });
+        if (existing_user_email) {
+            return res.status(409).json({
+                message: 'Email hoặc số điện thoại đã tồn tại.'
+            });
+        }
     }
+    if (phone) {
+        const existing_user_phone = await db.User.findOne({
+            where: { phone }
+        });
+        if (existing_user_phone) {
+            return res.status(409).json({
+                message: 'Email hoặc số điện thoại đã tồn tại.'
+            });
+        }
+    }
+
     const hashedPassword = password ? await argon2.hash(password) : null;
     // 4. Tạo người dùng
     const user = await db.User.create({
@@ -135,10 +147,23 @@ export async function login(req, res) {
         });
     }
 
+    const token = jwt.sign(
+        {
+            id: user.id
+        },
+        process.env.JWT_SECRET,
+        {
+            expiresIn: process.env.JWT_EXPIRATION
+        }
+    );
+
     // 4. Trả về thông tin người dùng nếu hợp lệ
     return res.status(200).json({
         message: 'Đăng nhập thành công.',
-        data: new ResponseUser(user)
+        data: {
+            user: new ResponseUser(user),
+            token
+        }
     });
 }
 
