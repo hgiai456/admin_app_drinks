@@ -2,11 +2,50 @@
 class ProductAPI {
   static baseUrl = "http://localhost:3001/api/products";
 
-  static async getAll() {
+  static async getAll({ page = 1 } = {}) {
     try {
+<<<<<<< HEAD
       const res = await fetch(this.baseUrl);
       const data = await res.json();
       return data.data;
+=======
+      // Gọi API với tham số page
+      const res = await fetch(`${this.baseUrl}?page=${page}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      console.log("Raw response from getAll:", data);
+
+      // Lấy mảng sản phẩm và thông tin phân trang
+      const productsArr = data.products || data.data || [];
+      const currentPage = data.currentPage || 1;
+      const totalPage = data.totalPage || 1;
+
+      // Chuyển thành instance Product
+      const products = Array.isArray(productsArr)
+        ? productsArr.map(
+            (p) =>
+              new Product(
+                p.id,
+                p.name,
+                p.description,
+                p.image,
+                p.brand_id,
+                p.category_id,
+                p.createdAt,
+                p.updatedAt
+              )
+          )
+        : [];
+
+      // Trả về đúng cấu trúc cho component
+      return {
+        products,
+        currentPage,
+        totalPage,
+      };
+>>>>>>> 93a1a05091c6ca6d7bf387675eb57d41ccbf4c38
     } catch (error) {
       throw new Error("Lỗi khi tải danh sách sản phẩm: " + error.message);
     }

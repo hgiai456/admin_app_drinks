@@ -72,7 +72,8 @@ class UserAPI {
   static async create(userData) {
     try {
       console.log("Creating user with data:", userData);
-      const res = await fetch(this.baseUrl, {
+      // Sử dụng endpoint /api/users/register thay vì /api/users
+      const res = await fetch("http://localhost:3001/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),

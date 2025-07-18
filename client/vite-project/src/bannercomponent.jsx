@@ -12,6 +12,7 @@ function BannerComponent() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
     fetchBanners();
@@ -41,31 +42,22 @@ function BannerComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
       setLoading(true);
       setError(null);
-
-      // Tạo object dữ liệu theo cấu trúc API
       const bannerData = {
         name: form.title,
         image: form.image || null,
         status: form.status,
       };
-
       if (editingId) {
-        // Cập nhật banner
         await BannerAPI.update(editingId, bannerData);
       } else {
-        // Tạo banner mới
         await BannerAPI.create(bannerData);
       }
-
-      // Reset form
       setForm({ title: "", image: "", status: 1 });
       setEditingId(null);
-
-      // Tải lại danh sách
+      setShowDialog(false);
       await fetchBanners();
     } catch (err) {
       setError("Có lỗi xảy ra: " + err.message);
@@ -79,7 +71,6 @@ function BannerComponent() {
     if (!window.confirm("Bạn có chắc muốn xóa banner này?")) {
       return;
     }
-
     try {
       setLoading(true);
       setError(null);
@@ -100,11 +91,19 @@ function BannerComponent() {
       status: banner.status || 1,
     });
     setEditingId(banner.id);
+    setShowDialog(true);
+  };
+
+  const handleAddNew = () => {
+    setForm({ title: "", image: "", status: 1 });
+    setEditingId(null);
+    setShowDialog(true);
   };
 
   const handleCancel = () => {
     setForm({ title: "", image: "", status: 1 });
     setEditingId(null);
+    setShowDialog(false);
   };
 
   const getStatusText = (status) => {
@@ -115,6 +114,65 @@ function BannerComponent() {
     return status === 1 ? "#4CAF50" : "#f44336";
   };
 
+  // Dialog styles
+  const dialogOverlayStyle = {
+    position: "fixed",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    display: showDialog ? "flex" : "none",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1000,
+  };
+
+  const dialogStyle = {
+    backgroundColor: "white",
+    padding: "30px",
+    borderRadius: "8px",
+    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    maxWidth: "400px",
+    width: "90%",
+  };
+
+  const inputStyle = {
+    width: "100%",
+    padding: "10px",
+    border: "1px solid #ddd",
+    borderRadius: "4px",
+    fontSize: "14px",
+    marginBottom: "15px",
+  };
+
+  const buttonGroupStyle = {
+    display: "flex",
+    gap: "10px",
+    justifyContent: "flex-end",
+    marginTop: "10px",
+  };
+
+  const buttonStyle = {
+    padding: "10px 20px",
+    border: "none",
+    borderRadius: "4px",
+    cursor: "pointer",
+    fontSize: "14px",
+  };
+
+  const primaryButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#007bff",
+    color: "white",
+  };
+
+  const secondaryButtonStyle = {
+    ...buttonStyle,
+    backgroundColor: "#6c757d",
+    color: "white",
+  };
+
   if (loading && banners.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "20px" }}>Đang tải...</div>
@@ -123,7 +181,30 @@ function BannerComponent() {
 
   return (
     <div style={{ maxWidth: 1000, margin: "0 auto", padding: 20 }}>
-      <h2>Quản lý Banner</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 20,
+        }}
+      >
+        <h2>Quản lý Banner</h2>
+        <button
+          onClick={handleAddNew}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#28a745",
+            color: "white",
+            border: "none",
+            borderRadius: "4px",
+            cursor: "pointer",
+            fontSize: "14px",
+          }}
+        >
+          + Thêm banner mới
+        </button>
+      </div>
 
       {error && (
         <div
@@ -140,131 +221,52 @@ function BannerComponent() {
         </div>
       )}
 
-      <form
-        onSubmit={handleSubmit}
-        style={{
-          marginBottom: 30,
-          backgroundColor: "#f5f5f5",
-          padding: "20px",
-          borderRadius: "8px",
-          border: "1px solid #ddd",
-        }}
-      >
-        <div style={{ marginBottom: 15 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontWeight: "bold",
-            }}
-          >
-            Tên Banner:
-          </label>
-          <input
-            name="title"
-            placeholder="Nhập tên banner"
-            value={form.title}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "10px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              fontSize: "14px",
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: 15 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontWeight: "bold",
-            }}
-          >
-            Link ảnh:
-          </label>
-          <input
-            name="image"
-            placeholder="Nhập URL ảnh"
-            value={form.image}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "10px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              fontSize: "14px",
-            }}
-          />
-        </div>
-
-        <div style={{ marginBottom: 15 }}>
-          <label
-            style={{
-              display: "block",
-              marginBottom: "5px",
-              fontWeight: "bold",
-            }}
-          >
-            Trạng thái:
-          </label>
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            style={{
-              width: "100%",
-              padding: "10px",
-              border: "1px solid #ccc",
-              borderRadius: "4px",
-              fontSize: "14px",
-            }}
-          >
-            <option value={1}>Hoạt động</option>
-            <option value={0}>Không hoạt động</option>
-          </select>
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{
-              backgroundColor: "#2196F3",
-              color: "white",
-              padding: "10px 20px",
-              border: "none",
-              borderRadius: "4px",
-              cursor: loading ? "not-allowed" : "pointer",
-              marginRight: "10px",
-              fontSize: "14px",
-            }}
-          >
-            {loading ? "Đang xử lý..." : editingId ? "Cập nhật" : "Thêm mới"}
-          </button>
-
-          {editingId && (
-            <button
-              type="button"
-              onClick={handleCancel}
-              style={{
-                backgroundColor: "#757575",
-                color: "white",
-                padding: "10px 20px",
-                border: "none",
-                borderRadius: "4px",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+      {/* Dialog */}
+      <div style={dialogOverlayStyle} onClick={handleCancel}>
+        <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
+          <h3 style={{ marginTop: 0, marginBottom: 20 }}>
+            {editingId ? "Cập nhật banner" : "Thêm banner mới"}
+          </h3>
+          <form onSubmit={handleSubmit}>
+            <input
+              name="title"
+              placeholder="Tên Banner"
+              value={form.title}
+              onChange={handleChange}
+              required
+              style={inputStyle}
+            />
+            <input
+              name="image"
+              placeholder="Link ảnh"
+              value={form.image}
+              onChange={handleChange}
+              style={inputStyle}
+            />
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              style={inputStyle}
             >
-              Hủy
-            </button>
-          )}
+              <option value={1}>Hoạt động</option>
+              <option value={0}>Không hoạt động</option>
+            </select>
+            <div style={buttonGroupStyle}>
+              <button
+                type="button"
+                onClick={handleCancel}
+                style={secondaryButtonStyle}
+              >
+                Hủy
+              </button>
+              <button type="submit" style={primaryButtonStyle}>
+                {editingId ? "Cập nhật" : "Thêm mới"}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      </div>
 
       <div
         style={{

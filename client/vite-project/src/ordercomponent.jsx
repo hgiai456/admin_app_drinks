@@ -1,516 +1,303 @@
-// components/OrderComponent.js
-import { useEffect, useState } from "react";
-import OrderAPI from "../api/orderapi";
-import Order from "../models/ordermodel";
+// client/vite-project/src/ordercomponent.jsx
+import React, { useEffect, useState } from "react";
+import { getOrders, getOrderById, updateOrderStatus } from "../api/orderapi";
+import { orderStatusMap } from "../models/ordermodel";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Select,
+  MenuItem,
+  Pagination,
+  Typography,
+  Box,
+  Grid,
+  Avatar,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import AssignmentIcon from "@mui/icons-material/Assignment";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import CancelIcon from "@mui/icons-material/Cancel";
+import ReplayIcon from "@mui/icons-material/Replay";
+import ErrorIcon from "@mui/icons-material/Error";
 
-function OrderComponent() {
+// Mapping trạng thái (ví dụ, bạn cần đồng bộ với orderStatusMap của bạn)
+// Ví dụ:
+// 1: Đang xử lý, 2: Đã vận chuyển, 3: Đã thành công, 4: Đã hủy, 5: Trả hàng, 6: Đã thất bại
+const statusColors = {
+  1: "#1976d2", // Đang xử lý - xanh dương
+  2: "#ff9800", // Đã vận chuyển - cam
+  3: "#2e7d32", // Đã thành công - xanh lá
+  4: "#2e7d32", // Đã hủy - đỏ
+  5: "#d32f2f", // Trả hàng - đỏ
+  6: "#d32f2f", // Đã thất bại - đỏ
+  7: "#d32f2f", // Đã hủy - đỏ
+};
+const statusIcons = {
+  1: <AssignmentIcon />, // Đang xử lý
+  2: <LocalShippingIcon />, // Đã vận chuyển
+  3: <CheckCircleIcon />, // Đã thành công
+  4: <CheckCircleIcon />, // Đã thành công
+  5: <CancelIcon />, // Trả hàng
+  6: <ReplayIcon />, // Đã thất bại
+  7: <CancelIcon />, // Đã hủy
+};
+
+export default function OrderComponent() {
   const [orders, setOrders] = useState([]);
-  const [form, setForm] = useState({
-    user_id: "",
-    status: 0,
-    total: 0,
-    note: "",
-    address: "",
-    phone: "",
-  });
-  const [editingId, setEditingId] = useState(null);
-  const [filterStatus, setFilterStatus] = useState(-1); // -1 = all
-  const [loading, setLoading] = useState(false);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [page, setPage] = useState(1);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [detailDialogOpen, setDetailDialogOpen] = useState(false);
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState(1);
+  const [stats, setStats] = useState({});
+  // Lọc trạng thái
+  const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
-    fetchOrders();
-  }, [filterStatus]);
+    fetchOrders(page);
+  }, [page]);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    try {
-      let data;
-      if (filterStatus === -1) {
-        data = await OrderAPI.getAll();
-      } else {
-        data = await OrderAPI.getByStatus(filterStatus);
-      }
-      setOrders(data);
-    } catch (error) {
-      console.error("Error fetching orders:", error);
-      alert("Có lỗi khi tải danh sách đơn hàng: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({
-      ...form,
-      [name]:
-        name === "total" || name === "status" || name === "user_id"
-          ? Number(value)
-          : value,
+  const fetchOrders = async (page) => {
+    const res = await getOrders(page, 5);
+    setOrders(res.data.data);
+    setTotalOrders(res.data.totalOrders);
+    // Thống kê trạng thái
+    const stat = {};
+    res.data.data.forEach((o) => {
+      stat[o.status] = (stat[o.status] || 0) + 1;
     });
+    setStats(stat);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validate form
-    if (!form.user_id || !form.address || !form.phone) {
-      alert("User ID, địa chỉ và số điện thoại là bắt buộc!");
-      return;
-    }
-
-    if (form.total <= 0) {
-      alert("Tổng tiền phải lớn hơn 0!");
-      return;
-    }
-
-    // Tạo plain object
-    const orderData = {
-      user_id: form.user_id,
-      status: form.status,
-      total: form.total,
-      note: form.note.trim(),
-      address: form.address.trim(),
-      phone: form.phone.trim(),
-    };
-
-    console.log("Submitting order data:", orderData);
-    console.log("Editing ID:", editingId);
-
-    try {
-      setLoading(true);
-      let result;
-      if (editingId) {
-        console.log("Updating order with data:", orderData);
-        result = await OrderAPI.update(editingId, orderData);
-        console.log("Update result:", result);
-      } else {
-        console.log("Creating new order with data:", orderData);
-        result = await OrderAPI.create(orderData);
-        console.log("Create result:", result);
-      }
-
-      // Reset form
-      setForm({
-        user_id: "",
-        status: 0,
-        total: 0,
-        note: "",
-        address: "",
-        phone: "",
-      });
-      setEditingId(null);
-
-      // Reload orders
-      await fetchOrders();
-
-      alert(
-        editingId ? "Cập nhật đơn hàng thành công!" : "Tạo đơn hàng thành công!"
-      );
-    } catch (error) {
-      console.error("Detailed error:", error);
-
-      let errorMessage =
-        "Có lỗi xảy ra khi " + (editingId ? "cập nhật" : "tạo") + " đơn hàng";
-      if (error.message.includes("400")) {
-        errorMessage += "\nLỗi: Dữ liệu không hợp lệ";
-      } else if (error.message.includes("404")) {
-        errorMessage += "\nLỗi: Không tìm thấy đơn hàng";
-      } else if (error.message.includes("500")) {
-        errorMessage += "\nLỗi: Lỗi server";
-      }
-      errorMessage += "\nChi tiết: " + error.message;
-
-      alert(errorMessage);
-    } finally {
-      setLoading(false);
-    }
+  const handleDetail = async (id) => {
+    const res = await getOrderById(id);
+    setSelectedOrder(res.data.data);
+    setDetailDialogOpen(true);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa đơn hàng này?")) {
-      return;
-    }
-
-    try {
-      setLoading(true);
-      await OrderAPI.delete(id);
-      await fetchOrders();
-      alert("Xóa đơn hàng thành công!");
-    } catch (error) {
-      console.error("Error deleting order:", error);
-      alert("Có lỗi xảy ra khi xóa đơn hàng: " + error.message);
-    } finally {
-      setLoading(false);
-    }
+  const handleUpdate = (order) => {
+    setSelectedOrder(order);
+    setNewStatus(order.status);
+    setUpdateDialogOpen(true);
   };
 
-  const handleEdit = (order) => {
-    console.log("Editing order:", order);
-    setForm({
-      user_id: order.getUserId(),
-      status: order.getStatus(),
-      total: order.getTotal(),
-      note: order.getNote(),
-      address: order.getAddress(),
-      phone: order.getPhone(),
-    });
-    setEditingId(order.getId());
+  const handleUpdateStatus = async () => {
+    await updateOrderStatus(selectedOrder.id, newStatus);
+    setUpdateDialogOpen(false);
+    fetchOrders(page);
   };
 
-  const handleUpdateStatus = async (orderId, newStatus) => {
-    try {
-      setLoading(true);
-      await OrderAPI.updateStatus(orderId, newStatus);
-      await fetchOrders();
-      alert("Cập nhật trạng thái thành công!");
-    } catch (error) {
-      console.error("Error updating status:", error);
-      alert("Có lỗi khi cập nhật trạng thái: " + error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCancel = () => {
-    setForm({
-      user_id: "",
-      status: 0,
-      total: 0,
-      note: "",
-      address: "",
-      phone: "",
-    });
-    setEditingId(null);
-  };
-
-  const getStatusOptions = (currentStatus) => {
-    const options = [];
-    Object.entries(Order.STATUS_TEXT).forEach(([value, text]) => {
-      const statusValue = Number(value);
-      if (statusValue === currentStatus) {
-        options.push({ value: statusValue, text, disabled: false });
-      } else {
-        // Kiểm tra xem có thể chuyển sang trạng thái này không
-        const tempOrder = new Order(1, 1, currentStatus);
-        const canUpdate = tempOrder.canUpdateStatus(statusValue);
-        options.push({ value: statusValue, text, disabled: !canUpdate });
-      }
-    });
-    return options;
-  };
-
-  const getAvailableStatusTransitions = (currentStatus) => {
-    const transitions = [];
-    Object.entries(Order.STATUS).forEach(([key, value]) => {
-      const tempOrder = new Order(1, 1, currentStatus);
-      if (tempOrder.canUpdateStatus(value) && value !== currentStatus) {
-        transitions.push({ value, text: Order.STATUS_TEXT[value], key });
-      }
-    });
-    return transitions;
-  };
+  // Lọc đơn hàng theo trạng thái
+  const filteredOrders =
+    filterStatus === "all"
+      ? orders
+      : orders.filter((order) => String(order.status) === String(filterStatus));
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: 20 }}>
-      <h2>Quản lý đơn hàng</h2>
-
-      {/* Filter */}
-      <div style={{ marginBottom: 20 }}>
-        <label style={{ marginRight: 10 }}>
-          Lọc theo trạng thái:
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(Number(e.target.value))}
-            style={{ marginLeft: 10, padding: 5 }}
-          >
-            <option value={-1}>Tất cả</option>
-            {Object.entries(Order.STATUS_TEXT).map(([value, text]) => (
-              <option key={value} value={value}>
-                {text}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
-
-      {/* Form */}
-      <form
-        onSubmit={handleSubmit}
-        style={{ marginBottom: 20, border: "1px solid #ccc", padding: 15 }}
-      >
-        <h3>{editingId ? "Cập nhật đơn hàng" : "Tạo đơn hàng mới"}</h3>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            marginBottom: 10,
-          }}
-        >
-          <input
-            name="user_id"
-            placeholder="User ID"
-            value={form.user_id}
-            onChange={handleChange}
-            type="number"
-            required
-            style={{ padding: 8 }}
-          />
-          <input
-            name="total"
-            placeholder="Tổng tiền"
-            value={form.total}
-            onChange={handleChange}
-            type="number"
-            step="0.01"
-            required
-            style={{ padding: 8 }}
-          />
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: 10,
-            marginBottom: 10,
-          }}
-        >
-          <input
-            name="phone"
-            placeholder="Số điện thoại"
-            value={form.phone}
-            onChange={handleChange}
-            required
-            style={{ padding: 8 }}
-          />
-          <select
-            name="status"
-            value={form.status}
-            onChange={handleChange}
-            style={{ padding: 8 }}
-          >
-            {Object.entries(Order.STATUS_TEXT).map(([value, text]) => (
-              <option key={value} value={value}>
-                {text}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <textarea
-          name="address"
-          placeholder="Địa chỉ giao hàng"
-          value={form.address}
-          onChange={handleChange}
-          required
-          style={{ width: "100%", padding: 8, marginBottom: 10, minHeight: 60 }}
-        />
-
-        <textarea
-          name="note"
-          placeholder="Ghi chú"
-          value={form.note}
-          onChange={handleChange}
-          style={{ width: "100%", padding: 8, marginBottom: 10, minHeight: 60 }}
-        />
-
-        <div>
-          <button
-            type="submit"
-            disabled={loading}
-            style={{ marginRight: 10, padding: "8px 16px" }}
-          >
-            {loading ? "Đang xử lý..." : editingId ? "Cập nhật" : "Tạo mới"}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={handleCancel}
-              style={{ padding: "8px 16px" }}
-            >
-              Hủy
-            </button>
-          )}
-        </div>
-      </form>
-
-      {/* Loading indicator */}
-      {loading && (
-        <div style={{ textAlign: "center", margin: "20px 0" }}>Đang tải...</div>
-      )}
-
-      {/* Orders table */}
-      <table
-        border="1"
-        cellPadding="8"
-        style={{ width: "100%", borderCollapse: "collapse" }}
-      >
-        <thead>
-          <tr style={{ backgroundColor: "#f5f5f5" }}>
-            <th>ID</th>
-            <th>User ID</th>
-            <th>Trạng thái</th>
-            <th>Tổng tiền</th>
-            <th>Địa chỉ</th>
-            <th>Số điện thoại</th>
-            <th>Ghi chú</th>
-            <th>Ngày tạo</th>
-            <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.getId()}>
-              <td>{order.getId()}</td>
-              <td>{order.getUserId()}</td>
-              <td>
-                <span
-                  style={{
-                    backgroundColor: order.getStatusColor(),
-                    color: "white",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {order.getStatusText()}
-                </span>
-              </td>
-              <td>{order.getFormattedTotal()}</td>
-              <td style={{ maxWidth: 150, wordWrap: "break-word" }}>
-                {order.getAddress()}
-              </td>
-              <td>{order.getPhone()}</td>
-              <td style={{ maxWidth: 150, wordWrap: "break-word" }}>
-                {order.getNote()}
-              </td>
-              <td>{order.getFormattedCreatedAt()}</td>
-              <td>
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "5px",
-                  }}
-                >
-                  {/* Các nút chuyển trạng thái */}
-                  {getAvailableStatusTransitions(order.getStatus()).map(
-                    (transition) => (
-                      <button
-                        key={transition.key}
-                        onClick={() =>
-                          handleUpdateStatus(order.getId(), transition.value)
-                        }
-                        style={{
-                          padding: "4px 8px",
-                          fontSize: "12px",
-                          backgroundColor: Order.STATUS_COLOR[transition.value],
-                          color: "white",
-                          border: "none",
-                          borderRadius: "3px",
-                          cursor: "pointer",
-                        }}
-                        disabled={loading}
-                      >
-                        {transition.text}
-                      </button>
-                    )
-                  )}
-
-                  {/* Nút Edit */}
-                  <button
-                    onClick={() => handleEdit(order)}
-                    style={{
-                      padding: "4px 8px",
-                      fontSize: "12px",
-                      backgroundColor: "#007bff",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "3px",
-                      cursor: "pointer",
-                    }}
-                    disabled={loading}
-                  >
-                    Sửa
-                  </button>
-
-                  {/* Nút Delete - chỉ cho phép xóa khi đơn hàng chưa được giao */}
-                  {(order.isPending() || order.isCancelled()) && (
-                    <button
-                      onClick={() => handleDelete(order.getId())}
-                      style={{
-                        padding: "4px 8px",
-                        fontSize: "12px",
-                        backgroundColor: "#dc3545",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "3px",
-                        cursor: "pointer",
-                      }}
-                      disabled={loading}
-                    >
-                      Xóa
-                    </button>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Thống kê đơn hàng */}
-      <div style={{ marginTop: 20 }}>
-        <h3>Thống kê đơn hàng</h3>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "10px",
-          }}
-        >
-          {Object.entries(Order.STATUS_TEXT).map(([status, text]) => {
-            const count = orders.filter(
-              (order) => order.getStatus() === Number(status)
-            ).length;
-            const total = orders
-              .filter((order) => order.getStatus() === Number(status))
-              .reduce((sum, order) => sum + order.getTotal(), 0);
-
-            return (
-              <div
-                key={status}
-                style={{
-                  padding: "15px",
-                  backgroundColor: Order.STATUS_COLOR[status],
-                  color: "white",
-                  borderRadius: "5px",
-                  textAlign: "center",
+    <div>
+      <Typography variant="h4" gutterBottom>
+        Quản lý đơn hàng
+      </Typography>
+      {/* Thống kê trạng thái đẹp hơn */}
+      <Box sx={{ p: 2, mb: 2 }}>
+        <Typography variant="h6" sx={{ mb: 2 }}>
+          Thống kê trạng thái đơn hàng
+        </Typography>
+        <Grid container spacing={2}>
+          {Object.entries(orderStatusMap).map(([key, label]) => (
+            <Grid item xs={12} sm={6} md={3} key={key}>
+              <Paper
+                elevation={3}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  p: 2,
+                  bgcolor: statusColors[key] + "22",
                 }}
               >
-                <div style={{ fontSize: "14px", fontWeight: "bold" }}>
-                  {text}
-                </div>
-                <div style={{ fontSize: "18px", margin: "5px 0" }}>
-                  {count} đơn
-                </div>
-                <div style={{ fontSize: "12px" }}>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(total)}
-                </div>
+                <Avatar sx={{ bgcolor: statusColors[key], mr: 2 }}>
+                  {statusIcons[key]}
+                </Avatar>
+                <Box>
+                  <Typography
+                    variant="subtitle1"
+                    sx={{ color: statusColors[key], fontWeight: "bold" }}
+                  >
+                    {label}
+                  </Typography>
+                  <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                    {stats[key] || 0}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      {/* Bộ lọc trạng thái */}
+      <Box sx={{ mb: 2, display: "flex", alignItems: "center", gap: 2 }}>
+        <FormControl size="small" sx={{ minWidth: 200 }}>
+          <InputLabel>Lọc theo trạng thái</InputLabel>
+          <Select
+            label="Lọc theo trạng thái"
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+          >
+            <MenuItem value="all">Tất cả</MenuItem>
+            {Object.entries(orderStatusMap).map(([key, label]) => (
+              <MenuItem key={key} value={key}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      {/* Bảng đơn hàng */}
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Khách/SĐT</TableCell>
+              <TableCell>Địa chỉ</TableCell>
+              <TableCell>Trạng thái</TableCell>
+              <TableCell>Tổng tiền</TableCell>
+              <TableCell>Hành động</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredOrders.map((order) => {
+              console.log("order.status:", order.status);
+              return (
+                <TableRow key={order.id}>
+                  <TableCell>{order.id}</TableCell>
+                  <TableCell>
+                    {order.phone || order.user_id || order.session_id}
+                  </TableCell>
+                  <TableCell>{order.address}</TableCell>
+                  <TableCell>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                      <Avatar
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          bgcolor: statusColors[order.status],
+                        }}
+                      >
+                        {statusIcons[order.status]}
+                      </Avatar>
+                      <span>{orderStatusMap[order.status]}</span>
+                    </Box>
+                  </TableCell>
+                  <TableCell>{order.total.toLocaleString()}đ</TableCell>
+                  <TableCell>
+                    <Button onClick={() => handleDetail(order.id)}>
+                      Chi tiết
+                    </Button>
+                    <Button onClick={() => handleUpdate(order)}>
+                      Cập nhật
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+        {/* Phân trang */}
+        <Pagination
+          count={Math.ceil(totalOrders / 5)}
+          page={page}
+          onChange={(_, value) => setPage(value)}
+          sx={{ m: 2 }}
+        />
+      </TableContainer>
+
+      {/* Dialog chi tiết */}
+      <Dialog
+        open={detailDialogOpen}
+        onClose={() => setDetailDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Chi tiết đơn hàng</DialogTitle>
+        <DialogContent>
+          {selectedOrder && (
+            <div>
+              <div>
+                <b>ID:</b> {selectedOrder.id}
               </div>
-            );
-          })}
-        </div>
-      </div>
+              <div>
+                <b>Trạng thái:</b> {orderStatusMap[selectedOrder.status]}
+              </div>
+              <div>
+                <b>Địa chỉ:</b> {selectedOrder.address}
+              </div>
+              <div>
+                <b>Điện thoại:</b> {selectedOrder.phone}
+              </div>
+              <div>
+                <b>Ghi chú:</b> {selectedOrder.note}
+              </div>
+              <div>
+                <b>Chi tiết sản phẩm:</b>
+                <ul>
+                  {selectedOrder.order_details?.map((item) => (
+                    <li key={item.id}>
+                      <b>{item.product_detail?.name}</b> - SL: {item.quantity} -
+                      Giá: {item.price.toLocaleString()}đ
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDetailDialogOpen(false)}>Đóng</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Dialog cập nhật trạng thái */}
+      <Dialog
+        open={updateDialogOpen}
+        onClose={() => setUpdateDialogOpen(false)}
+      >
+        <DialogTitle>Cập nhật trạng thái đơn hàng</DialogTitle>
+        <DialogContent>
+          <Select
+            value={newStatus}
+            onChange={(e) => setNewStatus(e.target.value)}
+            fullWidth
+          >
+            {Object.entries(orderStatusMap).map(([key, label]) => (
+              <MenuItem key={key} value={Number(key)}>
+                {label}
+              </MenuItem>
+            ))}
+          </Select>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setUpdateDialogOpen(false)}>Hủy</Button>
+          <Button onClick={handleUpdateStatus} variant="contained">
+            Cập nhật
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
-
-export default OrderComponent;

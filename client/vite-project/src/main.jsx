@@ -70,7 +70,7 @@ function Header({ currentPage, setCurrentPage }) {
             textShadow: "0 2px 4px rgba(0,0,0,0.1)",
           }}
         >
-          🍹 Admin Dashboard
+          Admin Dashboard
         </h1>
         <nav
           style={{
@@ -154,7 +154,7 @@ function Footer() {
           opacity: 0.9,
         }}
       >
-        © 2025 Admin App Drinks | Made with ❤️
+        © 2025 Admin App Drinks | Made with ❤️Hieu
       </p>
     </footer>
   );
