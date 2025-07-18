@@ -1,5 +1,4 @@
-import Product from "../models/productmodel";
-
+// ProductAPI.js
 class ProductAPI {
   static baseUrl = "http://localhost:3003/api/products";
 
@@ -10,77 +9,26 @@ class ProductAPI {
 
   static async getAll({ page = 1 } = {}) {
     try {
-      // Gọi API với tham số page
-      const res = await fetch(`${this.baseUrl}?page=${page}`);
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+      const res = await fetch(this.baseUrl);
       const data = await res.json();
-      console.log("Raw response from getAll:", data);
-
-      // Lấy mảng sản phẩm và thông tin phân trang
-      const productsArr = data.products || data.data || [];
-      const currentPage = data.currentPage || 1;
-      const totalPage = data.totalPage || 1;
-
-      // Chuyển thành instance Product
-      const products = Array.isArray(productsArr)
-        ? productsArr.map(
-            (p) =>
-              new Product(
-                p.id,
-                p.name,
-                p.description,
-                p.image,
-                p.brand_id,
-                p.category_id,
-                p.createdAt,
-                p.updatedAt
-              )
-          )
-        : [];
-
-      // Trả về đúng cấu trúc cho component
-      return {
-        products,
-        currentPage,
-        totalPage,
-      };
+      return data.data;
     } catch (error) {
-      console.error("Error fetching products:", error);
-      throw error;
+      throw new Error("Lỗi khi tải danh sách sản phẩm: " + error.message);
     }
   }
 
   static async getById(id) {
     try {
       const res = await fetch(`${this.baseUrl}/${id}`);
-      if (!res.ok) {
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
       const data = await res.json();
-      console.log("Raw response from getById:", data);
-
-      const p = data.data || data.product || data;
-      return new Product(
-        p.id,
-        p.name,
-        p.description,
-        p.image,
-        p.brand_id,
-        p.category_id,
-        p.createdAt,
-        p.updatedAt
-      );
+      return data.data;
     } catch (error) {
-      console.error("Error fetching product:", error);
-      throw error;
+      throw new Error("Lỗi khi tải sản phẩm: " + error.message);
     }
   }
 
-  static async create(productData) {
+  static async create(product) {
     try {
-      console.log("Creating product with data:", productData);
       const res = await fetch(this.baseUrl, {
         method: "POST",
         headers: {
@@ -89,41 +37,18 @@ class ProductAPI {
         },
         body: JSON.stringify(productData),
       });
-
-      console.log("Create response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Create error response:", errorText);
-        throw new Error(
-          `HTTP error! status: ${res.status}, message: ${errorText}`
-        );
-      }
-
       const data = await res.json();
-      console.log("Raw response from create:", data);
-
-      const p = data.data || data.product || data;
-      return new Product(
-        p.id,
-        p.name,
-        p.description,
-        p.image,
-        p.brand_id,
-        p.category_id,
-        p.createdAt,
-        p.updatedAt
-      );
+      if (!res.ok) {
+        throw new Error(data.message || "Lỗi thêm mới sản phẩm");
+      }
+      return data.data;
     } catch (error) {
-      console.error("Error creating product:", error);
-      throw error;
+      throw new Error("Lỗi khi thêm sản phẩm: " + error.message);
     }
   }
 
-  static async update(id, productData) {
+  static async update(id, product) {
     try {
-      console.log("Updating product ID:", id, "with data:", productData);
-
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "PUT",
         headers: {
@@ -132,74 +57,47 @@ class ProductAPI {
         },
         body: JSON.stringify(productData),
       });
-
-      console.log("Update response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Update error response:", errorText);
-        throw new Error(
-          `HTTP error! status: ${res.status}, message: ${errorText}`
-        );
-      }
-
       const data = await res.json();
-      console.log("Raw response from update:", data);
-
-      // Một số API chỉ trả về success message, không trả về product object
-      if (data.success || data.message) {
-        // Nếu chỉ trả về success, fetch lại product
-        return await this.getById(id);
+      if (!res.ok) {
+        throw new Error(data.message || "Lỗi cập nhật sản phẩm");
       }
-
-      const p = data.data || data.product || data;
-      if (!p.id) {
-        // Nếu không có ID trong response, fetch lại product
-        return await this.getById(id);
-      }
-
-      return new Product(
-        p.id,
-        p.name,
-        p.description,
-        p.image,
-        p.brand_id,
-        p.category_id,
-        p.createdAt,
-        p.updatedAt
-      );
+      return data.data;
     } catch (error) {
-      console.error("Error updating product:", error);
-      throw error;
+      throw new Error("Lỗi khi cập nhật sản phẩm: " + error.message);
     }
   }
 
   static async delete(id) {
     try {
-      console.log("Deleting product ID:", id);
-
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "DELETE",
         headers: this.getAuthHeader(),
       });
-
-      console.log("Delete response status:", res.status);
-
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Delete error response:", errorText);
-        throw new Error(
-          `HTTP error! status: ${res.status}, message: ${errorText}`
-        );
-      }
-
       const data = await res.json();
-      console.log("Raw response from delete:", data);
-
-      return data.data || data;
+      if (!res.ok) {
+        throw new Error(data.message || "Lỗi xóa sản phẩm");
+      }
+      return data.data;
     } catch (error) {
-      console.error("Error deleting product:", error);
-      throw error;
+      throw new Error("Lỗi khi xóa sản phẩm: " + error.message);
+    }
+  }
+
+  static async getPaging({ page = 1, search = "" } = {}) {
+    try {
+      const url = `${this.baseUrl}?search=${encodeURIComponent(
+        search
+      )}&page=${page}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Lỗi lấy danh sách sản phẩm");
+      }
+      return data;
+    } catch (error) {
+      throw new Error(
+        "Lỗi khi tải danh sách sản phẩm có phân trang: " + error.message
+      );
     }
   }
 }
