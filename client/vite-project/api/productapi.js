@@ -1,7 +1,12 @@
 import Product from "../models/productmodel";
 
 class ProductAPI {
-  static baseUrl = "http://localhost:3001/api/products";
+  static baseUrl = "http://localhost:3003/api/products";
+
+  static getAuthHeader() {
+    const token = localStorage.getItem("admin_token");
+    return token ? { Authorization: "Bearer " + token } : {};
+  }
 
   static async getAll({ page = 1 } = {}) {
     try {
@@ -78,7 +83,10 @@ class ProductAPI {
       console.log("Creating product with data:", productData);
       const res = await fetch(this.baseUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
         body: JSON.stringify(productData),
       });
 
@@ -118,7 +126,10 @@ class ProductAPI {
 
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
         body: JSON.stringify(productData),
       });
 
@@ -169,6 +180,7 @@ class ProductAPI {
 
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "DELETE",
+        headers: this.getAuthHeader(),
       });
 
       console.log("Delete response status:", res.status);

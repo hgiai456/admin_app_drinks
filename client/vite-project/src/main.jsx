@@ -1,4 +1,4 @@
-import { StrictMode, useState } from "react";
+import { StrictMode, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 // Import các component gốc của bạn
@@ -12,6 +12,7 @@ import ProductComponent from "./productcomponent.jsx";
 import SizeComponent from "./sizecomponent.jsx";
 import OrderComponent from "./ordercomponent.jsx";
 import ImageComponent from "./imagecomponent.jsx";
+import LoginAdmin from "./loginadmin.jsx"; // Thêm dòng này
 
 // Wrapper component để áp dụng styling cho các component của bạn
 function StyledComponentWrapper({ children, title, description }) {
@@ -167,6 +168,42 @@ function Footer() {
 
 function App() {
   const [currentPage, setCurrentPage] = useState("Order");
+  const [admin, setAdmin] = useState(null);
+
+  // Kiểm tra token và user khi load lại trang
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    const user = localStorage.getItem("admin_user");
+    if (token && user) {
+      try {
+        const userObj = JSON.parse(user);
+        if (userObj.role === 2) {
+          setAdmin(userObj);
+        }
+      } catch (e) {
+        // Nếu lỗi parse, xóa luôn token/user
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_user");
+      }
+    }
+  }, []);
+
+  // Hàm xử lý khi đăng nhập thành công
+  const handleLogin = (user) => {
+    setAdmin(user);
+    localStorage.setItem("admin_user", JSON.stringify(user));
+  };
+
+  // Hàm đăng xuất
+  const handleLogout = () => {
+    setAdmin(null);
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_user");
+  };
+
+  if (!admin) {
+    return <LoginAdmin onLogin={handleLogin} />;
+  }
 
   const renderPage = () => {
     switch (currentPage) {
@@ -417,6 +454,24 @@ function App() {
       <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main style={{ padding: "0 1.5rem" }}>{renderPage()}</main>
       <Footer />
+      {/* Thêm nút đăng xuất */}
+      <button
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+          zIndex: 999,
+          background: "#f44336",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+          padding: "8px 16px",
+          cursor: "pointer",
+        }}
+        onClick={handleLogout}
+      >
+        Đăng xuất
+      </button>
     </div>
   );
 }

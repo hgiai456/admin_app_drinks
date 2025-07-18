@@ -1,7 +1,12 @@
 import Size from "../models/sizemodel";
 
 class SizeAPI {
-  static baseUrl = "http://localhost:3001/api/sizes";
+  static baseUrl = "http://localhost:3003/api/sizes";
+
+  static getAuthHeader() {
+    const token = localStorage.getItem("admin_token");
+    return token ? { Authorization: "Bearer " + token } : {};
+  }
 
   static async getAll() {
     try {
@@ -49,7 +54,10 @@ class SizeAPI {
       console.log("Creating size with data:", sizeData);
       const res = await fetch(this.baseUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
         body: JSON.stringify(sizeData),
       });
 
@@ -80,7 +88,10 @@ class SizeAPI {
 
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
         body: JSON.stringify(sizeData),
       });
 
@@ -122,6 +133,7 @@ class SizeAPI {
 
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "DELETE",
+        headers: this.getAuthHeader(),
       });
 
       console.log("Delete response status:", res.status);

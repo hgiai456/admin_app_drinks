@@ -1,12 +1,19 @@
-const BASE_URL = "http://localhost:3001/api/images";
+const BASE_URL = "http://localhost:3003/api/images";
 
 const ImageAPI = {
+  getAuthHeader() {
+    const token = localStorage.getItem("admin_token");
+    return token ? { Authorization: "Bearer " + token } : {};
+  },
   // Upload ảnh lên Google Storage
   async uploadToGoogle(file) {
     const formData = new FormData();
     formData.append("image", file);
     const res = await fetch(`${BASE_URL}/google/upload`, {
       method: "POST",
+      headers: {
+        ...this.getAuthHeader(),
+      },
       body: formData,
     });
     if (!res.ok) {
@@ -19,7 +26,10 @@ const ImageAPI = {
   async deleteImage(url) {
     const res = await fetch(`${BASE_URL}/delete`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...this.getAuthHeader(),
+      },
       body: JSON.stringify({ url }),
     });
     if (!res.ok) {
