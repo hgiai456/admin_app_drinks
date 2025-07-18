@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import ProductAPI from "../api/productapi";
-import Product from "../models/productmodel";
+
 function ProductComponent() {
   const [products, setProducts] = useState([]);
   const [form, setForm] = useState({
@@ -11,15 +11,18 @@ function ProductComponent() {
     category_id: 0,
   });
   const [editingId, setEditingId] = useState(null);
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(page);
+  }, [page]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (pageNum = 1) => {
     try {
-      const data = await ProductAPI.getAll();
-      setProducts(data);
+      const data = await ProductAPI.getPaging({ page: pageNum });
+      setProducts(data.data);
+      setTotalPage(data.totalPage || 1);
     } catch (error) {
       console.error("Error fetching products:", error);
     }
@@ -31,14 +34,10 @@ function ProductComponent() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate form
     if (!form.name.trim()) {
       alert("Tên sản phẩm là bắt buộc!");
       return;
     }
-
-    // Tạo plain object
     const productData = {
       name: form.name.trim(),
       description: form.description.trim(),
@@ -46,23 +45,12 @@ function ProductComponent() {
       brand_id: Number(form.brand_id),
       category_id: Number(form.category_id),
     };
-
-    console.log("Submitting data:", productData);
-    console.log("Editing ID:", editingId);
-
     try {
-      let result;
       if (editingId) {
-        console.log("Updating product with data:", productData);
-        result = await ProductAPI.update(editingId, productData);
-        console.log("Update result:", result);
+        await ProductAPI.update(editingId, productData);
       } else {
-        console.log("Creating new product with data:", productData);
-        result = await ProductAPI.create(productData);
-        console.log("Create result:", result);
+        await ProductAPI.create(productData);
       }
-
-      // Reset form
       setForm({
         name: "",
         description: "",
@@ -71,61 +59,35 @@ function ProductComponent() {
         category_id: 0,
       });
       setEditingId(null);
-
-      // Reload products
       await fetchProducts();
-
       alert(editingId ? "Cập nhật thành công!" : "Tạo sản phẩm thành công!");
     } catch (error) {
-      console.error("Detailed error:", error);
-      console.error("Error message:", error.message);
-      console.error("Error stack:", error.stack);
-
-      // Hiển thị lỗi chi tiết hơn
-      let errorMessage =
-        "Có lỗi xảy ra khi " + (editingId ? "cập nhật" : "tạo") + " sản phẩm";
-      if (error.message.includes("400")) {
-        errorMessage += "\nLỗi: Dữ liệu không hợp lệ";
-      } else if (error.message.includes("404")) {
-        errorMessage += "\nLỗi: Không tìm thấy sản phẩm";
-      } else if (error.message.includes("500")) {
-        errorMessage += "\nLỗi: Lỗi server";
-      } else if (error.message.includes("Cannot read properties")) {
-        errorMessage += "\nLỗi: Cấu trúc response từ server không đúng";
-      }
-      errorMessage += "\nChi tiết: " + error.message;
-
-      alert(errorMessage);
+      alert("Có lỗi xảy ra: " + error.message);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+    if (!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
       return;
     }
-
     try {
       await ProductAPI.delete(id);
       fetchProducts();
       alert("Xóa thành công!");
     } catch (error) {
-      console.error("Error deleting product:", error);
       alert("Có lỗi xảy ra khi xóa sản phẩm: " + error.message);
     }
   };
 
   const handleEdit = (product) => {
-    console.log("Editing product:", product);
     setForm({
-      name: product.getName(),
-      description: product.getDescription(),
-      image: product.getImage() || "",
-      brand_id: product.getBrandId(),
-      category_id: product.getCategoryId(),
+      name: product.name,
+      description: product.description,
+      image: product.image || "",
+      brand_id: product.brand_id,
+      category_id: product.category_id,
     });
-    setEditingId(product.getId());
-    console.log("Form after edit:", form);
-    console.log("Editing ID set to:", product.getId());
+    setEditingId(product.id);
   };
 
   const handleCancel = () => {
@@ -142,14 +104,6 @@ function ProductComponent() {
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", padding: 20 }}>
       <h2>Quản lý sản phẩm</h2>
-
-      {/* Debug info */}
-      <div style={{ background: "#f0f0f0", padding: 10, marginBottom: 20 }}>
-        <strong>Debug Info:</strong>
-        <p>Editing ID: {editingId}</p>
-        <p>Form data: {JSON.stringify(form, null, 2)}</p>
-      </div>
-
       <form onSubmit={handleSubmit} style={{ marginBottom: 20 }}>
         <div style={{ marginBottom: 10 }}>
           <input
@@ -204,7 +158,6 @@ function ProductComponent() {
           </button>
         )}
       </form>
-
       <table
         border="1"
         cellPadding="8"
@@ -225,9 +178,9 @@ function ProductComponent() {
         </thead>
         <tbody>
           {products.map((product) => (
-            <tr key={product.getId()}>
-              <td>{product.getId()}</td>
-              <td>{product.getName()}</td>
+            <tr key={product.id}>
+              <td>{product.id}</td>
+              <td>{product.name}</td>
               <td
                 style={{
                   maxWidth: 200,
@@ -235,29 +188,29 @@ function ProductComponent() {
                   textOverflow: "ellipsis",
                 }}
               >
-                {product.getDescription()}
+                {product.description}
               </td>
               <td>
-                {product.getImage() && (
+                {product.image && (
                   <img
-                    src={product.getImage()}
-                    alt={product.getName()}
+                    src={product.image}
+                    alt={product.name}
                     width={60}
                     height={60}
                     style={{ objectFit: "cover" }}
                   />
                 )}
               </td>
-              <td>{product.getBrandId()}</td>
-              <td>{product.getCategoryId()}</td>
+              <td>{product.brand_id}</td>
+              <td>{product.category_id}</td>
               <td>
-                {product.getCreatedAt()
-                  ? new Date(product.getCreatedAt()).toLocaleDateString("vi-VN")
+                {product.createdAt
+                  ? new Date(product.createdAt).toLocaleDateString("vi-VN")
                   : "-"}
               </td>
               <td>
-                {product.getUpdatedAt()
-                  ? new Date(product.getUpdatedAt()).toLocaleDateString("vi-VN")
+                {product.updatedAt
+                  ? new Date(product.updatedAt).toLocaleDateString("vi-VN")
                   : "-"}
               </td>
               <td>
@@ -268,7 +221,7 @@ function ProductComponent() {
                   Sửa
                 </button>
                 <button
-                  onClick={() => handleDelete(product.getId())}
+                  onClick={() => handleDelete(product.id)}
                   style={{ padding: 5 }}
                 >
                   Xóa
@@ -278,6 +231,32 @@ function ProductComponent() {
           ))}
         </tbody>
       </table>
+      {/* Phân trang */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 8,
+          marginTop: 16,
+        }}
+      >
+        <button
+          onClick={() => setPage((p) => Math.max(1, p - 1))}
+          disabled={page === 1}
+        >
+          Trang trước
+        </button>
+        <span>
+          Trang {page} / {totalPage}
+        </span>
+        <button
+          onClick={() => setPage((p) => Math.min(totalPage, p + 1))}
+          disabled={page === totalPage}
+        >
+          Trang sau
+        </button>
+      </div>
     </div>
   );
 }

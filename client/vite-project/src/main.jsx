@@ -14,13 +14,9 @@ import OrderComponent from "./ordercomponent.jsx";
 import ImageComponent from "./imagecomponent.jsx";
 
 // Wrapper component để áp dụng styling cho các component của bạn
-function StyledComponentWrapper({ children, title, description }) {
+function StyledComponentWrapper({ children }) {
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
       <div className="component-wrapper">{children}</div>
     </div>
   );
@@ -148,12 +144,7 @@ function Footer() {
         color: COLORS.surface,
         padding: "1.5rem",
         textAlign: "center",
-        position: "fixed",
-        left: 0,
-        bottom: 0,
-        borderRadius: "24px 24px 0 0",
-        boxShadow: `0 -8px 32px ${COLORS.shadow}`,
-        backdropFilter: "blur(10px)",
+        // Bỏ borderRadius để không tạo bo tròn nổi phía trên
       }}
     >
       <p
@@ -176,82 +167,55 @@ function App() {
     switch (currentPage) {
       case "Order":
         return (
-          <StyledComponentWrapper
-            title="Order Management"
-            description="Track and manage customer orders"
-          >
+          <StyledComponentWrapper>
             <OrderComponent />
           </StyledComponentWrapper>
         );
       case "Store":
         return (
-          <StyledComponentWrapper
-            title="Store Management"
-            description="Manage your store locations and settings"
-          >
+          <StyledComponentWrapper>
             <Store />
           </StyledComponentWrapper>
         );
       case "Brand":
         return (
-          <StyledComponentWrapper
-            title="Brand Management"
-            description="Manage product brands and partnerships"
-          >
+          <StyledComponentWrapper>
             <Brand />
           </StyledComponentWrapper>
         );
       case "Category":
         return (
-          <StyledComponentWrapper
-            title="Category Management"
-            description="Organize products into categories"
-          >
+          <StyledComponentWrapper>
             <Category />
           </StyledComponentWrapper>
         );
       case "Product":
         return (
-          <StyledComponentWrapper
-            title="Product Management"
-            description="Manage your product inventory and catalog"
-          >
+          <StyledComponentWrapper>
             <ProductComponent />
           </StyledComponentWrapper>
         );
       case "User":
         return (
-          <StyledComponentWrapper
-            title="User Management"
-            description="Manage customer accounts and permissions"
-          >
+          <StyledComponentWrapper>
             <UserComponent />
           </StyledComponentWrapper>
         );
       case "Size":
         return (
-          <StyledComponentWrapper
-            title="Size Management"
-            description="Manage product sizes and variations"
-          >
+          <StyledComponentWrapper>
             <SizeComponent />
           </StyledComponentWrapper>
         );
       case "Banner":
         return (
-          <StyledComponentWrapper
-            title="Banner Management"
-            description="Create and manage promotional banners"
-          >
+          <StyledComponentWrapper>
             <BannerComponent />
           </StyledComponentWrapper>
         );
       case "Product Detail":
         return (
-          <StyledComponentWrapper
-            title="Product Details"
-            description="Detailed product information and specifications"
-          >
+          <StyledComponentWrapper>
             <ProdetailComponent />
           </StyledComponentWrapper>
         );
@@ -266,10 +230,7 @@ function App() {
         );
       default:
         return (
-          <StyledComponentWrapper
-            title="Order Management"
-            description="Track and manage customer orders"
-          >
+          <StyledComponentWrapper>
             <OrderComponent />
           </StyledComponentWrapper>
         );
@@ -281,46 +242,20 @@ function App() {
       style={{
         background: `linear-gradient(135deg, ${COLORS.background} 0%, #e2e8f0 100%)`,
         minHeight: "100vh",
-        paddingBottom: "100px",
+        paddingBottom: "0px",
         fontFamily:
           "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+        width: "100vw",
+        overflowX: "hidden",
       }}
     >
       <style>
         {`
           .page-container {
-            max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
             padding: 0 1rem;
           }
-          
-          .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: ${COLORS.surface};
-            border-radius: 20px;
-            box-shadow: 0 4px 20px ${COLORS.shadow};
-            border: 1px solid ${COLORS.border};
-          }
-          
-          .page-header h2 {
-            color: ${COLORS.text};
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-            background: linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary});
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-          }
-          
-          .page-header p {
-            color: ${COLORS.textLight};
-            font-size: 1.1rem;
-            margin: 0;
-          }
-          
           .component-wrapper {
             background: ${COLORS.surface};
             padding: 2rem;
