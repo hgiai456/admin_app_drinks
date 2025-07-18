@@ -167,23 +167,49 @@ export async function login(req, res) {
     });
 }
 
-// Cập nhật người dùng
 export async function updateUser(req, res) {
     const { id } = req.params;
+    const { name, avatar, password, oldPassword } = req.body;
 
-    const [updated] = await db.User.update(req.body, {
-        where: { id }
-    });
-
-    if (updated) {
-        return res.status(200).json({
-            message: 'Cập nhật người dùng thành công.'
-        });
-    } else {
-        return res.status(404).json({
-            message: 'Người dùng không tìm thấy.'
+    // Kiểm tra quyền người dùng: chỉ được phép cập nhật thông tin chính mình
+    if (req.user.id != id) {
+        return res.status(403).json({
+            message: 'Bạn không có quyền cập nhật thông tin người khác.'
         });
     }
+
+    const user = await db.User.findByPk(id);
+    if (!user) {
+        return res.status(404).json({ message: 'Người dùng không tìm thấy.' });
+    }
+
+    const updateData = {};
+
+    // Chỉ cập nhật name và avatar nếu có
+    if (name) updateData.name = name;
+    if (avatar) updateData.avatar = avatar;
+
+    // Nếu có yêu cầu cập nhật password
+    if (password) {
+        if (!oldPassword) {
+            return res.status(400).json({
+                message: 'Vui lòng cung cấp mật khẩu cũ để đổi mật khẩu.'
+            });
+        }
+
+        const isMatch = await argon2.verify(user.password, oldPassword);
+        if (!isMatch) {
+            return res.status(401).json({
+                message: 'Mật khẩu cũ không chính xác.'
+            });
+        }
+
+        updateData.password = await argon2.hash(password);
+    }
+
+    await user.update(updateData);
+
+    return res.status(200).json({ message: 'Cập nhật người dùng thành công.' });
 }
 
 // Xoá người dùng

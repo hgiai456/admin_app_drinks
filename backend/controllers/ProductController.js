@@ -103,7 +103,7 @@ export async function getProductsById(req, res) {
     }
 
     const formattedSizes = product.ProDetails.map((detail) => ({
-        product_detail: detail.id,
+        product_detail_id: detail.id,
         size_id: detail.size_id,
         size_name: detail.Size?.name,
         price: detail.price,
@@ -113,6 +113,7 @@ export async function getProductsById(req, res) {
 
     res.status(200).json({
         message: 'Lấy thông tin sản phẩm thành công.',
+
         id: product.id,
         name: product.name,
         description: product.description,

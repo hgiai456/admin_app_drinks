@@ -255,11 +255,7 @@ export function AppRoute(app) {
         asyncHandle(CartController.insertCart)
     ); // Thêm mới giỏ hàng
     router.post('/carts/checkout', asyncHandle(CartController.checkoutCart)); //Checkout
-    router.delete(
-        '/carts/:id',
-        requireRoles([UserRole.USER]),
-        asyncHandle(CartController.deleteCart)
-    ); // Xoá giỏ hàng theo ID
+    router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
 
     //Routes for CartItemController
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
@@ -273,18 +269,15 @@ export function AppRoute(app) {
     );
     router.post(
         '/cart-items',
-        requireRoles([UserRole.USER]),
         validate(InsertCartItemRequest),
         asyncHandle(CartItemController.insertCartItem)
     ); // Thêm item vào giỏ
     router.put(
         '/cart-items/:id',
-        requireRoles([UserRole.USER]),
         asyncHandle(CartItemController.updateCartItem)
     ); // Cập nhật số lượng item
     router.delete(
         '/cart-items/:id',
-        requireRoles([UserRole.ADMIN, UserRole.USER]),
         asyncHandle(CartItemController.deleteCartItem)
     ); // Xoá item khỏi giỏ
 
@@ -294,6 +287,11 @@ export function AppRoute(app) {
         '/prodetails/:id',
         asyncHandle(ProDetailController.getProDetailById)
     ); // Lấy thông tin chi tiết sản phẩm theo ID
+    router.get(
+        '/prodetail/find',
+        asyncHandle(ProDetailController.getProDetailBySizeAndProduct)
+    ); // Lấy thông tin chi tiết sản phẩm theo product_id và size_id
+
     router.post(
         '/prodetails',
         validate(InsertProDetailRequest),

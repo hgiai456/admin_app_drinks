@@ -34,7 +34,10 @@ module.exports = {
                 type: Sequelize.INTEGER,
                 defaultValue: 0
             },
-
+            password_changed_ad: {
+                type: Sequelize.DATE,
+                allowNull: true
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

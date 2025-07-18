@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import db from '../models/index.js';
+import db from '../models';
 const { Op } = Sequelize;
 
 // Lấy danh sách sản phẩm chi tiết
@@ -32,6 +32,38 @@ export async function getProDetails(req, res) {
         currentPage: parseInt(page, 10),
         totalPage: Math.ceil(totalProDetails / pageSize),
         totalProDetails
+    });
+}
+
+export async function getProDetailBySizeAndProduct(req, res) {
+    const { pro_id, size_id } = req.query;
+
+    if (!pro_id || !size_id) {
+        return res
+            .status(400)
+            .json({ message: 'Thiếu product_id hoặc size_id' });
+    }
+
+    const whereClause = {
+        product_id: Number(pro_id),
+        size_id: Number(size_id)
+    };
+
+    console.log(' whereClause:', whereClause);
+
+    const proDetail = await db.ProDetail.findOne({
+        where: whereClause
+    });
+
+    if (!proDetail) {
+        return res.status(404).json({
+            message: 'Không tìm thấy ProDetail với product_id và size_id đã cho'
+        });
+    }
+
+    return res.status(200).json({
+        message: 'Tìm thấy chi tiết sản phẩm',
+        data: proDetail
     });
 }
 

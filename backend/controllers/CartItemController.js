@@ -1,5 +1,5 @@
 import db from '../models';
-import { Sequelize, where } from 'sequelize';
+import { Sequelize } from 'sequelize';
 const { Op } = Sequelize;
 
 export async function getCartItems(req, res) {
