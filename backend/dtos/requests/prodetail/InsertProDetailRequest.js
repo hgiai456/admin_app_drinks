@@ -21,7 +21,7 @@ class InsertProDetailRequest {
             name: Joi.string().required(),
             product_id: Joi.number().integer().min(1).required(),
             size_id: Joi.number().integer().min(1).required(),
-            store_id: Joi.number().integer().min(1).required(),
+            store_id: Joi.number().integer().min(1),
             buyturn: Joi.number().integer().min(0).default(0),
             specification: Joi.string(),
             price: Joi.number().integer().min(0).required(),

@@ -48,7 +48,13 @@ export async function getCartById(req, res) {
             include: [
                 {
                     model: db.ProDetail,
-                    as: 'prodetail'
+                    as: 'product_details',
+                    include: [
+                        {
+                            model: db.Product,
+                            as: 'product'
+                        }
+                    ]
                 }
             ]
         }
@@ -67,7 +73,7 @@ export async function getCartById(req, res) {
 export async function insertCart(req, res) {
     const { session_id, user_id } = req.body;
 
-    if ((session_id && user_id) || (!session_id && user_id)) {
+    if ((session_id && user_id) || (!session_id && !user_id)) {
         return res.status(400).json({
             message:
                 'Chỉ được cung cấp một giá trị trong session_id hoặc user_id, không được có đồng thời và ngược lại. ',
@@ -114,7 +120,7 @@ export async function checkoutCart(req, res) {
                 include: [
                     {
                         model: db.ProDetail,
-                        as: 'prodetail'
+                        as: 'product_details'
                     }
                 ]
             }
@@ -133,7 +139,7 @@ export async function checkoutCart(req, res) {
                     total ||
                     cart.cart_items.reduce(
                         (acc, item) =>
-                            acc + item.quantity * item.prodetail.price,
+                            acc + item.quantity * item.product_details.price,
                         0
                     ),
                 note: note,
@@ -154,7 +160,7 @@ export async function checkoutCart(req, res) {
                     order_id: newOrder.id,
                     product_detail_id: item.product_detail_id,
                     quantity: item.quantity,
-                    price: item.prodetail.price
+                    price: item.product_details.price
                 },
                 {
                     transaction: transaction,

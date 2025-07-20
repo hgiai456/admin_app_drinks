@@ -104,6 +104,10 @@ export function AppRoute(app) {
         asyncHandle(CategoryController.updateCategory)
     );
 
+    router.get(
+        '/orders/user/:user_id',
+        asyncHandle(OrderController.getOrdersByUserId)
+    );
     router.get('/orders', asyncHandle(OrderController.getOrders));
     router.get('/orders/:id', asyncHandle(OrderController.getOrderById));
     // router.post(
@@ -255,17 +259,13 @@ export function AppRoute(app) {
         asyncHandle(CartController.insertCart)
     ); // Thêm mới giỏ hàng
     router.post('/carts/checkout', asyncHandle(CartController.checkoutCart)); //Checkout
-    router.delete(
-        '/carts/:id',
-        requireRoles([UserRole.USER]),
-        asyncHandle(CartController.deleteCart)
-    ); // Xoá giỏ hàng theo ID
+    router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
 
     //Routes for CartItemController
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
     router.get(
         '/cart-items/:id',
-        asyncHandle(CartItemController.getCartItemById)
+        asyncHandle(CartItemController.getCartItemByCartId)
     ); // Lấy item theo ID
     router.get(
         '/cart-items/carts/:cart_id',
@@ -273,27 +273,29 @@ export function AppRoute(app) {
     );
     router.post(
         '/cart-items',
-        requireRoles([UserRole.USER]),
         validate(InsertCartItemRequest),
         asyncHandle(CartItemController.insertCartItem)
     ); // Thêm item vào giỏ
     router.put(
         '/cart-items/:id',
-        requireRoles([UserRole.USER]),
         asyncHandle(CartItemController.updateCartItem)
     ); // Cập nhật số lượng item
     router.delete(
         '/cart-items/:id',
-        requireRoles([UserRole.ADMIN, UserRole.USER]),
         asyncHandle(CartItemController.deleteCartItem)
     ); // Xoá item khỏi giỏ
 
+    //findProDetailByProductAndSize
     // Routes for ProDetailController
     router.get('/prodetails', asyncHandle(ProDetailController.getProDetails)); // Lấy danh sách chi tiết sản phẩm
     router.get(
         '/prodetails/:id',
         asyncHandle(ProDetailController.getProDetailById)
     ); // Lấy thông tin chi tiết sản phẩm theo ID
+    router.get(
+        '/prodetail',
+        asyncHandle(ProDetailController.findProDetailByProductAndSize)
+    );
     router.post(
         '/prodetails',
         validate(InsertProDetailRequest),

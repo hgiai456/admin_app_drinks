@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import db from '../models/index.js';
+import db from '../models';
 const { Op } = Sequelize;
 
 // Lấy danh sách sản phẩm chi tiết
@@ -50,6 +50,41 @@ export async function getProDetailById(req, res) {
         message: 'Lấy thông tin sản phẩm chi tiết thành công.',
         data: proDetail
     });
+}
+// Make sure this function exists and is exported
+export async function findProDetailByProductAndSize(req, res) {
+    try {
+        const { product_id, size_id } = req.query;
+
+        if (!product_id || !size_id) {
+            return res.status(400).json({
+                message: 'Vui lòng cung cấp đầy đủ product_id và size_id'
+            });
+        }
+
+        const proDetail = await db.ProDetail.findOne({
+            where: {
+                product_id: product_id,
+                size_id: size_id
+            }
+        });
+
+        if (!proDetail) {
+            return res.status(404).json({
+                message: 'Không tìm thấy sản phẩm chi tiết'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Tìm sản phẩm chi tiết thành công',
+            data: proDetail
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Lỗi khi tìm sản phẩm chi tiết',
+            error: error.message
+        });
+    }
 }
 
 // Thêm mới sản phẩm chi tiết

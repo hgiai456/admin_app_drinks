@@ -2,15 +2,13 @@
 const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class Banner extends Model {
-        /**
-         * Helper method for defining associations.
-         * This method is not a part of Sequelize lifecycle.
-         * The `models/index` file will call this method automatically.
-         */
         static associate(models) {
-            Banner.hasMany(models.BannerDetail, {
-                foreignKey: 'banner_id' // Sửa lại lỗi gõ nhầm: 'bannner_id'
-            });
+            if (models.BannerDetail) {
+                Banner.hasMany(models.BannerDetail, {
+                    foreignKey: 'banner_id',
+                    as: 'banner_details'
+                });
+            }
         }
     }
     Banner.init(

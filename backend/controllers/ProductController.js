@@ -25,6 +25,7 @@ export async function getProducts(req, res) {
             include: [
                 {
                     model: db.ProDetail,
+                    as: 'product_details',
                     attributes: ['price'],
                     limit: 1,
                     order: [['price', 'ASC']]
@@ -58,6 +59,7 @@ export async function getAllProductsByCategory(req, res) {
         include: [
             {
                 model: db.ProDetail,
+                as: 'product_details',
                 attributes: ['price'],
                 limit: 1,
                 order: [['price', 'ASC']]
@@ -78,11 +80,13 @@ export async function getProductsById(req, res) {
         include: [
             {
                 model: db.ProDetail,
+                as: 'product_details',
                 attributes: ['id', 'size_id', 'price', 'oldprice', 'quantity'],
                 include: [
                     {
                         model: db.Size,
-                        attributes: ['name'] //Lay ten size (S,M,L)
+                        as: 'sizes',
+                        attributes: ['name']
                     }
                 ]
             }
@@ -102,10 +106,10 @@ export async function getProductsById(req, res) {
         });
     }
 
-    const formattedSizes = product.ProDetails.map((detail) => ({
+    const formattedSizes = product.product_details.map((detail) => ({
         product_detail: detail.id,
         size_id: detail.size_id,
-        size_name: detail.Size?.name,
+        size_name: detail.sizes?.name,
         price: detail.price,
         oldprice: detail.oldprice,
         quantity: detail.quantity
@@ -185,67 +189,3 @@ export async function deleteProducts(req, res) {
         return res.status(404).json({ message: 'Sản phẩm không tìm thấy.' });
     }
 }
-/*
-[
-    {
-      "name": "Espresso",
-      "description": "A strong and bold coffee shot.",
-      "image": "",
-      "category_id": 4
-    },
-    {
-      "name": "Latte",
-      "description": "Smooth coffee with steamed milk.",
-      "image": "",
-      "category_id": 4
-    },
-    {
-      "name": "Cappuccino",
-      "description": "A coffee with steamed milk foam.",
-      "image": "",
-      "category_id": 4
-    },
-    {
-      "name": "Americano",
-      "description": "Espresso diluted with hot water.",
-      "image": "",
-      "category_id": 4
-    },
-    {
-      "name": "Mocha",
-      "description": "Chocolate flavored coffee drink.",
-      "image": "",
-      "category_id": 4
-    },
-    {
-      "name": "Green Tea",
-      "description": "A refreshing and healthy tea.",
-      "image": "",
-      "category_id": 5
-    },
-    {
-      "name": "Black Tea",
-      "description": "Classic strong flavored tea.",
-      "image": "",
-      "category_id": 5
-    },
-    {
-      "name": "Oolong Tea",
-      "description": "Traditional Chinese tea with rich aroma.",
-      "image": "",
-      "category_id": 5
-    },
-    {
-      "name": "Peace Tea",
-      "description": "Spiced tea with a blend of herbs.",
-      "image": "",
-      "category_id": 5
-    },
-    {
-      "name": "Herbal Tea",
-      "description": "Caffeine-free tea made from herbs.",
-      "image": "",
-      "category_id": 5
-    }
-  ]
-*/
