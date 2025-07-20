@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 const router = express.Router();
 import * as ProductController from './controllers/ProductController.js'; // thêm .js nếu dùng ES Module
 import * as CategoryController from './controllers/CategoryController.js'; // thêm .js nếu dùng ES Module
@@ -36,6 +37,7 @@ import { requireRoles } from './middlewares/jwtMiddleware.js';
 import UserRole from './constants/UserRole.js';
 
 export function AppRoute(app) {
+    app.use(cors());
     //Product
     // http://localhost:3000/products
     router.get('/products', asyncHandle(ProductController.getProducts));
