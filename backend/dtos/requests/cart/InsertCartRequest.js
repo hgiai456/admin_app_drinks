@@ -9,7 +9,7 @@ class InsertCartRequest {
     static validate(data) {
         const schema = Joi.object({
             user_id: Joi.number().integer().optional(),
-            session_id: Joi.string().optional()
+            session_id: Joi.string().optional().allow('')
         });
 
         return schema.validate(data); // Returns { error, value }

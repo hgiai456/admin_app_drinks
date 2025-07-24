@@ -255,6 +255,10 @@ export function AppRoute(app) {
     //Routes for CartController
     router.get('/carts', asyncHandle(CartController.getCarts)); // Lấy danh sách giỏ hàng
     router.get('/carts/:id', asyncHandle(CartController.getCartById)); // Lấy giỏ hàng theo ID
+    router.get(
+        '/carts/user/:user_id',
+        asyncHandle(CartController.getCartByUserId)
+    );
     router.post(
         '/carts',
         validate(InsertCartRequest),
