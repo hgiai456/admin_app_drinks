@@ -150,43 +150,6 @@ export async function updateProDetail(req, res) {
     message: "Không tìm thấy sản phẩm chi tiết.",
   });
 }
-export const getProductDetailByProductAndSize = async (req, res) => {
-  try {
-    const { pro_id, size_id } = req.query;
-
-    if (!pro_id || !size_id) {
-      return res.status(400).json({
-        message: "Thiếu product_id hoặc size_id",
-      });
-    }
-
-    // Tìm ProductDetail theo product_id và size_id
-    const productDetail = await db.ProDetail.findOne({
-      where: {
-        product_id: pro_id,
-        size_id: size_id,
-      },
-    });
-
-    if (!productDetail) {
-      return res.status(404).json({
-        message: "Không tìm thấy ProductDetail phù hợp",
-        data: null,
-      });
-    }
-
-    return res.status(200).json({
-      message: "Lấy ProductDetail thành công",
-      data: productDetail,
-    });
-  } catch (error) {
-    console.error("Error getProductDetailByProductAndSize:", error);
-    return res.status(500).json({
-      message: "Lỗi server",
-      error: error.message,
-    });
-  }
-};
 // Xóa sản phẩm chi tiết
 export async function deleteProDetail(req, res) {
   const { id } = req.params;

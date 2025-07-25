@@ -269,10 +269,7 @@ export function AppRoute(app) {
 
   //Routes for CartItemController
   router.get("/cart-items", asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
-  router.get(
-    "/cart-items/:id",
-    asyncHandle(CartItemController.getCartItemByCartId)
-  ); // Lấy item theo ID
+  router.get("/cart-items/:id", asyncHandle(CartItemController.getCartById)); // Lấy item theo ID
   router.get(
     "/cart-items/carts/:cart_id",
     asyncHandle(CartItemController.getCartItemByCartId)
@@ -297,7 +294,7 @@ export function AppRoute(app) {
   // getProductDetailByProductAndSize
   router.get(
     "/prodetail",
-    asyncHandle(ProDetailController.getProductDetailByProductAndSize)
+    asyncHandle(ProDetailController.findProDetailByProductAndSize)
   );
   router.post(
     "/prodetails",

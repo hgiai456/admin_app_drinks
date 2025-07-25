@@ -48,7 +48,7 @@ export async function getCartById(req, res) {
       include: [
         {
           model: db.ProDetail,
-          as: "prodetail",
+          as: "product_details",
           include: [
             {
               model: db.Product,
@@ -114,7 +114,7 @@ export async function insertCart(req, res) {
 }
 
 export async function checkoutCart(req, res) {
-  const { cart_id, total, note, phone, address } = req.body;
+  const { cart_id, total, note, phone, address, user_id } = req.body;
 
   const transaction = await db.sequelize.transaction();
 
@@ -127,7 +127,7 @@ export async function checkoutCart(req, res) {
         include: [
           {
             model: db.ProDetail,
-            as: "prodetail",
+            as: "product_details",
           },
         ],
       },
@@ -137,15 +137,19 @@ export async function checkoutCart(req, res) {
       return res.status(404).json({ message: "Giỏ hàng không tồn tại" });
     }
 
+    const user = await db.User.findByPk(user_id);
+    if (!user) {
+      return res.status(404).json({ message: "Người dùng không tồn tại" });
+    }
     // 3. Tạo đơn hàng mới
     const newOrder = await db.Order.create(
       {
         session_id: cart.session_id,
-        user_id: cart.user_id,
+        user_id: user_id,
         total:
           total ||
           cart.cart_items.reduce(
-            (acc, item) => acc + item.quantity * item.prodetail.price,
+            (acc, item) => acc + item.quantity * item.product_details.price,
             0
           ),
         note: note,
@@ -166,7 +170,7 @@ export async function checkoutCart(req, res) {
           order_id: newOrder.id,
           product_detail_id: item.product_detail_id,
           quantity: item.quantity,
-          price: item.prodetail.price,
+          price: item.product_details.price,
         },
         {
           transaction: transaction,
