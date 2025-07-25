@@ -1,7 +1,7 @@
-import { required, when } from 'joi';
 import db from '../models';
 import { Sequelize } from 'sequelize';
 import { OrderStatus } from '../constants';
+import EmailService from '../services/EmailService';
 const { Op } = Sequelize;
 
 export async function getCarts(req, res) {
@@ -236,8 +236,9 @@ export async function checkoutCart(req, res) {
         );
 
         // 4. Thêm cart items to order_details
+        const orderDetails = [];
         for (let item of cart.cart_items) {
-            await db.OrderDetail.create(
+            const orderDetail = await db.OrderDetail.create(
                 {
                     order_id: newOrder.id,
                     product_detail_id: item.product_detail_id,
@@ -249,6 +250,11 @@ export async function checkoutCart(req, res) {
                     timestamps: false
                 }
             );
+
+            orderDetails.push({
+                ...orderDetail.toJSON(),
+                product_details: item.product_details
+            });
         }
 
         // 5. Xóa cart và cart_items
@@ -261,6 +267,15 @@ export async function checkoutCart(req, res) {
         await cart.destroy({ transaction: transaction });
 
         await transaction.commit();
+
+        EmailService.sendOrderConfirmation(user.email, {
+            order: newOrder,
+            user: user,
+            orderDetails: orderDetails
+        }).catch((error) => {
+            console.error('Email sending failed:', error);
+        });
+
         return res.status(201).json({
             message: 'Thanh toán giỏ hàng thành công',
             data: newOrder
@@ -272,17 +287,6 @@ export async function checkoutCart(req, res) {
             .json({ message: 'Lỗi khi thanh toán', error: error.message });
     }
 }
-
-// export async function checkoutCart(req, res) {
-//     const { cart_id, total, note } = req.body;
-//     //check if Cart with cart_id exists, and cart_id.cart_items must NOT blank
-//     //Insert session_id, user_id to db.Order
-//     //After inserted, get order_id
-//     //Insert cart_items to order_details, with order_id above
-//     //if(total == null) then calculate using prodetail.price*quantity
-//     //detele carts and cart_items above
-//     //if any of these steps failed, rollback
-// }
 
 export async function deleteCart(req, res) {
     const { id } = req.params;

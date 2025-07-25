@@ -12,7 +12,8 @@ export async function getCartItems(req, res) {
 
     const items = await db.CartItem.findAll({
         where: whereClause,
-        include: db.ProDetail
+        include: db.ProDetail,
+        as: 'product_details'
     });
 
     res.status(200).json({
