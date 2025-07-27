@@ -297,7 +297,7 @@ export function AppRoute(app) {
   // getProductDetailByProductAndSize
   router.get(
     "/prodetail",
-    asyncHandle(ProDetailController.getProductDetailByProductAndSize)
+    asyncHandle(ProDetailController.findProDetailByProductAndSize)
   );
   router.post(
     "/prodetails",

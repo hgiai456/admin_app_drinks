@@ -158,6 +158,7 @@ export const getProductDetailByProductAndSize = async (req, res) => {
       return res.status(400).json({
         message: "Thiếu product_id hoặc size_id",
       });
+      zz;
     }
 
     // Tìm ProductDetail theo product_id và size_id
