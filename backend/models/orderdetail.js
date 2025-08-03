@@ -9,11 +9,12 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             OrderDetail.belongsTo(models.Order, {
-                foreignKey: 'order_id'
+                foreignKey: 'order_id',
+                as: 'order_details'
             });
             OrderDetail.belongsTo(models.ProDetail, {
                 foreignKey: 'product_detail_id',
-                as: 'prodetails'
+                as: 'product_details' // PHẢI có as này để match với include
             });
         }
     }

@@ -1,7 +1,12 @@
 import User from "../models/usermodel";
 
 class UserAPI {
-  static baseUrl = "http://localhost:3001/api/users";
+  static baseUrl = "http://localhost:3003/api/users";
+
+  static getAuthHeader() {
+    const token = localStorage.getItem("admin_token");
+    return token ? { Authorization: "Bearer " + token } : {};
+  }
 
   static async getAll() {
     try {
@@ -72,7 +77,8 @@ class UserAPI {
   static async create(userData) {
     try {
       console.log("Creating user with data:", userData);
-      const res = await fetch(this.baseUrl, {
+      // Sử dụng endpoint /api/users/register thay vì /api/users
+      const res = await fetch("http://localhost:3003/api/users/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -122,7 +128,10 @@ class UserAPI {
 
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...this.getAuthHeader(),
+        },
         body: JSON.stringify(updateData),
       });
 
@@ -175,6 +184,7 @@ class UserAPI {
 
       const res = await fetch(`${this.baseUrl}/${id}`, {
         method: "DELETE",
+        headers: this.getAuthHeader(),
       });
 
       console.log("Delete response status:", res.status);

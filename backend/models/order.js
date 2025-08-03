@@ -10,13 +10,14 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             //Bảng order có khóa phụ user_id từ tham chiếu từ bảng users
             Order.belongsTo(models.User, {
-                foreignKey: 'user_id'
+                foreignKey: 'user_id',
+                as: 'user'
             });
 
             //Khóa chính của bảng order có khóa phụ order_id trong bảng OrderDetail
             Order.hasMany(models.OrderDetail, {
                 foreignKey: 'order_id',
-                as: 'order_details'
+                as: 'order_details' // PHẢI có as này để match với include
             });
         }
     }

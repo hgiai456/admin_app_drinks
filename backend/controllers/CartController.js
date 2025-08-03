@@ -1,7 +1,7 @@
-import { required, when } from 'joi';
 import db from '../models';
 import { Sequelize } from 'sequelize';
 import { OrderStatus } from '../constants';
+import EmailService from '../services/EmailService';
 const { Op } = Sequelize;
 
 export async function getCarts(req, res) {
@@ -48,7 +48,13 @@ export async function getCartById(req, res) {
             include: [
                 {
                     model: db.ProDetail,
-                    as: 'prodetail'
+                    as: 'product_details',
+                    include: [
+                        {
+                            model: db.Product,
+                            as: 'product'
+                        }
+                    ]
                 }
             ]
         }
@@ -64,44 +70,120 @@ export async function getCartById(req, res) {
     });
 }
 
-export async function insertCart(req, res) {
-    const { session_id, user_id } = req.body;
+// Tìm giỏ hàng theo user_id
+export async function getCartByUserId(req, res) {
+    try {
+        const { user_id } = req.params;
 
-    if ((session_id && user_id) || (!session_id && user_id)) {
-        return res.status(400).json({
-            message:
-                'Chỉ được cung cấp một giá trị trong session_id hoặc user_id, không được có đồng thời và ngược lại. ',
-            data: cart
-        });
-    }
-    const existingCart = await db.Cart.findOne({
-        where: {
-            [Op.or]: [
-                { session_id: session_id ? session_id : null },
-                { user_id: user_id ? user_id : null }
-            ]
+        if (!user_id) {
+            return res.status(400).json({
+                message: 'Vui lòng cung cấp user_id'
+            });
         }
-    });
-    if (existingCart) {
-        return res.status(409).json({
-            message: 'Một giỏ hàng với cùng session đã tồn tại .'
+
+        const cart = await db.Cart.findOne({
+            where: { user_id },
+            include: [
+                {
+                    model: db.CartItem,
+                    as: 'cart_items',
+                    include: [
+                        {
+                            model: db.ProDetail,
+                            as: 'product_details',
+                            include: [
+                                {
+                                    model: db.Product,
+                                    as: 'product',
+                                    attributes: ['id', 'name', 'image']
+                                },
+                                {
+                                    model: db.Size,
+                                    as: 'sizes',
+                                    attributes: ['id', 'name']
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Không tìm thấy giỏ hàng cho user này'
+            });
+        }
+
+        // Calculate total amount
+        const totalAmount = cart.cart_items.reduce((total, item) => {
+            return total + item.quantity * item.product_details.price;
+        }, 0);
+
+        res.status(200).json({
+            message: 'Lấy giỏ hàng theo user thành công',
+            data: {
+                ...cart.toJSON(),
+                totalAmount,
+                totalItems: cart.cart_items.length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Lỗi khi lấy giỏ hàng',
+            error: error.message
         });
     }
-    const cart = await db.Cart.create(req.body);
-    if (cart) {
+}
+export async function insertCart(req, res) {
+    try {
+        const { session_id, user_id } = req.body;
+
+        // Validation: chỉ được có 1 trong 2
+        if ((session_id && user_id) || (!session_id && !user_id)) {
+            return res.status(400).json({
+                message:
+                    'Chỉ được cung cấp một giá trị trong session_id hoặc user_id, không được có đồng thời và ngược lại.'
+            });
+        }
+
+        // Logic kiểm tra đúng
+        let whereClause = {};
+        if (session_id) {
+            whereClause.session_id = session_id;
+        }
+        if (user_id) {
+            whereClause.user_id = user_id;
+        }
+
+        const existingCart = await db.Cart.findOne({
+            where: whereClause
+        });
+
+        if (existingCart) {
+            return res.status(409).json({
+                message: session_id
+                    ? 'Một giỏ hàng với cùng session_id đã tồn tại'
+                    : 'Một giỏ hàng với cùng user_id đã tồn tại'
+            });
+        }
+
+        const cart = await db.Cart.create(req.body);
+
         return res.status(201).json({
             message: 'Thêm giỏ hàng thành công',
             data: cart
         });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Lỗi khi tạo giỏ hàng',
+            error: error.message
+        });
     }
-
-    return res.status(400).json({
-        message: 'Thêm giỏ hàng thất bại'
-    });
 }
 
 export async function checkoutCart(req, res) {
-    const { cart_id, total, note, phone, address } = req.body;
+    const { cart_id, total, note, phone, address, user_id } = req.body;
 
     const transaction = await db.sequelize.transaction();
 
@@ -114,7 +196,7 @@ export async function checkoutCart(req, res) {
                 include: [
                     {
                         model: db.ProDetail,
-                        as: 'prodetail'
+                        as: 'product_details'
                     }
                 ]
             }
@@ -124,16 +206,22 @@ export async function checkoutCart(req, res) {
             return res.status(404).json({ message: 'Giỏ hàng không tồn tại' });
         }
 
+        const user = await db.User.findByPk(user_id);
+        if (!user) {
+            return res
+                .status(404)
+                .json({ message: 'Người dùng không tồn tại' });
+        }
         // 3. Tạo đơn hàng mới
         const newOrder = await db.Order.create(
             {
                 session_id: cart.session_id,
-                user_id: cart.user_id,
+                user_id: user_id,
                 total:
                     total ||
                     cart.cart_items.reduce(
                         (acc, item) =>
-                            acc + item.quantity * item.prodetail.price,
+                            acc + item.quantity * item.product_details.price,
                         0
                     ),
                 note: note,
@@ -148,19 +236,25 @@ export async function checkoutCart(req, res) {
         );
 
         // 4. Thêm cart items to order_details
+        const orderDetails = [];
         for (let item of cart.cart_items) {
-            await db.OrderDetail.create(
+            const orderDetail = await db.OrderDetail.create(
                 {
                     order_id: newOrder.id,
                     product_detail_id: item.product_detail_id,
                     quantity: item.quantity,
-                    price: item.prodetail.price
+                    price: item.product_details.price
                 },
                 {
                     transaction: transaction,
                     timestamps: false
                 }
             );
+
+            orderDetails.push({
+                ...orderDetail.toJSON(),
+                product_details: item.product_details
+            });
         }
 
         // 5. Xóa cart và cart_items
@@ -173,6 +267,15 @@ export async function checkoutCart(req, res) {
         await cart.destroy({ transaction: transaction });
 
         await transaction.commit();
+
+        EmailService.sendOrderConfirmation(user.email, {
+            order: newOrder,
+            user: user,
+            orderDetails: orderDetails
+        }).catch((error) => {
+            console.error('Email sending failed:', error);
+        });
+
         return res.status(201).json({
             message: 'Thanh toán giỏ hàng thành công',
             data: newOrder
@@ -184,17 +287,6 @@ export async function checkoutCart(req, res) {
             .json({ message: 'Lỗi khi thanh toán', error: error.message });
     }
 }
-
-// export async function checkoutCart(req, res) {
-//     const { cart_id, total, note } = req.body;
-//     //check if Cart with cart_id exists, and cart_id.cart_items must NOT blank
-//     //Insert session_id, user_id to db.Order
-//     //After inserted, get order_id
-//     //Insert cart_items to order_details, with order_id above
-//     //if(total == null) then calculate using prodetail.price*quantity
-//     //detele carts and cart_items above
-//     //if any of these steps failed, rollback
-// }
 
 export async function deleteCart(req, res) {
     const { id } = req.params;

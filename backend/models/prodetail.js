@@ -9,10 +9,12 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             ProDetail.belongsTo(models.Product, {
-                foreignKey: 'product_id'
+                foreignKey: 'product_id',
+                as: 'product' // Thêm as nếu muốn truy cập là product
             });
             ProDetail.belongsTo(models.Size, {
-                foreignKey: 'size_id'
+                foreignKey: 'size_id',
+                as: 'sizes'
             });
 
             ProDetail.hasMany(models.OrderDetail, {
@@ -20,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'order_details'
             });
             ProDetail.hasMany(models.CartItem, {
-                foreignKey: 'product_detail_id'
+                foreignKey: 'product_detail_id',
+                as: 'cart_items'
             });
             ProDetail.belongsTo(models.Store, {
                 foreignKey: 'store_id'

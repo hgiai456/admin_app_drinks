@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             });
             CartItem.belongsTo(models.ProDetail, {
                 foreignKey: 'product_detail_id',
-                as: 'prodetail'
+                as: 'product_details'
             });
         }
     }

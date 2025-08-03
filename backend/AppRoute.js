@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors';
 const router = express.Router();
 import * as ProductController from './controllers/ProductController.js'; // thêm .js nếu dùng ES Module
 import * as CategoryController from './controllers/CategoryController.js'; // thêm .js nếu dùng ES Module
@@ -36,6 +37,7 @@ import { requireRoles } from './middlewares/jwtMiddleware.js';
 import UserRole from './constants/UserRole.js';
 
 export function AppRoute(app) {
+    app.use(cors());
     //Product
     // http://localhost:3000/products
     router.get('/products', asyncHandle(ProductController.getProducts));
@@ -104,6 +106,10 @@ export function AppRoute(app) {
         asyncHandle(CategoryController.updateCategory)
     );
 
+    router.get(
+        '/orders/user/:user_id',
+        asyncHandle(OrderController.getOrdersByUserId)
+    );
     router.get('/orders', asyncHandle(OrderController.getOrders));
     router.get('/orders/:id', asyncHandle(OrderController.getOrderById));
     // router.post(
@@ -249,6 +255,10 @@ export function AppRoute(app) {
     //Routes for CartController
     router.get('/carts', asyncHandle(CartController.getCarts)); // Lấy danh sách giỏ hàng
     router.get('/carts/:id', asyncHandle(CartController.getCartById)); // Lấy giỏ hàng theo ID
+    router.get(
+        '/carts/user/:user_id',
+        asyncHandle(CartController.getCartByUserId)
+    );
     router.post(
         '/carts',
         validate(InsertCartRequest),
@@ -261,7 +271,7 @@ export function AppRoute(app) {
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
     router.get(
         '/cart-items/:id',
-        asyncHandle(CartItemController.getCartItemById)
+        asyncHandle(CartItemController.getCartItemByCartId)
     ); // Lấy item theo ID
     router.get(
         '/cart-items/carts/:cart_id',
@@ -281,6 +291,7 @@ export function AppRoute(app) {
         asyncHandle(CartItemController.deleteCartItem)
     ); // Xoá item khỏi giỏ
 
+    //findProDetailByProductAndSize
     // Routes for ProDetailController
     router.get('/prodetails', asyncHandle(ProDetailController.getProDetails)); // Lấy danh sách chi tiết sản phẩm
     router.get(
@@ -288,10 +299,9 @@ export function AppRoute(app) {
         asyncHandle(ProDetailController.getProDetailById)
     ); // Lấy thông tin chi tiết sản phẩm theo ID
     router.get(
-        '/prodetail/find',
-        asyncHandle(ProDetailController.getProDetailBySizeAndProduct)
-    ); // Lấy thông tin chi tiết sản phẩm theo product_id và size_id
-
+        '/prodetail',
+        asyncHandle(ProDetailController.findProDetailByProductAndSize)
+    );
     router.post(
         '/prodetails',
         validate(InsertProDetailRequest),

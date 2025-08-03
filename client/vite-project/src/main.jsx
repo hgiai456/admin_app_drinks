@@ -1,4 +1,4 @@
-import { StrictMode, useState } from "react";
+import { StrictMode, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
 
 // Import các component gốc của bạn
@@ -12,15 +12,12 @@ import ProductComponent from "./productcomponent.jsx";
 import SizeComponent from "./sizecomponent.jsx";
 import OrderComponent from "./ordercomponent.jsx";
 import ImageComponent from "./imagecomponent.jsx";
+import LoginAdmin from "./loginadmin.jsx"; // Thêm dòng này
 
 // Wrapper component để áp dụng styling cho các component của bạn
-function StyledComponentWrapper({ children, title, description }) {
+function StyledComponentWrapper({ children }) {
   return (
     <div className="page-container">
-      <div className="page-header">
-        <h2>{title}</h2>
-        <p>{description}</p>
-      </div>
       <div className="component-wrapper">{children}</div>
     </div>
   );
@@ -74,7 +71,7 @@ function Header({ currentPage, setCurrentPage }) {
             textShadow: "0 2px 4px rgba(0,0,0,0.1)",
           }}
         >
-          🍹 Admin Dashboard
+          Admin Dashboard
         </h1>
         <nav
           style={{
@@ -148,12 +145,7 @@ function Footer() {
         color: COLORS.surface,
         padding: "1.5rem",
         textAlign: "center",
-        position: "fixed",
-        left: 0,
-        bottom: 0,
-        borderRadius: "24px 24px 0 0",
-        boxShadow: `0 -8px 32px ${COLORS.shadow}`,
-        backdropFilter: "blur(10px)",
+        // Bỏ borderRadius để không tạo bo tròn nổi phía trên
       }}
     >
       <p
@@ -163,7 +155,7 @@ function Footer() {
           opacity: 0.9,
         }}
       >
-        © 2025 Admin App Drinks | Made with ❤️
+        © 2025 Admin App Drinks | Made with ❤️Hieu
       </p>
     </footer>
   );
@@ -171,87 +163,96 @@ function Footer() {
 
 function App() {
   const [currentPage, setCurrentPage] = useState("Order");
+  const [admin, setAdmin] = useState(null);
+
+  // Kiểm tra token và user khi load lại trang
+  useEffect(() => {
+    const token = localStorage.getItem("admin_token");
+    const user = localStorage.getItem("admin_user");
+    if (token && user) {
+      try {
+        const userObj = JSON.parse(user);
+        if (userObj.role === 2) {
+          setAdmin(userObj);
+        }
+      } catch (e) {
+        // Nếu lỗi parse, xóa luôn token/user
+        localStorage.removeItem("admin_token");
+        localStorage.removeItem("admin_user");
+      }
+    }
+  }, []);
+
+  // Hàm xử lý khi đăng nhập thành công
+  const handleLogin = (user) => {
+    setAdmin(user);
+    localStorage.setItem("admin_user", JSON.stringify(user));
+  };
+
+  // Hàm đăng xuất
+  const handleLogout = () => {
+    setAdmin(null);
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_user");
+  };
+
+  if (!admin) {
+    return <LoginAdmin onLogin={handleLogin} />;
+  }
 
   const renderPage = () => {
     switch (currentPage) {
       case "Order":
         return (
-          <StyledComponentWrapper
-            title="Order Management"
-            description="Track and manage customer orders"
-          >
+          <StyledComponentWrapper>
             <OrderComponent />
           </StyledComponentWrapper>
         );
       case "Store":
         return (
-          <StyledComponentWrapper
-            title="Store Management"
-            description="Manage your store locations and settings"
-          >
+          <StyledComponentWrapper>
             <Store />
           </StyledComponentWrapper>
         );
       case "Brand":
         return (
-          <StyledComponentWrapper
-            title="Brand Management"
-            description="Manage product brands and partnerships"
-          >
+          <StyledComponentWrapper>
             <Brand />
           </StyledComponentWrapper>
         );
       case "Category":
         return (
-          <StyledComponentWrapper
-            title="Category Management"
-            description="Organize products into categories"
-          >
+          <StyledComponentWrapper>
             <Category />
           </StyledComponentWrapper>
         );
       case "Product":
         return (
-          <StyledComponentWrapper
-            title="Product Management"
-            description="Manage your product inventory and catalog"
-          >
+          <StyledComponentWrapper>
             <ProductComponent />
           </StyledComponentWrapper>
         );
       case "User":
         return (
-          <StyledComponentWrapper
-            title="User Management"
-            description="Manage customer accounts and permissions"
-          >
+          <StyledComponentWrapper>
             <UserComponent />
           </StyledComponentWrapper>
         );
       case "Size":
         return (
-          <StyledComponentWrapper
-            title="Size Management"
-            description="Manage product sizes and variations"
-          >
+          <StyledComponentWrapper>
             <SizeComponent />
           </StyledComponentWrapper>
         );
       case "Banner":
         return (
-          <StyledComponentWrapper
-            title="Banner Management"
-            description="Create and manage promotional banners"
-          >
+          <StyledComponentWrapper>
             <BannerComponent />
           </StyledComponentWrapper>
         );
       case "Product Detail":
         return (
-          <StyledComponentWrapper
-            title="Product Details"
-            description="Detailed product information and specifications"
-          >
+          <StyledComponentWrapper>
             <ProdetailComponent />
           </StyledComponentWrapper>
         );
@@ -266,10 +267,7 @@ function App() {
         );
       default:
         return (
-          <StyledComponentWrapper
-            title="Order Management"
-            description="Track and manage customer orders"
-          >
+          <StyledComponentWrapper>
             <OrderComponent />
           </StyledComponentWrapper>
         );
@@ -281,46 +279,20 @@ function App() {
       style={{
         background: `linear-gradient(135deg, ${COLORS.background} 0%, #e2e8f0 100%)`,
         minHeight: "100vh",
-        paddingBottom: "100px",
+        paddingBottom: "0px",
         fontFamily:
           "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
+        width: "100vw",
+        overflowX: "hidden",
       }}
     >
       <style>
         {`
           .page-container {
-            max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
             padding: 0 1rem;
           }
-          
-          .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding: 2rem;
-            background: ${COLORS.surface};
-            border-radius: 20px;
-            box-shadow: 0 4px 20px ${COLORS.shadow};
-            border: 1px solid ${COLORS.border};
-          }
-          
-          .page-header h2 {
-            color: ${COLORS.text};
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-            background: linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary});
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-          }
-          
-          .page-header p {
-            color: ${COLORS.textLight};
-            font-size: 1.1rem;
-            margin: 0;
-          }
-          
           .component-wrapper {
             background: ${COLORS.surface};
             padding: 2rem;
@@ -421,6 +393,24 @@ function App() {
       <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
       <main style={{ padding: "0 1.5rem" }}>{renderPage()}</main>
       <Footer />
+      {/* Thêm nút đăng xuất */}
+      <button
+        style={{
+          position: "fixed",
+          top: 20,
+          right: 20,
+          zIndex: 999,
+          background: "#f44336",
+          color: "#fff",
+          border: "none",
+          borderRadius: 8,
+          padding: "8px 16px",
+          cursor: "pointer",
+        }}
+        onClick={handleLogout}
+      >
+        Đăng xuất
+      </button>
     </div>
   );
 }

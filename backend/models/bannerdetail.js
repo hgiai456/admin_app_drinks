@@ -9,11 +9,13 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             BannerDetail.belongsTo(models.Product, {
-                foreignKey: 'product_id'
+                foreignKey: 'product_id',
+                as: 'product'
             });
 
             BannerDetail.belongsTo(models.Banner, {
-                foreignKey: 'banner_id' // Sửa lại lỗi gõ nhầm: 'bannner_id'
+                foreignKey: 'banner_id', // Sửa lại lỗi gõ nhầm: 'bannner_id'
+                as: 'banner_details'
             });
         }
     }

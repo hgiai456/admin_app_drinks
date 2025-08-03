@@ -1,5 +1,5 @@
 import { Sequelize, where } from 'sequelize';
-import db from '../models/index.js';
+import db from '../models';
 import { OrderStatus } from '../constants';
 const { Op } = Sequelize;
 
@@ -52,6 +52,72 @@ export async function getOrders(req, res) {
         totalOrders
     });
 }
+export async function getOrdersByUserId(req, res) {
+    try {
+        const { user_id } = req.params;
+        const { page = 1, status } = req.query;
+        const pageSize = 5;
+        const offset = (page - 1) * pageSize;
+
+        let whereClause = { user_id };
+
+        if (status) {
+            whereClause.status = status;
+        }
+
+        const [orders, totalOrders] = await Promise.all([
+            db.Order.findAll({
+                where: whereClause,
+                limit: pageSize,
+                offset: offset,
+                include: [
+                    {
+                        model: db.OrderDetail,
+                        as: 'order_details',
+                        attributes: ['quantity', 'price'], // Chỉ lấy quantity và price từ OrderDetail
+                        include: [
+                            {
+                                model: db.ProDetail,
+                                as: 'product_details',
+                                attributes: ['name'], // Chỉ lấy name và price từ ProDetail
+                                include: [
+                                    {
+                                        model: db.Product,
+                                        as: 'product',
+                                        attributes: ['image'] // Chỉ lấy image từ Product
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                order: [['createdAt', 'DESC']]
+            }),
+            db.Order.count({
+                where: whereClause
+            })
+        ]);
+
+        if (!orders.length) {
+            return res.status(404).json({
+                message: 'Không tìm thấy đơn hàng nào'
+            });
+        }
+
+        res.status(200).json({
+            message: 'Lấy danh sách đơn hàng theo user thành công',
+            data: orders,
+            currentPage: parseInt(page, 10),
+            totalPage: Math.ceil(totalOrders / pageSize),
+            totalOrders
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Lỗi khi lấy đơn hàng',
+            error: error.message
+        });
+    }
+}
 
 export async function getOrderById(req, res) {
     const { id } = req.params;
@@ -63,13 +129,12 @@ export async function getOrderById(req, res) {
                 include: [
                     {
                         model: db.ProDetail,
-                        as: 'prodetails'
+                        as: 'product_detail'
                     }
                 ]
-                // Đúng alias trong associate
             }
         ]
-    }); // Tìm đơn hàng theo ID
+    });
 
     if (!order) {
         return res.status(404).json({
@@ -82,43 +147,6 @@ export async function getOrderById(req, res) {
         data: order
     });
 }
-
-// export async function insertOrder(req, res) {
-//     // Kiểm tra user có tồn tại không
-//     const user = await db.User.findOne({
-//         where: { id: req.body.user_id }
-//     });
-
-//     if (!user) {
-//         return res.status(404).json({
-//             message: 'Người dùng không tồn tại.'
-//         });
-//     }
-
-//     // Kiểm tra dữ liệu đầu vào
-//     const { error } = InsertOrderRequest.validate(req.body);
-//     if (error) {
-//         return res.status(400).json({
-//             message: 'Lỗi khi thêm đơn hàng.',
-//             error
-//         });
-//     }
-
-//     // Tạo đơn hàng
-//     db.Order.create(req.body)
-//         .then((order) => {
-//             res.status(201).json({
-//                 message: 'Thêm mới đơn hàng thành công.',
-//                 data: order
-//             });
-//         })
-//         .catch((err) => {
-//             res.status(500).json({
-//                 message: 'Đã xảy ra lỗi khi thêm đơn hàng.',
-//                 error: err.message
-//             });
-//         });
-// }
 
 export async function updateOrder(req, res) {
     const { id } = req.params;

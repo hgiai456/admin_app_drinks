@@ -35,12 +35,13 @@ services:
             context: ./backend # Đường dẫn tới thư mục backend
         container_name: backend-container
         ports:
-            - '3000:3000' # Backend sẽ chạy ở localhost:3000
+            - '3003:3003' # Backend sẽ chạy ở localhost:3000
         environment:
             DB_HOST: mysql
             DB_USER: root
             DB_PASSWORD: ''
             DB_NAME: db_hgstore
+            PORT: 3003
         depends_on:
             - mysql
         networks:

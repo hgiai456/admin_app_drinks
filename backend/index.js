@@ -30,10 +30,12 @@ import { AppRoute } from './AppRoute.js';
 dotenv.config();
 import db from './models';
 const os = require('os');
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 app.use(function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -46,11 +48,10 @@ app.use(function (req, res, next) {
 });
 
 app.get('/', (req, res) => {
-    //http://localhost:3000/
-    res.send('I am a project manager,My salary is 100 million. ');
+    res.send('Listening port ${port}');
 });
 
-const port = process?.env?.PORT ?? 3000;
+const port = process?.env?.PORT ?? 3003;
 
 // Healthcheck API toàn diện
 app.get('/api/healthcheck', async (req, res) => {
