@@ -1,0 +1,208 @@
+@use 'sass:color';
+@use './variables' as v;
+
+@mixin form-group($margin-bottom: v.$spacing-xl) {
+    margin-bottom: $margin-bottom;
+}
+
+@mixin form-label {
+    display: block;
+    margin-bottom: v.$spacing-sm;
+    font-weight: v.$font-weight-semibold;
+    color: v.$dark-color;
+    font-size: v.$font-size-md;
+}
+
+@mixin form-input($border-color: v.$border-color) {
+    width: 100%;
+    padding: 10px v.$spacing-md;
+    border: 1px solid $border-color;
+    border-radius: v.$border-radius-md;
+    font-size: v.$font-size-md;
+    box-sizing: border-box;
+    transition: border-color v.$transition-fast;
+
+    &:focus {
+        outline: none;
+        border-color: v.$border-color-focus;
+    }
+
+    &.error {
+        border: 2px solid v.$border-color-error;
+    }
+
+    &::placeholder {
+        color: #6c757d;
+    }
+}
+
+// ✅ Mixin cho button
+@mixin button-base {
+    padding: v.$spacing-md v.$spacing-xl;
+    border: none;
+    border-radius: v.$border-radius-md;
+    cursor: pointer;
+    font-size: v.$font-size-md;
+    font-weight: v.$font-weight-semibold;
+    transition: all v.$transition-fast;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: v.$spacing-sm;
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+}
+
+@mixin button-primary {
+    @include button-base;
+    background-color: v.$primary-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+        background-color: color.adjust(v.$primary-color, $lightness: -10%);
+        transform: translateY(-1px);
+    }
+}
+
+@mixin button-success {
+    @include button-base;
+    background-color: v.$success-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+        background-color: color.adjust(v.$success-color, $lightness: -10%);
+        transform: translateY(-1px);
+    }
+}
+
+@mixin button-danger {
+    @include button-base;
+    background-color: v.$danger-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+        background-color: color.adjust(v.$danger-color, $lightness: -10%);
+    }
+}
+
+@mixin button-secondary {
+    @include button-base;
+    background-color: v.$secondary-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+        background-color: color.adjust(v.$secondary-color, $lightness: -10%);
+    }
+}
+
+@mixin button-info {
+    @include button-base;
+    background-color: v.$info-color;
+    color: white;
+
+    &:hover:not(:disabled) {
+        background-color: color.adjust(v.$info-color, $lightness: -10%);
+    }
+}
+
+// ✅ Mixin cho card
+@mixin card {
+    background-color: white;
+    border-radius: v.$border-radius-lg;
+    box-shadow: v.$box-shadow-md;
+    border: 1px solid #dee2e6;
+}
+
+// ✅ Mixin cho flexbox
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+// ✅ Mixin cho table
+@mixin table-base {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: v.$border-radius-lg;
+    overflow: hidden;
+    box-shadow: v.$box-shadow-sm;
+
+    th,
+    td {
+        padding: v.$spacing-md v.$spacing-sm;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    th {
+        background-color: v.$dark-color;
+        color: white;
+        font-weight: v.$font-weight-semibold;
+    }
+
+    tbody tr {
+        &:nth-child(even) {
+            background-color: v.$light-color;
+        }
+
+        &:hover {
+            background-color: #e9ecef;
+        }
+    }
+}
+
+// ✅ Mixin cho modal
+@mixin modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    @include flex-center;
+    z-index: 1000;
+    padding: v.$spacing-xl;
+    animation: fadeIn v.$transition-normal;
+}
+
+@mixin modal-content {
+    @include card;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow: hidden;
+    animation: slideIn v.$transition-normal;
+    position: relative;
+}
+
+// ✅ Keyframes
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}

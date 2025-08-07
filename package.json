@@ -1,6 +1,7 @@
 {
   "devDependencies": {
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.0",
+    "sass": "^1.89.2"
   },
   "scripts": {
     "start": "concurrently \"npm run server\" \"npm run client\"",

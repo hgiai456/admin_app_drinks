@@ -1,0 +1,58 @@
+//Biến màu sắc
+$primary-color: #007bff;
+$success-color: #28a745;
+$warning-color: #ffc107;
+$danger-color: #dc3545;
+$info-color: #17a2b8;
+$secondary-color: #6c757d;
+$light-color: #f8f9fa;
+$dark-color: #495057;
+$red-color: #b2292e;
+$black-color: #333333;
+
+//Theme của admin
+$admin-primary: #333333; // Đen chính cho header
+$admin-secondary: #6c757d; // Xám cho các element phụ
+$admin-light: #f8f9fa; // Nền sáng
+$admin-accent: #495057; // Màu nhấn
+$admin-border: #dee2e6; // Màu viền
+$admin-text: #333333; // Màu text chính
+$admin-text-light: #6c757d; // Màu text nhạt
+
+//Biến spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 12px;
+$spacing-lg: 16px;
+$spacing-xl: 20px;
+$spacing-xxl: 24px;
+
+//Biến font
+$font-size-xs: 12px;
+$font-size-sm: 13px;
+$font-size-md: 14px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;
+
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+//Biến border và shadow
+$border-radius-sm: 4px;
+$border-radius-md: 6px;
+$border-radius-lg: 8px;
+$border-radius-xl: 12px;
+
+$border-color: #ced4da;
+$border-color-focus: #007bff;
+$border-color-error: #dc3545;
+
+$box-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+$box-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+$box-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+// ✅ Biến transition
+$transition-fast: 0.15s ease-in-out;
+$transition-normal: 0.3s ease-out;

@@ -1,0 +1,545 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as m;
+@use 'sass:color';
+
+// ✅ LOGIN CONTAINER
+.login-container {
+    min-height: 100vh;
+    @include m.flex-center;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        sans-serif;
+}
+
+// ✅ ANIMATED BACKGROUND
+.login-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        $admin-primary 0%,
+        $admin-secondary 50%,
+        $admin-light 100%
+    );
+    z-index: 1;
+
+    .bg-shapes {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            animation: floatSmooth 8s ease-in-out infinite;
+
+            &.shape-1 {
+                width: 120px;
+                height: 120px;
+                top: 15%;
+                left: 8%;
+                animation-delay: 0s;
+            }
+
+            &.shape-2 {
+                width: 80px;
+                height: 80px;
+                top: 70%;
+                right: 12%;
+                animation-delay: 3s;
+            }
+
+            &.shape-3 {
+                width: 150px;
+                height: 150px;
+                bottom: 20%;
+                left: 15%;
+                animation-delay: 6s;
+            }
+
+            &.shape-4 {
+                width: 90px;
+                height: 90px;
+                top: 8%;
+                right: 25%;
+                animation-delay: 1.5s;
+            }
+        }
+    }
+}
+
+// ✅ SMOOTH FLOATING ANIMATION
+@keyframes floatSmooth {
+    0%,
+    100% {
+        transform: translateY(0px) translateX(0px) scale(1);
+        opacity: 0.6;
+    }
+    33% {
+        transform: translateY(-15px) translateX(10px) scale(1.05);
+        opacity: 0.8;
+    }
+    66% {
+        transform: translateY(10px) translateX(-8px) scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+// ✅ LOGIN CONTENT
+.login-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 450px;
+    padding: 0 $spacing-xxl;
+}
+
+// ✅ LOGIN FORM
+.login-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: $spacing-xxl;
+    padding: 48px 36px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+
+    // Top gradient border
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+            90deg,
+            $admin-primary,
+            $admin-secondary,
+            $success-color
+        );
+        z-index: 1;
+    }
+}
+
+// ✅ LOGIN HEADER
+.login-header {
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+    z-index: 2;
+
+    .logo-container {
+        margin-bottom: $spacing-xxl;
+        @include m.flex-center;
+
+        .login-logo {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            border-radius: 20px;
+            background: rgba($admin-primary, 0.1);
+            padding: 8px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+            &:hover {
+                transform: scale(1.05) rotate(2deg);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        .logo-fallback {
+            font-size: 4rem;
+            background: linear-gradient(
+                135deg,
+                $admin-primary,
+                $admin-secondary
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            display: none;
+        }
+    }
+
+    .login-title {
+        font-size: 2rem;
+        font-weight: $font-weight-bold;
+        margin: 0 0 8px 0;
+        background: linear-gradient(135deg, $admin-primary, $admin-secondary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .login-subtitle {
+        color: $admin-text-light;
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: $font-weight-medium;
+        opacity: 0.8;
+    }
+}
+
+// ✅ ERROR MESSAGE - FIXED
+.error-message {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    padding: $spacing-lg 20px;
+    border-radius: $spacing-lg;
+    margin-bottom: $spacing-xxl;
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+    font-weight: $font-weight-medium;
+    font-size: $font-size-sm;
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    animation: errorSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+    .error-icon {
+        font-size: 1.2rem;
+        animation: shake 0.5s ease-in-out;
+    }
+}
+
+@keyframes errorSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-3px);
+    }
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+// ✅ FORM FIELDS - NEW NATURAL ANIMATION
+.form-fields {
+    margin-bottom: 32px;
+
+    .form-group {
+        margin-bottom: $spacing-xxl;
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+            color: $admin-text;
+            font-weight: $font-weight-semibold;
+            font-size: $font-size-sm;
+            transition: color 0.3s ease;
+
+            .label-icon {
+                font-size: 1.1rem;
+                transition: transform 0.3s ease;
+            }
+        }
+
+        .input-wrapper {
+            position: relative;
+
+            .form-input {
+                width: 100%;
+                padding: $spacing-lg 20px;
+                border: 2px solid rgba($admin-primary, 0.15);
+                border-radius: $spacing-lg;
+                font-size: $font-size-lg;
+                font-weight: $font-weight-medium;
+                background: rgba(255, 255, 255, 0.9);
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                color: $admin-text;
+                box-sizing: border-box;
+                outline: none;
+
+                &::placeholder {
+                    color: rgba($admin-text-light, 0.6);
+                    transition: opacity 0.3s ease;
+                }
+
+                // ✅ FOCUS STATE - BORDER HIGHLIGHT THAY VÌ UNDERLINE
+                &:focus {
+                    border-color: $admin-primary;
+                    background: white;
+                    box-shadow: 0 0 0 4px rgba($admin-primary, 0.1),
+                        0 4px 20px rgba($admin-primary, 0.15);
+                    transform: translateY(-1px);
+
+                    &::placeholder {
+                        opacity: 0.4;
+                    }
+
+                    // ✅ ANIMATE LABEL ICON
+                    + .input-border {
+                        opacity: 0;
+                    }
+                }
+
+                // ✅ HOVER STATE
+                &:hover:not(:focus):not(:disabled) {
+                    border-color: rgba($admin-primary, 0.3);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                }
+
+                &:disabled {
+                    background: $admin-light;
+                    color: $admin-text-light;
+                    cursor: not-allowed;
+                    border-color: rgba($admin-secondary, 0.2);
+                }
+            }
+
+            // ✅ REMOVE UNDERLINE BORDER
+            .input-border {
+                display: none;
+            }
+        }
+
+        // ✅ ANIMATE LABEL KTHỜI FOCUS
+        &:focus-within {
+            .form-label {
+                color: $admin-primary;
+
+                .label-icon {
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+}
+
+// ✅ SUBMIT BUTTON - ENHANCED ANIMATION
+.submit-btn {
+    width: 100%;
+    padding: 18px $spacing-xxl;
+    background: linear-gradient(135deg, $admin-primary, $admin-secondary);
+    color: white;
+    border: none;
+    border-radius: $spacing-lg;
+    font-weight: $font-weight-semibold;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: $spacing-xxl;
+    box-shadow: 0 6px 20px rgba($admin-primary, 0.3);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba($admin-primary, 0.4);
+        background: linear-gradient(
+            135deg,
+            color.adjust($admin-primary, $lightness: 5%),
+            $admin-primary
+        );
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+        transition: transform 0.1s ease;
+    }
+
+    &:disabled {
+        background: linear-gradient(
+            135deg,
+            $admin-secondary,
+            rgba($admin-secondary, 0.8)
+        );
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 4px 12px rgba($admin-secondary, 0.2);
+    }
+
+    .btn-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        z-index: 2;
+
+        .btn-icon,
+        .btn-spinner {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-spinner {
+            animation: spinSmooth 1.5s linear infinite;
+        }
+
+        .btn-text {
+            transition: opacity 0.3s ease;
+        }
+    }
+
+    // ✅ ENHANCED RIPPLE EFFECT
+    .btn-ripple {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: translate(-50%, -50%);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        pointer-events: none;
+    }
+
+    &:active:not(:disabled) .btn-ripple {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+    }
+
+    &.loading {
+        .btn-content .btn-icon {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+    }
+}
+
+@keyframes spinSmooth {
+    from {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(180deg) scale(1.1);
+    }
+    to {
+        transform: rotate(360deg) scale(1);
+    }
+}
+
+// ✅ LOGIN FOOTER
+.login-footer {
+    text-align: center;
+
+    .security-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: $spacing-md 20px;
+        background: rgba($admin-primary, 0.08);
+        border-radius: 50px;
+        font-size: 0.85rem;
+        color: $admin-text-light;
+        font-weight: $font-weight-medium;
+        border: 1px solid rgba($admin-primary, 0.1);
+        transition: all 0.3s ease;
+
+        &:hover {
+            background: rgba($admin-primary, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .security-icon {
+            font-size: 1rem;
+            animation: pulse 2s ease-in-out infinite;
+        }
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.7;
+        transform: scale(1.05);
+    }
+}
+
+// ✅ RESPONSIVE
+@media (max-width: 768px) {
+    .login-content {
+        padding: 0 $spacing-lg;
+    }
+
+    .login-form {
+        padding: 36px $spacing-xxl;
+        border-radius: 20px;
+    }
+
+    .login-header {
+        .login-title {
+            font-size: 1.75rem;
+        }
+
+        .logo-container .login-logo {
+            width: 70px;
+            height: 70px;
+        }
+
+        .logo-fallback {
+            font-size: 3.5rem;
+        }
+    }
+
+    .form-fields .form-group .input-wrapper .form-input {
+        padding: 14px $spacing-lg;
+    }
+
+    .submit-btn {
+        padding: $spacing-lg 20px;
+        font-size: $font-size-lg;
+    }
+
+    // ✅ GIẢM ANIMATIONS TRÊN MOBILE
+    .bg-shapes .shape {
+        animation-duration: 12s;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-form {
+        padding: 32px 20px;
+        margin: $spacing-lg;
+    }
+
+    .login-header .login-title {
+        font-size: 1.5rem;
+    }
+
+    .bg-shapes {
+        opacity: 0.5;
+    }
+}
+
+// ✅ ACCESSIBILITY
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

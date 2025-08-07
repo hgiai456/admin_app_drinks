@@ -1,0 +1,948 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as m;
+@use 'sass:color';
+
+// ✅ RESET VÀ BASE STYLES
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        'Roboto', sans-serif;
+    background-color: $admin-light;
+    color: $admin-text;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+// ✅ ADMIN LAYOUT
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+    background: linear-gradient(135deg, $admin-light 0%, #e9ecef 100%);
+}
+
+// ✅ SIDEBAR STYLES
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    width: 280px;
+    background: linear-gradient(180deg, $admin-primary 0%, $admin-accent 100%);
+    color: white;
+    transition: all $transition-normal;
+    z-index: 1000;
+    box-shadow: $box-shadow-lg;
+    display: flex;
+    flex-direction: column;
+
+    //Không cho scroll ngang
+    overflow-x: hidden;
+    overflow-y: auto;
+
+    // ✅ NGĂN USER SELECT VÀ DRAG
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+
+    // ✅ NGĂN TOUCH SCROLL NGANG
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+
+    &.collapsed {
+        width: 80px;
+    }
+
+    // ✅ SIDEBAR HEADER - CENTERED LAYOUT
+    &-header {
+        padding: $spacing-xl;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: relative;
+        min-height: 120px; // ✅ TĂNG HEIGHT
+        flex-shrink: 0;
+
+        .sidebar-brand {
+            display: flex;
+            flex-direction: column; // ✅ COLUMN LAYOUT
+            align-items: center; // ✅ CENTER HORIZONTALLY
+            justify-content: center;
+            text-align: center;
+            gap: $spacing-md;
+
+            // ✅ LOGO CONTAINER - CENTERED
+            .brand-logo {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+
+                .sidebar-logo {
+                    width: 105px; // ✅ TĂNG SIZE
+                    height: 105px;
+                    object-fit: contain;
+                    border-radius: 16px; // ✅ TĂNG BORDER RADIUS
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 5px;
+                    transition: all $transition-normal;
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+
+                    &:hover {
+                        transform: scale(1.05) rotate(2deg);
+                        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+                    }
+                }
+
+                .brand-icon {
+                    font-size: 2.5rem; // ✅ TĂNG SIZE
+                    display: none;
+                    background: rgba(255, 255, 255, 0.1);
+                    padding: 12px;
+                    border-radius: 16px;
+                    transition: all $transition-normal;
+
+                    &:hover {
+                        transform: scale(1.05);
+                        background: rgba(255, 255, 255, 0.2);
+                    }
+                }
+            }
+
+            // ✅ BRAND CONTENT - BELOW LOGO
+            .brand-content {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                transition: all $transition-normal;
+                opacity: 1;
+                transform: translateY(0);
+
+                .brand-text {
+                    font-size: 1.3rem; // ✅ TĂNG SIZE
+                    font-weight: $font-weight-bold;
+                    margin: 0;
+                    line-height: 1.2;
+                    background: linear-gradient(
+                        135deg,
+                        white,
+                        rgba(255, 255, 255, 0.9)
+                    );
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+
+                .brand-subtitle {
+                    font-size: 0.8rem;
+                    opacity: 0.8;
+                    margin-top: 4px;
+                    font-weight: $font-weight-medium;
+                    color: rgba(255, 255, 255, 0.8);
+                    letter-spacing: 0.5px;
+                }
+            }
+        }
+
+        // ✅ TOGGLE BUTTON - ABSOLUTE POSITION
+        .sidebar-toggle {
+            position: absolute;
+            top: $spacing-md;
+            right: $spacing-md;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all $transition-normal;
+            font-size: 0.9rem;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+    }
+
+    // ✅ COLLAPSED STATE ANIMATIONS
+    &.collapsed {
+        .sidebar-header {
+            min-height: 30px; // ✅ GIẢM HEIGHT KHI COLLAPSED
+            .sidebar-brand {
+                .brand-logo {
+                    .sidebar-logo {
+                        width: 50px;
+                        height: 50px;
+                        border-radius: 12px;
+                    }
+
+                    .brand-icon {
+                        font-size: 3rem;
+                        padding: 8px;
+                        border-radius: 12px;
+                    }
+                }
+
+                .brand-content {
+                    opacity: 0;
+                    transform: translateY(-10px);
+                    pointer-events: none;
+                }
+            }
+        }
+    }
+
+    // ✅ SIDEBAR NAVIGATION
+    &-nav {
+        flex: 1;
+        padding: $spacing-lg 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        .nav-item {
+            width: 100%;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.8);
+            padding: $spacing-md $spacing-xl;
+            cursor: pointer;
+            transition: all $transition-normal;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+            font-size: $font-size-md;
+            font-weight: $font-weight-medium;
+            margin: 2px $spacing-md;
+            border-radius: $border-radius-md;
+
+            .nav-icon {
+                font-size: 1.2rem;
+                min-width: 24px;
+                text-align: center;
+            }
+
+            .nav-text {
+                transition: all $transition-normal;
+                white-space: nowrap;
+            }
+
+            .nav-indicator {
+                position: absolute;
+                right: 0;
+                top: 50%;
+                transform: translateY(-50%);
+                width: 4px;
+                height: 60%;
+                background: var(--accent-color, #{$success-color});
+                border-radius: 2px 0 0 2px;
+            }
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                transform: translateX(4px);
+            }
+
+            &.active {
+                background: var(--accent-color, #{$success-color});
+                color: white;
+                transform: translateX(4px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+                .nav-icon {
+                    transform: scale(1.1);
+                }
+            }
+        }
+    }
+
+    // ✅ SIDEBAR FOOTER
+    &-footer {
+        padding: $spacing-lg $spacing-xl;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+            padding: $spacing-md;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: $border-radius-md;
+            transition: all $transition-normal;
+
+            &:hover {
+                background: rgba(255, 255, 255, 0.15);
+            }
+
+            .admin-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.2);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+            }
+
+            .admin-details {
+                display: flex;
+                flex-direction: column;
+
+                .admin-name {
+                    font-weight: $font-weight-semibold;
+                    font-size: $font-size-sm;
+                }
+
+                .admin-role {
+                    font-size: 0.75rem;
+                    opacity: 0.7;
+                }
+            }
+        }
+        .logout-btn-sidebar {
+            width: 100%;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            color: white;
+            padding: $spacing-md $spacing-lg;
+            border-radius: $border-radius-md;
+            cursor: pointer;
+            transition: all $transition-normal;
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+            font-size: $font-size-sm;
+            font-weight: $font-weight-medium;
+            position: relative;
+            overflow: hidden;
+
+            .logout-icon {
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+
+            .logout-text {
+                flex: 1;
+                text-align: left;
+            }
+
+            .logout-arrow {
+                font-size: 0.9rem;
+                opacity: 0;
+                transform: translateX(-10px);
+                transition: all $transition-normal;
+            }
+
+            &:hover {
+                background: linear-gradient(135deg, #e85563, #d73847);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+
+                .logout-arrow {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            &:active {
+                transform: translateY(0);
+                box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+            }
+
+            // ✅ RIPPLE EFFECT
+            &::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 0;
+                height: 0;
+                border-radius: 50%;
+                background: rgba(255, 255, 255, 0.3);
+                transform: translate(-50%, -50%);
+                transition: width 0.6s, height 0.6s;
+            }
+
+            &:active::after {
+                width: 300px;
+                height: 300px;
+            }
+        }
+
+        // ✅ LOGOUT BUTTON - COLLAPSED STATE
+        .logout-btn-collapsed {
+            width: 100%;
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            border: none;
+            color: white;
+            padding: $spacing-md;
+            border-radius: $border-radius-md;
+            cursor: pointer;
+            transition: all $transition-normal;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+
+            &:hover {
+                background: linear-gradient(135deg, #e85563, #d73847);
+                transform: scale(1.05);
+                box-shadow: 0 4px 12px rgba(220, 53, 69, 0.4);
+            }
+
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+    }
+}
+
+// ✅ MAIN CONTENT AREA
+.main-content {
+    flex: 1;
+    margin-left: 280px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+
+    .sidebar.collapsed + & {
+        margin-left: 80px;
+    }
+}
+
+// ✅ HEADER STYLES
+.main-header {
+    background: white;
+    border-bottom: 1px solid $admin-border;
+    padding: $spacing-xl $spacing-xxl;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+    .header-content {
+        @include m.flex-between;
+        max-width: none;
+
+        .page-info {
+            .page-title {
+                font-size: 2rem;
+                font-weight: $font-weight-bold;
+                color: $admin-text;
+                margin-bottom: $spacing-xs;
+                background: linear-gradient(
+                    135deg,
+                    $admin-primary,
+                    $admin-accent
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+
+            .page-subtitle {
+                color: $admin-text-light;
+                font-size: $font-size-md;
+                margin: 0;
+            }
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: $spacing-lg;
+
+            .current-time {
+                background: $admin-light;
+                padding: $spacing-sm $spacing-md;
+                border-radius: $border-radius-md;
+                font-size: $font-size-sm;
+                color: $admin-text-light;
+                border: 1px solid $admin-border;
+            }
+        }
+    }
+}
+
+// ✅ CONTENT AREA
+.content-area {
+    flex: 1;
+    padding: $spacing-xxl;
+    background: transparent;
+
+    .content-wrapper {
+        background: white;
+        border-radius: $border-radius-xl;
+        padding: $spacing-xxl;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border: 1px solid $admin-border;
+        position: relative;
+        overflow: hidden;
+
+        // Subtle gradient overlay
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(
+                90deg,
+                $admin-primary,
+                $admin-secondary,
+                $success-color
+            );
+            z-index: 1;
+        }
+
+        // Content positioning
+        > * {
+            position: relative;
+            z-index: 2;
+        }
+    }
+}
+
+// ✅ LOGOUT BUTTON
+.logout-btn {
+    position: fixed;
+    top: $spacing-xl;
+    right: $spacing-xl;
+    background: linear-gradient(
+        135deg,
+        $danger-color,
+        color.adjust($danger-color, $lightness: -10%)
+    );
+    color: white;
+    border: none;
+    padding: $spacing-md $spacing-lg;
+    border-radius: $border-radius-lg;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    box-shadow: 0 4px 12px rgba($danger-color, 0.3);
+    transition: all 0.3s ease;
+    z-index: 1001;
+
+    .logout-icon {
+        font-size: 1.1rem;
+    }
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba($danger-color, 0.4);
+    }
+}
+
+// ✅ COMPONENT SPECIFIC STYLES
+.prodetail-container {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+
+    .header {
+        margin-bottom: $spacing-xl;
+        @include m.flex-between;
+        padding-bottom: $spacing-lg;
+        border-bottom: 2px solid $admin-border;
+
+        h2 {
+            color: $admin-text;
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: $font-weight-bold;
+            align-items: center;
+            display: flex;
+            gap: $spacing-sm;
+        }
+
+        .btn {
+            @include m.button-success;
+            padding: $spacing-md $spacing-xl;
+            border-radius: $border-radius-lg;
+            font-weight: $font-weight-semibold;
+            box-shadow: 0 4px 12px rgba($success-color, 0.3);
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 6px 16px rgba($success-color, 0.4);
+            }
+        }
+    }
+
+    // Message styles
+    .message {
+        padding: $spacing-md $spacing-lg;
+        margin-bottom: $spacing-xl;
+        border-radius: $border-radius-lg;
+        font-weight: $font-weight-medium;
+        position: relative;
+        border-left: 4px solid;
+
+        &.success {
+            color: $success-color;
+            background: color.adjust($success-color, $lightness: 45%);
+            border-color: $success-color;
+        }
+
+        &.error {
+            color: $danger-color;
+            background: color.adjust($danger-color, $lightness: 45%);
+            border-color: $danger-color;
+        }
+    }
+
+    // Search bar
+    .search-bar {
+        @include m.flex-between;
+        margin-bottom: $spacing-xl;
+        padding: $spacing-lg;
+        background: $admin-light;
+        border-radius: $border-radius-lg;
+        border: 1px solid $admin-border;
+
+        .search-info {
+            color: $admin-text-light;
+            font-size: $font-size-md;
+
+            strong {
+                color: $admin-text;
+                font-weight: $font-weight-semibold;
+            }
+        }
+
+        .search-form {
+            display: flex;
+            gap: $spacing-md;
+
+            .search-input {
+                @include m.form-input;
+                width: 300px;
+                padding: $spacing-md;
+                border-radius: $border-radius-lg;
+            }
+
+            .btn-search {
+                @include m.button-primary;
+                padding: $spacing-md $spacing-xl;
+                border-radius: $border-radius-lg;
+                font-weight: $font-weight-semibold;
+            }
+        }
+    }
+
+    // Table styles
+    .table-container {
+        overflow-x: auto;
+        margin-bottom: $spacing-xl;
+        border-radius: $border-radius-lg;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+        .data-table {
+            @include m.table-base;
+            border-radius: $border-radius-lg;
+            text-align: center;
+            th {
+                background: $admin-primary;
+                color: white;
+                font-weight: $font-weight-semibold;
+                text-transform: uppercase;
+                font-size: $font-size-xs;
+                letter-spacing: 0.5px;
+                padding: $spacing-lg $spacing-md;
+                text-align: center;
+            }
+
+            td {
+                text-align: center;
+                padding: $spacing-md;
+                vertical-align: middle;
+            }
+
+            tbody tr {
+                &:hover {
+                    background: $admin-light;
+                    transform: scale(1.001);
+                }
+            }
+
+            .table-id {
+                font-weight: $font-weight-semibold;
+                color: $primary-color;
+            }
+
+            .product-name {
+                text-align: left;
+                font-weight: $font-weight-medium;
+                color: $admin-text;
+            }
+
+            .size-badge {
+                background: $admin-light;
+                padding: 4px 8px;
+                border-radius: $border-radius-sm;
+                font-size: $font-size-xs;
+                font-weight: $font-weight-medium;
+                color: $admin-text;
+            }
+
+            .price {
+                font-weight: $font-weight-semibold;
+                color: $success-color;
+            }
+
+            .old-price {
+                color: $admin-text-light;
+                text-decoration: line-through;
+            }
+
+            .quantity {
+                font-weight: $font-weight-semibold;
+                text-align: center;
+
+                &.in-stock {
+                    color: $success-color;
+                }
+
+                &.out-of-stock {
+                    color: $danger-color;
+                }
+            }
+
+            .actions {
+                .action-buttons {
+                    display: flex;
+                    gap: $spacing-sm;
+                    justify-content: center;
+
+                    .btn-edit {
+                        @include m.button-primary;
+                        padding: $spacing-sm $spacing-md;
+                        font-size: $font-size-xs;
+                        border-radius: $border-radius-md;
+                    }
+
+                    .btn-delete {
+                        @include m.button-danger;
+                        padding: $spacing-sm $spacing-md;
+                        font-size: $font-size-xs;
+                        border-radius: $border-radius-md;
+                    }
+                }
+            }
+        }
+    }
+
+    // Pagination
+    .pagination {
+        @include m.flex-between;
+        padding: $spacing-lg;
+        background: $admin-light;
+        border-radius: $border-radius-lg;
+        border: 1px solid $admin-border;
+
+        .pagination-info {
+            color: $admin-text-light;
+            font-size: $font-size-md;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: $spacing-sm;
+
+            .btn-nav,
+            .btn-page {
+                padding: $spacing-sm $spacing-md;
+                border: 1px solid $admin-border;
+                background: white;
+                color: $admin-text;
+                border-radius: $border-radius-md;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: $font-size-sm;
+
+                &:hover:not(:disabled) {
+                    background: $admin-primary;
+                    color: white;
+                    transform: translateY(-1px);
+                }
+
+                &.active {
+                    background: $success-color;
+                    color: white;
+                    border-color: $success-color;
+                }
+
+                &:disabled {
+                    background: $admin-secondary;
+                    color: white;
+                    cursor: not-allowed;
+                    opacity: 0.6;
+                }
+            }
+        }
+    }
+}
+
+// ✅ FORM STYLES
+.form-group {
+    margin-bottom: $spacing-lg;
+
+    .form-label {
+        @include m.form-label;
+        font-weight: $font-weight-semibold;
+        margin-bottom: $spacing-sm;
+    }
+
+    .form-input {
+        @include m.form-input;
+        border-radius: $border-radius-lg;
+        padding: $spacing-md;
+
+        &:focus {
+            border-color: $admin-primary;
+            box-shadow: 0 0 0 3px rgba($admin-primary, 0.1);
+        }
+
+        &.error {
+            border-color: $danger-color;
+            box-shadow: 0 0 0 3px rgba($danger-color, 0.1);
+        }
+    }
+
+    .form-error {
+        color: $danger-color;
+        font-size: $font-size-xs;
+        margin-top: $spacing-xs;
+        font-weight: $font-weight-medium;
+    }
+}
+
+.form-row {
+    display: flex;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-lg;
+
+    .form-group {
+        flex: 1;
+        margin-bottom: 0;
+    }
+}
+
+.form-buttons {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: flex-end;
+    padding-top: $spacing-lg;
+    border-top: 1px solid $admin-border;
+
+    .btn {
+        padding: $spacing-md $spacing-xl;
+        border-radius: $border-radius-lg;
+        font-weight: $font-weight-semibold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &.btn-secondary {
+            @include m.button-secondary;
+        }
+
+        &.btn-success {
+            @include m.button-success;
+        }
+
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+}
+
+// ✅ LOADING STATES
+.loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: $admin-light;
+    border-radius: $border-radius-lg;
+    border: 1px solid $admin-border;
+
+    .loading-text {
+        font-size: $font-size-lg;
+        color: $admin-text-light;
+        font-weight: $font-weight-medium;
+    }
+}
+
+// ✅ RESPONSIVE
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+
+        &.show {
+            transform: translateX(0);
+        }
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-header {
+        padding: $spacing-lg;
+
+        .header-content {
+            flex-direction: column;
+            gap: $spacing-md;
+            align-items: flex-start;
+        }
+    }
+
+    .content-area {
+        padding: $spacing-lg;
+    }
+
+    .search-bar {
+        flex-direction: column;
+        gap: $spacing-md;
+
+        .search-form {
+            width: 100%;
+
+            .search-input {
+                width: 100%;
+            }
+        }
+    }
+
+    .pagination {
+        flex-direction: column;
+        gap: $spacing-md;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+
+        .form-group {
+            margin-bottom: $spacing-lg;
+        }
+    }
+}

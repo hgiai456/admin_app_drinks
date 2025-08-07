@@ -4,7 +4,7 @@ const { Op } = Sequelize;
 
 export async function getProducts(req, res) {
     const { search = '', page = 1 } = req.query;
-    const pageSize = 8;
+    const pageSize = 5;
     const offset = (page - 1) * pageSize;
 
     let whereClause = {};
@@ -106,13 +106,8 @@ export async function getProductsById(req, res) {
         });
     }
 
-<<<<<<< HEAD
-    const formattedSizes = product.ProDetails.map((detail) => ({
-        product_detail_id: detail.id,
-=======
     const formattedSizes = product.product_details.map((detail) => ({
         product_detail: detail.id,
->>>>>>> main
         size_id: detail.size_id,
         size_name: detail.sizes?.name,
         price: detail.price,

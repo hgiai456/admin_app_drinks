@@ -1,422 +1,351 @@
-import { StrictMode, useState, useEffect } from "react";
-import { createRoot } from "react-dom/client";
+import { StrictMode, useState, useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
 
 // Import các component gốc của bạn
-import Store from "./store.jsx";
-import Brand from "./brand.jsx";
-import Category from "./category.jsx";
-import ProdetailComponent from "./prodetailcomponent.jsx";
-import BannerComponent from "./bannercomponent.jsx";
-import UserComponent from "./usercomponent.jsx";
-import ProductComponent from "./productcomponent.jsx";
-import SizeComponent from "./sizecomponent.jsx";
-import OrderComponent from "./ordercomponent.jsx";
-import ImageComponent from "./imagecomponent.jsx";
-import LoginAdmin from "./loginadmin.jsx"; // Thêm dòng này
+import Store from '@components/admin/store.jsx';
+import Brand from '@components/admin/brand.jsx';
+import '@styles/pages/_admin.scss';
+import Category from '@components/admin/category.jsx';
+import ProdetailComponent from '@components/admin/prodetailcomponent.jsx';
+import BannerComponent from '@components/admin/bannercomponent.jsx';
+import UserComponent from '@components/admin/usercomponent.jsx';
+import ProductComponent from '@components/admin/productcomponent.jsx';
+import SizeComponent from '@components/admin/sizecomponent.jsx';
+import OrderComponent from '@components/admin/ordercomponent.jsx';
+import ImageComponent from '@components/admin/imagecomponent.jsx';
+import LoginAdmin from '@components/admin/loginadmin.jsx'; // Thêm dòng này
 
-// Wrapper component để áp dụng styling cho các component của bạn
-function StyledComponentWrapper({ children }) {
-  return (
-    <div className="page-container">
-      <div className="component-wrapper">{children}</div>
-    </div>
-  );
+// ✅ THÊM STYLED COMPONENT WRAPPER
+function StyledComponentWrapper({ children, title, description }) {
+    return (
+        <div className='component-wrapper'>
+            {title && (
+                <div className='component-header'>
+                    <h2>{title}</h2>
+                    {description && <p>{description}</p>}
+                </div>
+            )}
+            {children}
+        </div>
+    );
 }
 
-const COLORS = {
-  primary: "#2563eb",
-  primaryLight: "#3b82f6",
-  secondary: "#10b981",
-  accent: "#f59e0b",
-  background: "#f8fafc",
-  surface: "#ffffff",
-  text: "#1e293b",
-  textLight: "#64748b",
-  border: "#e2e8f0",
-  shadow: "rgba(0, 0, 0, 0.1)",
-};
+function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
-function Header({ currentPage, setCurrentPage }) {
-  const pages = [
-    { name: "Order", icon: "📋" },
-    { name: "Store", icon: "🏪" },
-    { name: "Brand", icon: "🏷️" },
-    { name: "Category", icon: "📁" },
-    { name: "Product", icon: "🛍️" },
-    { name: "User", icon: "👥" },
-    { name: "Size", icon: "📏" },
-    { name: "Banner", icon: "🎨" },
-    { name: "Product Detail", icon: "📄" },
-    { name: "Image", icon: "🖼️" }, // Thêm tab Image
-  ];
+    const pages = [
+        { name: 'Quản lý đơn hàng', icon: '📋' },
+        { name: 'Quản lý cửa hàng', icon: '🏪' },
+        { name: 'Quản lý thương hiệu', icon: '🏷️' },
+        { name: 'Quản lý danh mục', icon: '📁' },
+        { name: 'Quản lý sản phẩm', icon: '🛍️' },
+        { name: 'Quản lý người dùng', icon: '👥' },
+        { name: 'Quản lý kích thước', icon: '📏' },
+        { name: 'Quản lý banner', icon: '🎨' },
+        { name: 'Quản lý chi tiết sản phẩm', icon: '🛍️' },
+        { name: 'Quản lý hình ảnh', icon: '🖼️' }
+    ];
+    return (
+        <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+            {/* Sidebar Header */}
+            <div className='sidebar-header'>
+                <div className='sidebar-brand'>
+                    {/* ✅ LOGO CONTAINER - CENTERED */}
+                    <div className='brand-logo'>
+                        <img
+                            src='https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f'
+                            alt='Logo'
+                            className='sidebar-logo'
+                            onError={(e) => {
+                                e.target.style.display = 'none';
+                                e.target.nextElementSibling.style.display =
+                                    'block';
+                            }}
+                        />
+                        <span className='brand-icon'>🍹</span>
+                    </div>
 
-  return (
-    <header
-      style={{
-        background: `linear-gradient(135deg, ${COLORS.primary} 0%, ${COLORS.primaryLight} 100%)`,
-        color: COLORS.surface,
-        padding: "2rem 1rem",
-        borderRadius: "0 0 24px 24px",
-        boxShadow: `0 8px 32px ${COLORS.shadow}`,
-        marginBottom: "2rem",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        <h1
-          style={{
-            marginBottom: "1.5rem",
-            fontWeight: 700,
-            fontSize: "2.5rem",
-            textAlign: "center",
-            textShadow: "0 2px 4px rgba(0,0,0,0.1)",
-          }}
-        >
-          Admin Dashboard
-        </h1>
-        <nav
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-          }}
-        >
-          {pages.map((page) => (
-            <button
-              key={page.name}
-              onClick={() => setCurrentPage(page.name)}
-              style={{
-                background:
-                  currentPage === page.name
-                    ? `linear-gradient(135deg, ${COLORS.accent} 0%, #f97316 100%)`
-                    : `rgba(255, 255, 255, 0.15)`,
-                color:
-                  currentPage === page.name ? COLORS.surface : COLORS.surface,
-                fontWeight: "600",
-                border:
-                  currentPage === page.name
-                    ? `2px solid ${COLORS.accent}`
-                    : "2px solid rgba(255, 255, 255, 0.2)",
-                padding: "0.75rem 1.5rem",
-                borderRadius: "50px",
-                cursor: "pointer",
-                transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                fontSize: "0.9rem",
-                backdropFilter: "blur(10px)",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                transform:
-                  currentPage === page.name ? "translateY(-2px)" : "none",
-                boxShadow:
-                  currentPage === page.name
-                    ? "0 4px 12px rgba(0,0,0,0.15)"
-                    : "0 2px 4px rgba(0,0,0,0.1)",
-              }}
-              onMouseEnter={(e) => {
-                if (currentPage !== page.name) {
-                  e.target.style.background = "rgba(255, 255, 255, 0.25)";
-                  e.target.style.transform = "translateY(-1px)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (currentPage !== page.name) {
-                  e.target.style.background = "rgba(255, 255, 255, 0.15)";
-                  e.target.style.transform = "none";
-                }
-              }}
-            >
-              <span style={{ fontSize: "1.1rem" }}>{page.icon}</span>
-              {page.name}
-            </button>
-          ))}
-        </nav>
-      </div>
-    </header>
-  );
+                    {/* ✅ BRAND TEXT - BELOW LOGO */}
+                    {!isCollapsed && (
+                        <div className='brand-content'>
+                            <span className='brand-text'>Admin Panel</span>
+                            <span className='brand-subtitle'>
+                                Management System
+                            </span>
+                        </div>
+                    )}
+                </div>
+
+                {/* ✅ TOGGLE BUTTON */}
+                <button
+                    className='sidebar-toggle'
+                    onClick={() => setIsCollapsed(!isCollapsed)}
+                >
+                    {isCollapsed ? '➡️' : '⬅️'}
+                </button>
+            </div>
+
+            {/* Navigation Menu */}
+            <nav className='sidebar-nav'>
+                {pages.map((page) => (
+                    <button
+                        key={page.name}
+                        onClick={() => setCurrentPage(page.name)}
+                        className={`nav-item ${
+                            currentPage === page.name ? 'active' : ''
+                        }`}
+                        data-page={page.name}
+                        style={{ '--accent-color': page.color }}
+                        title={isCollapsed ? page.name : ''}
+                    >
+                        <span className='nav-icon'>{page.icon}</span>
+                        {!isCollapsed && (
+                            <span className='nav-text'>{page.name}</span>
+                        )}
+                        {currentPage === page.name && (
+                            <div className='nav-indicator' />
+                        )}
+                    </button>
+                ))}
+            </nav>
+
+            {/* Sidebar Footer */}
+            <div className='sidebar-footer'>
+                {!isCollapsed && (
+                    <>
+                        <div className='admin-info'>
+                            <div className='admin-avatar'>👨‍💼</div>
+                            <div className='admin-details'>
+                                <span className='admin-name'>Admin</span>
+                                <span className='admin-role'>Super User</span>
+                            </div>
+                        </div>
+
+                        <button
+                            className='logout-btn-sidebar'
+                            onClick={onLogout}
+                            title='Đăng xuất khỏi hệ thống'
+                        >
+                            <span className='logout-text'>Đăng xuất</span>
+                            <div className='logout-arrow'>→</div>
+                        </button>
+                    </>
+                )}
+                {isCollapsed && (
+                    <button
+                        className='logout-btn-collapsed'
+                        onClick={onLogout}
+                        title='Đăng xuất'
+                    >
+                        <span className='logout-icon'>🚪</span>
+                    </button>
+                )}
+            </div>
+        </aside>
+    );
 }
 
-function Footer() {
-  return (
-    <footer
-      style={{
-        width: "100%",
-        background: `linear-gradient(135deg, ${COLORS.text} 0%, #374151 100%)`,
-        color: COLORS.surface,
-        padding: "1.5rem",
-        textAlign: "center",
-        // Bỏ borderRadius để không tạo bo tròn nổi phía trên
-      }}
-    >
-      <p
-        style={{
-          margin: 0,
-          fontSize: "0.9rem",
-          opacity: 0.9,
-        }}
-      >
-        © 2025 Admin App Drinks | Made with ❤️Hieu
-      </p>
-    </footer>
-  );
+function Header({ currentPage }) {
+    // ✅ DANH SÁCH CÁC COMPONENT MUỐN ẨN HEADER
+    const hideHeaderPages = [
+        'Quản lý đơn hàng',
+        'Quản lý sản phẩm',
+        'Quản lý chi tiết sản phẩm',
+        'Quản lý cửa hàng',
+        'Quản lý thương hiệu',
+        'Quản lý danh mục',
+        'Quản lý người dùng'
+        // Thêm các trang khác nếu cần
+    ];
+
+    if (hideHeaderPages.includes(currentPage)) {
+        return null; // Ẩn header cho các trang này
+    }
+
+    // ✅ HIỂN THỊ HEADER CHO CÁC TRANG KHÁC (nếu có)
+    const getCurrentPageInfo = () => {
+        const pageMap = {
+            // ... các trang khác không bị ẩn header
+        };
+        return pageMap[currentPage] || { title: currentPage, subtitle: '' };
+    };
+
+    const pageInfo = getCurrentPageInfo();
+    return (
+        <header className='main-header'>
+            <div className='header-content'>
+                <div className='page-info'>
+                    <h1 className='page-title'>{pageInfo.title}</h1>
+                    <p className='page-subtitle'>{pageInfo.subtitle}</p>
+                </div>
+                <div className='header-actions'>
+                    <div className='current-time'>
+                        {new Date().toLocaleString('vi-VN')}
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+}
+
+// ✅ MAIN LAYOUT COMPONENT
+function AdminLayout({
+    children,
+    currentPage,
+    setCurrentPage,
+    onLogout,
+    admin
+}) {
+    return (
+        <div className='admin-layout'>
+            <Sidebar
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                onLogout={onLogout}
+                admin={admin}
+            />
+
+            <div className='main-content'>
+                <Header currentPage={currentPage} />
+
+                <main className='content-area'>
+                    <div className='content-wrapper'>{children}</div>
+                </main>
+            </div>
+        </div>
+    );
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("Order");
-  const [admin, setAdmin] = useState(null);
+    const [currentPage, setCurrentPage] = useState('Order');
+    const [admin, setAdmin] = useState(null);
 
-  // Kiểm tra token và user khi load lại trang
-  useEffect(() => {
-    const token = localStorage.getItem("admin_token");
-    const user = localStorage.getItem("admin_user");
-    if (token && user) {
-      try {
-        const userObj = JSON.parse(user);
-        if (userObj.role === 2) {
-          setAdmin(userObj);
+    // Kiểm tra token và user khi load lại trang
+    useEffect(() => {
+        const token = localStorage.getItem('admin_token');
+        const user = localStorage.getItem('admin_user');
+        if (token && user) {
+            try {
+                const userObj = JSON.parse(user);
+                if (userObj.role === 2) {
+                    setAdmin(userObj);
+                }
+            } catch (e) {
+                // Nếu lỗi parse, xóa luôn token/user
+                localStorage.removeItem('admin_token');
+                localStorage.removeItem('admin_user');
+            }
         }
-      } catch (e) {
-        // Nếu lỗi parse, xóa luôn token/user
-        localStorage.removeItem("admin_token");
-        localStorage.removeItem("admin_user");
-      }
+    }, []);
+
+    // Hàm xử lý khi đăng nhập thành công
+    const handleLogin = (user) => {
+        setAdmin(user);
+        localStorage.setItem('admin_user', JSON.stringify(user));
+    };
+
+    // Hàm đăng xuất
+    const handleLogout = () => {
+        if (confirm('bạn có chắc muốn đăng xuất?')) {
+            setAdmin(null);
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            setCurrentPage('Quản lý đơn hàng');
+        }
+    };
+
+    if (!admin) {
+        return <LoginAdmin onLogin={handleLogin} />;
     }
-  }, []);
 
-  // Hàm xử lý khi đăng nhập thành công
-  const handleLogin = (user) => {
-    setAdmin(user);
-    localStorage.setItem("admin_user", JSON.stringify(user));
-  };
+    const renderPage = () => {
+        // ✅ CẬP NHẬT SWITCH CASE THEO TÊN TIẾNG VIỆT
+        switch (currentPage) {
+            case 'Quản lý đơn hàng':
+                return (
+                    <StyledComponentWrapper>
+                        <OrderComponent />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý cửa hàng':
+                return (
+                    <StyledComponentWrapper>
+                        <Store />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý thương hiệu':
+                return (
+                    <StyledComponentWrapper>
+                        <Brand />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý danh mục':
+                return (
+                    <StyledComponentWrapper>
+                        <Category />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý sản phẩm':
+                return (
+                    <StyledComponentWrapper>
+                        <ProductComponent />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý người dùng':
+                return (
+                    <StyledComponentWrapper>
+                        <UserComponent />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý kích thước':
+                return (
+                    <StyledComponentWrapper>
+                        <SizeComponent />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý banner':
+                return (
+                    <StyledComponentWrapper>
+                        <BannerComponent />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý chi tiết sản phẩm':
+                return (
+                    <StyledComponentWrapper>
+                        <ProdetailComponent />
+                    </StyledComponentWrapper>
+                );
+            case 'Quản lý hình ảnh':
+                return (
+                    <StyledComponentWrapper
+                        title='Quản lý hình ảnh'
+                        description='Upload và quản lý ảnh'
+                    >
+                        <ImageComponent />
+                    </StyledComponentWrapper>
+                );
+            default:
+                return (
+                    <StyledComponentWrapper>
+                        <OrderComponent />
+                    </StyledComponentWrapper>
+                );
+        }
+    };
 
-  // Hàm đăng xuất
-  const handleLogout = () => {
-    setAdmin(null);
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("admin_user");
-  };
-
-  if (!admin) {
-    return <LoginAdmin onLogin={handleLogin} />;
-  }
-
-  const renderPage = () => {
-    switch (currentPage) {
-      case "Order":
-        return (
-          <StyledComponentWrapper>
-            <OrderComponent />
-          </StyledComponentWrapper>
-        );
-      case "Store":
-        return (
-          <StyledComponentWrapper>
-            <Store />
-          </StyledComponentWrapper>
-        );
-      case "Brand":
-        return (
-          <StyledComponentWrapper>
-            <Brand />
-          </StyledComponentWrapper>
-        );
-      case "Category":
-        return (
-          <StyledComponentWrapper>
-            <Category />
-          </StyledComponentWrapper>
-        );
-      case "Product":
-        return (
-          <StyledComponentWrapper>
-            <ProductComponent />
-          </StyledComponentWrapper>
-        );
-      case "User":
-        return (
-          <StyledComponentWrapper>
-            <UserComponent />
-          </StyledComponentWrapper>
-        );
-      case "Size":
-        return (
-          <StyledComponentWrapper>
-            <SizeComponent />
-          </StyledComponentWrapper>
-        );
-      case "Banner":
-        return (
-          <StyledComponentWrapper>
-            <BannerComponent />
-          </StyledComponentWrapper>
-        );
-      case "Product Detail":
-        return (
-          <StyledComponentWrapper>
-            <ProdetailComponent />
-          </StyledComponentWrapper>
-        );
-      case "Image":
-        return (
-          <StyledComponentWrapper
-            title="Image Upload"
-            description="Upload và quản lý ảnh"
-          >
-            <ImageComponent />
-          </StyledComponentWrapper>
-        );
-      default:
-        return (
-          <StyledComponentWrapper>
-            <OrderComponent />
-          </StyledComponentWrapper>
-        );
-    }
-  };
-
-  return (
-    <div
-      style={{
-        background: `linear-gradient(135deg, ${COLORS.background} 0%, #e2e8f0 100%)`,
-        minHeight: "100vh",
-        paddingBottom: "0px",
-        fontFamily:
-          "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
-        width: "100vw",
-        overflowX: "hidden",
-      }}
-    >
-      <style>
-        {`
-          .page-container {
-            width: 100%;
-            margin: 0 auto;
-            padding: 0 1rem;
-          }
-          .component-wrapper {
-            background: ${COLORS.surface};
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 4px 20px ${COLORS.shadow};
-            border: 1px solid ${COLORS.border};
-            margin-top: 1rem;
-          }
-          
-          .component-wrapper > * {
-            margin: 0;
-          }
-          
-          /* Style cho các elements con của component */
-          .component-wrapper table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-          }
-          
-          .component-wrapper th,
-          .component-wrapper td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid ${COLORS.border};
-          }
-          
-          .component-wrapper th {
-            background: ${COLORS.background};
-            font-weight: 600;
-            color: ${COLORS.text};
-          }
-          
-          .component-wrapper button {
-            background: linear-gradient(135deg, ${COLORS.primary}, ${COLORS.primaryLight});
-            color: white;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 0.25rem;
-          }
-          
-          .component-wrapper button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px ${COLORS.shadow};
-          }
-          
-          .component-wrapper input,
-          .component-wrapper select,
-          .component-wrapper textarea {
-            width: 100%;
-            padding: 0.75rem;
-            border: 2px solid ${COLORS.border};
-            border-radius: 12px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-            margin: 0.5rem 0;
-          }
-          
-          .component-wrapper input:focus,
-          .component-wrapper select:focus,
-          .component-wrapper textarea:focus {
-            outline: none;
-            border-color: ${COLORS.primary};
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-          }
-          
-          .component-wrapper h1,
-          .component-wrapper h2,
-          .component-wrapper h3,
-          .component-wrapper h4,
-          .component-wrapper h5,
-          .component-wrapper h6 {
-            color: ${COLORS.text};
-            margin: 1rem 0 0.5rem 0;
-          }
-          
-          .component-wrapper p {
-            color: ${COLORS.textLight};
-            line-height: 1.6;
-            margin: 0.5rem 0;
-          }
-          
-          @media (max-width: 768px) {
-            .page-header h2 {
-              font-size: 2rem;
-            }
-            
-            .content-grid {
-              grid-template-columns: 1fr;
-            }
-          }
-        `}
-      </style>
-      <Header currentPage={currentPage} setCurrentPage={setCurrentPage} />
-      <main style={{ padding: "0 1.5rem" }}>{renderPage()}</main>
-      <Footer />
-      {/* Thêm nút đăng xuất */}
-      <button
-        style={{
-          position: "fixed",
-          top: 20,
-          right: 20,
-          zIndex: 999,
-          background: "#f44336",
-          color: "#fff",
-          border: "none",
-          borderRadius: 8,
-          padding: "8px 16px",
-          cursor: "pointer",
-        }}
-        onClick={handleLogout}
-      >
-        Đăng xuất
-      </button>
-    </div>
-  );
+    return (
+        <AdminLayout
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            onLogout={handleLogout}
+        >
+            {renderPage()}
+        </AdminLayout>
+    );
 }
 
-createRoot(document.getElementById("root")).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+createRoot(document.getElementById('root')).render(
+    <StrictMode>
+        <App />
+    </StrictMode>
 );
