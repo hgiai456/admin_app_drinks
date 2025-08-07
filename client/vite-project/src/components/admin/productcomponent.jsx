@@ -24,8 +24,7 @@ function ProductComponent() {
         description: '',
         image: '',
         brand_id: '',
-        category_id: '',
-        price: ''
+        category_id: ''
     });
 
     const loadingInitialData = async () => {
@@ -125,8 +124,7 @@ function ProductComponent() {
             description: '',
             image: '',
             brand_id: '',
-            category_id: '',
-            price: ''
+            category_id: ''
         });
         setModalMode('create');
         setEditingId(null);
@@ -140,8 +138,7 @@ function ProductComponent() {
             description: item.description || '',
             image: item.image || '',
             brand_id: item.brand_id?.toString() || '',
-            category_id: item.category_id?.toString() || '',
-            price: item.price?.toString() || ''
+            category_id: item.category_id?.toString() || ''
         });
         setModalMode('edit');
         setEditingId(item.id);
@@ -156,8 +153,7 @@ function ProductComponent() {
             description: '',
             image: '',
             brand_id: '',
-            category_id: '',
-            price: ''
+            category_id: ''
         });
         setEditingId(null);
         setErrors({});
@@ -191,14 +187,6 @@ function ProductComponent() {
             newErrors.category_id = 'Danh mục là bắt buộc';
         }
 
-        if (form.price && isNaN(parseFloat(form.price))) {
-            newErrors.price = 'Giá phải là số hợp lệ';
-        }
-
-        if (form.price && parseFloat(form.price) < 0) {
-            newErrors.price = 'Giá không được âm';
-        }
-
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -220,8 +208,7 @@ function ProductComponent() {
                 description: form.description.trim(),
                 image: form.image.trim(),
                 brand_id: parseInt(form.brand_id),
-                category_id: parseInt(form.category_id),
-                price: parseFloat(form.price) || 0
+                category_id: parseInt(form.category_id)
             };
 
             let result;
@@ -706,31 +693,6 @@ function ProductComponent() {
                             {errors.brand_id && (
                                 <span className='form-error'>
                                     {errors.brand_id}
-                                </span>
-                            )}
-                        </div>
-                    </div>
-
-                    <div className='form-row'>
-                        <div className='form-group'>
-                            <label className='form-label'>
-                                💰 Giá sản phẩm
-                            </label>
-                            <input
-                                type='number'
-                                name='price'
-                                value={form.price}
-                                onChange={handleChange}
-                                className={`form-input ${
-                                    errors.price ? 'error' : ''
-                                }`}
-                                placeholder='0'
-                                min='0'
-                                step='1000'
-                            />
-                            {errors.price && (
-                                <span className='form-error'>
-                                    {errors.price}
                                 </span>
                             )}
                         </div>

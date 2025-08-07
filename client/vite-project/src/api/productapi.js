@@ -42,11 +42,8 @@ class ProductAPI {
                                 category_id: item.category_id,
                                 brand_id: item.brand_id,
                                 description: item.description,
-                                status: item.status,
                                 createdAt: item.createdAt,
-                                updatedAt: item.updatedAt,
-                                // Thêm các field khác nếu cần
-                                ...item
+                                updatedAt: item.updatedAt
                             }
                   )
                 : [];

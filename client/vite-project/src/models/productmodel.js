@@ -6,8 +6,6 @@ class Product {
         image = '',
         brand_id = 0,
         category_id = 0,
-        status = 1,
-        price = 0,
         createdAt = null,
         updatedAt = null
     ) {
@@ -17,8 +15,6 @@ class Product {
         this.image = image;
         this.brand_id = brand_id;
         this.category_id = category_id;
-        this.status = status;
-        this.price = price;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -37,8 +33,6 @@ class Product {
             data.image || '',
             data.brand_id || 0,
             data.category_id || 0,
-            data.status !== undefined ? data.status : 1,
-            data.price || 0,
             data.createdAt,
             data.updatedAt
         );
@@ -52,9 +46,7 @@ class Product {
             description: this.description,
             image: this.image,
             brand_id: this.brand_id,
-            category_id: this.category_id,
-            status: this.status,
-            price: this.price
+            category_id: this.category_id
         };
     }
 
@@ -81,14 +73,6 @@ class Product {
 
     getCategoryId() {
         return this.category_id;
-    }
-
-    getStatus() {
-        return this.status;
-    }
-
-    getPrice() {
-        return this.price;
     }
 
     getCreatedAt() {
