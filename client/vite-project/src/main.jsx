@@ -2,18 +2,18 @@ import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // Import các component gốc của bạn
-import Store from '@components/admin/store.jsx';
-import Brand from '@components/admin/brand.jsx';
+import StoreComponent from '@components/admin/StoreComponent.jsx';
+import BrandComponent from '@components/admin/BrandComponent.jsx';
 import '@styles/pages/_admin.scss';
-import Category from '@components/admin/category.jsx';
-import ProdetailComponent from '@components/admin/prodetailcomponent.jsx';
-import BannerComponent from '@components/admin/bannercomponent.jsx';
-import UserComponent from '@components/admin/usercomponent.jsx';
-import ProductComponent from '@components/admin/productcomponent.jsx';
-import SizeComponent from '@components/admin/sizecomponent.jsx';
-import OrderComponent from '@components/admin/ordercomponent.jsx';
-import ImageComponent from '@components/admin/imagecomponent.jsx';
-import LoginAdmin from '@components/admin/loginadmin.jsx'; // Thêm dòng này
+import CategoryComponent from '@components/admin/CategoryComponent.jsx';
+import ProdetailComponent from '@components/admin/ProdetailComponent.jsx';
+import BannerComponent from '@components/admin/BannerComponent.jsx';
+import UserComponent from '@components/admin/UserComponent.jsx';
+import ProductComponent from '@components/admin/ProductComponent.jsx';
+import SizeComponent from '@components/admin/SizeComponent.jsx';
+import OrderComponent from '@components/admin/OrderComponent.jsx';
+import ImageComponent from '@components/admin/ImageComponent.jsx';
+import LoginAdmin from '@components/admin/LoginAdmin.jsx';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -259,7 +259,7 @@ function App() {
     }
 
     const renderPage = () => {
-        // ✅ CẬP NHẬT SWITCH CASE THEO TÊN TIẾNG VIỆT
+        // ✅ CẬP NHẬT COMPONENT NAMES THEO TÊN MỚI
         switch (currentPage) {
             case 'Quản lý đơn hàng':
                 return (
@@ -270,19 +270,19 @@ function App() {
             case 'Quản lý cửa hàng':
                 return (
                     <StyledComponentWrapper>
-                        <Store />
+                        <StoreComponent />
                     </StyledComponentWrapper>
                 );
             case 'Quản lý thương hiệu':
                 return (
                     <StyledComponentWrapper>
-                        <Brand />
+                        <BrandComponent />
                     </StyledComponentWrapper>
                 );
             case 'Quản lý danh mục':
                 return (
                     <StyledComponentWrapper>
-                        <Category />
+                        <CategoryComponent />
                     </StyledComponentWrapper>
                 );
             case 'Quản lý sản phẩm':

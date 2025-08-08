@@ -1,4 +1,4 @@
-import BannerDetail from '@models/bannerdetailmodel';
+import BannerDetail from '@models/bannerdetail';
 
 class BannerDetailAPI {
     static baseUrl = 'http://localhost:3003/api/banner-details';

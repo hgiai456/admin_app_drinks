@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import UserAPI from '@api/userapi';
-import User from '@models/usermodel';
+import User from '@models/user';
 
 function UserComponent() {
     const [users, setUsers] = useState([]);

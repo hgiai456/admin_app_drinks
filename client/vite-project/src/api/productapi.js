@@ -1,4 +1,4 @@
-import Product from '@models/productmodel.js';
+import Product from '@models/product.js';
 
 class ProductAPI {
     static baseUrl = 'http://localhost:3003/api/products';
@@ -118,8 +118,8 @@ class ProductAPI {
             // ✅ Nếu là Product instance, sử dụng toApiFormat
             const payload =
                 productData instanceof Product
-                    ? productData.toApiFormat()
-                    : productData;
+                    ? productData.toApiFormat() //
+                    : productData; //payload có nghĩa là format dữ liệu khi gửi về server
 
             const res = await fetch(this.baseUrl, {
                 method: 'POST',
@@ -127,7 +127,7 @@ class ProductAPI {
                     'Content-Type': 'application/json',
                     ...this.getAuthHeader()
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload) // Gửi lên server với dữ liệu đã format đúng kiểu dữ liệu
             });
 
             console.log('📊 Create Product Status:', res.status);

@@ -1,4 +1,4 @@
-import Size from '@models/sizemodel';
+import Size from '@models/size';
 
 class SizeAPI {
     static baseUrl = 'http://localhost:3003/api/sizes';

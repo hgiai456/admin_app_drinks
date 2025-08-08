@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { BannerAPI } from '@api/bannerApi';
-import Banner from '@models/bannermodel';
+import { BannerAPI } from '@api/bannerapi';
 
 function BannerComponent() {
     const [banners, setBanners] = useState([]);

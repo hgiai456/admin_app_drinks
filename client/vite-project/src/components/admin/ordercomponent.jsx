@@ -1,7 +1,7 @@
 // client/vite-project/src/ordercomponent.jsx
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getOrders, getOrderById, updateOrderStatus } from '@api/orderapi';
-import { orderStatusMap } from '@models/ordermodel';
+import { orderStatusMap } from '@models/order';
 import {
     Table,
     TableBody,

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import BannerDetailAPI from '@api/bannerdetailapi';
-import BannerDetail from '@models/bannerdetailmodel';
+import BannerDetail from '@models/bannerdetail';
 
 function BannerDetailComponent() {
     const [details, setDetails] = useState([]);
