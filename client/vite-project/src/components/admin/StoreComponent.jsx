@@ -1,232 +1,781 @@
 import { useEffect, useState } from 'react';
 import StoreAPI from '@api/storeapi';
+import Modal from './ModelComponent.jsx';
+import '@styles/pages/_admin.scss';
 
-function Store() {
+function StoreComponent() {
     const [stores, setStores] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [modalMode, setModalMode] = useState('create');
+    const [editingId, setEditingId] = useState(null);
+    const [message, setMessage] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [loadingData, setLoadingData] = useState(true);
+    const [errors, setErrors] = useState({});
+    const [page, setPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [search, setSearch] = useState('');
+
     const [form, setForm] = useState({
         storeName: '',
         address: '',
-        phoneNumber: ''
+        phoneNumber: '',
+        image: '',
+        openTime: '',
+        closeTime: ''
     });
-    const [editingId, setEditingId] = useState(null);
-    const [showDialog, setShowDialog] = useState(false);
 
-    useEffect(() => {
-        fetchStores();
-    }, []);
-
-    const fetchStores = async () => {
-        const data = await StoreAPI.getAll();
-        setStores(data);
+    const loadingInitialData = async () => {
+        setLoadingData(true);
+        try {
+            console.log('🔄 Đang tải dữ liệu ban đầu...');
+            await fetchStores(1, '');
+        } catch (error) {
+            console.error('❌ Lỗi tải dữ liệu ban đầu:', error);
+            setMessage('❌ Lỗi tải dữ liệu: ' + error.message);
+        } finally {
+            setLoadingData(false);
+        }
     };
 
+    // ✅ USEEFFECTS
+    useEffect(() => {
+        loadingInitialData();
+    }, []);
+
+    useEffect(() => {
+        if (!loadingData) {
+            fetchStores(page, search);
+        }
+    }, [page, search, loadingData]);
+
+    const fetchStores = async (pageNum = 1, searchTerm = '') => {
+        setLoading(true);
+        try {
+            console.log(
+                `🔄 fetchStores called with: page=${pageNum}, search="${searchTerm}"`
+            );
+
+            // Try to use getPaging if available, otherwise use getAll
+            let response;
+            try {
+                response = await StoreAPI.getPaging({
+                    page: pageNum || 1,
+                    search: searchTerm || ''
+                });
+            } catch (error) {
+                // Fallback to getAll if getPaging not implemented
+                console.log('📝 Fallback to getAll method');
+                const allStores = await StoreAPI.getAll();
+
+                // Filter by search term if provided
+                const filteredStores = searchTerm
+                    ? allStores.filter((store) =>
+                          store.storeName
+                              ?.toLowerCase()
+                              .includes(searchTerm.toLowerCase()) ||
+                          store.address
+                              ?.toLowerCase()
+                              .includes(searchTerm.toLowerCase())
+                      )
+                    : allStores;
+
+                // Manual pagination
+                const itemsPerPage = 10;
+                const startIndex = (pageNum - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedData = filteredStores.slice(
+                    startIndex,
+                    endIndex
+                );
+
+                response = {
+                    data: paginatedData,
+                    pagination: {
+                        currentPage: pageNum,
+                        totalPage: Math.ceil(
+                            filteredStores.length / itemsPerPage
+                        ),
+                        totalItems: filteredStores.length
+                    }
+                };
+            }
+
+            console.log('✅ Response từ StoreAPI:', response);
+
+            if (!response || !response.data) {
+                setStores([]);
+                setTotalPage(1);
+                setTotalItems(0);
+                setPage(1);
+                return;
+            }
+
+            const storesData = response.data || [];
+            const pagination = response.pagination || {};
+
+            console.log('📊 Stores Data:', storesData);
+            console.log('📊 Pagination:', pagination);
+
+            const currentPage = pagination.currentPage || pageNum || 1;
+            const totalPageCount = pagination.totalPage || 1;
+            const totalItemsCount = pagination.totalItems || 0;
+
+            setStores(storesData);
+            setPage(currentPage);
+            setTotalPage(totalPageCount);
+            setTotalItems(totalItemsCount);
+
+            console.log(`✅ State updated: ${storesData.length} stores loaded`);
+        } catch (error) {
+            console.error('❌ Error in fetchStores:', error);
+            setMessage(`❌ ${error.message}`);
+            setStores([]);
+            setTotalPage(1);
+            setTotalItems(0);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // ✅ MODAL FUNCTIONS
+    const openCreateModal = () => {
+        setForm({
+            storeName: '',
+            address: '',
+            phoneNumber: '',
+            image: '',
+            openTime: '',
+            closeTime: ''
+        });
+        setModalMode('create');
+        setEditingId(null);
+        setErrors({});
+        setShowModal(true);
+    };
+
+    const openEditModal = (item) => {
+        setForm({
+            storeName: item.storeName || '',
+            address: item.address || '',
+            phoneNumber: item.phoneNumber || '',
+            image: item.image || '',
+            openTime: item.openTime || '',
+            closeTime: item.closeTime || ''
+        });
+        setModalMode('edit');
+        setEditingId(item.id);
+        setErrors({});
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setForm({
+            storeName: '',
+            address: '',
+            phoneNumber: '',
+            image: '',
+            openTime: '',
+            closeTime: ''
+        });
+        setEditingId(null);
+        setErrors({});
+    };
+
+    // ✅ FORM HANDLERS
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setForm((prev) => ({ ...prev, [name]: value }));
+
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!form.storeName.trim()) {
+            newErrors.storeName = 'Tên cửa hàng là bắt buộc';
+        } else if (form.storeName.length > 255) {
+            newErrors.storeName = 'Tên cửa hàng không được dài quá 255 ký tự';
+        }
+
+        if (!form.address.trim()) {
+            newErrors.address = 'Địa chỉ là bắt buộc';
+        } else if (form.address.length > 500) {
+            newErrors.address = 'Địa chỉ không được dài quá 500 ký tự';
+        }
+
+        if (!form.phoneNumber.trim()) {
+            newErrors.phoneNumber = 'Số điện thoại là bắt buộc';
+        } else if (!/^(0[3|5|7|8|9])+([0-9]{8})$/.test(form.phoneNumber)) {
+            newErrors.phoneNumber = 'Số điện thoại không hợp lệ (VD: 0901234567)';
+        }
+
+        if (form.image && !isValidUrl(form.image)) {
+            newErrors.image = 'URL hình ảnh không hợp lệ';
+        }
+
+        if (form.openTime && form.closeTime) {
+            if (form.openTime >= form.closeTime) {
+                newErrors.closeTime = 'Giờ đóng cửa phải sau giờ mở cửa';
+            }
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const isValidUrl = (string) => {
+        try {
+            new URL(string);
+            return true;
+        } catch (_) {
+            return false;
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (editingId) {
-            await StoreAPI.update(editingId, form);
-        } else {
-            await StoreAPI.create(form);
+
+        if (!validateForm()) {
+            setMessage('❌ Vui lòng kiểm tra lại thông tin');
+            return;
         }
-        setForm({ storeName: '', address: '', phoneNumber: '' });
-        setEditingId(null);
-        setShowDialog(false);
-        fetchStores();
+
+        setLoading(true);
+
+        try {
+            const storeData = {
+                storeName: form.storeName.trim(),
+                address: form.address.trim(),
+                phoneNumber: form.phoneNumber.trim(),
+                image: form.image.trim() || null,
+                openTime: form.openTime || null,
+                closeTime: form.closeTime || null
+            };
+
+            let result;
+            if (modalMode === 'edit') {
+                console.log('🔄 Đang cập nhật cửa hàng:', editingId);
+                result = await StoreAPI.update(editingId, storeData);
+                setMessage('✅ Cập nhật cửa hàng thành công!');
+            } else {
+                console.log('🔄 Đang tạo cửa hàng mới');
+                result = await StoreAPI.create(storeData);
+                setMessage('✅ Thêm cửa hàng thành công!');
+            }
+
+            console.log('✅ Kết quả:', result);
+
+            closeModal();
+            await fetchStores(page, search);
+
+            setTimeout(() => setMessage(''), 3000);
+        } catch (error) {
+            console.error('❌ Lỗi submit form:', error);
+            setMessage('❌ ' + error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
+    // ✅ ACTION HANDLERS
     const handleDelete = async (id) => {
-        await StoreAPI.delete(id);
-        fetchStores();
+        if (!confirm('Bạn có chắc chắn muốn xóa cửa hàng này không?')) {
+            return;
+        }
+
+        setLoading(true);
+        try {
+            console.log('🗑️ Đang xóa cửa hàng:', id);
+
+            await StoreAPI.delete(id);
+            setMessage('✅ Xóa cửa hàng thành công!');
+
+            await fetchStores(page, search);
+
+            setTimeout(() => setMessage(''), 3000);
+        } catch (error) {
+            console.error('❌ Lỗi xóa cửa hàng:', error);
+            setMessage('❌ Lỗi xóa cửa hàng: ' + error.message);
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleEdit = (store) => {
-        setForm({
-            storeName: store.storeName,
-            address: store.address,
-            phoneNumber: store.phoneNumber || ''
-        });
-        setEditingId(store.id);
-        setShowDialog(true);
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const searchTerm = formData.get('search') || '';
+        setSearch(searchTerm);
+        setPage(1);
     };
 
-    const handleAddNew = () => {
-        setForm({ storeName: '', address: '', phoneNumber: '' });
-        setEditingId(null);
-        setShowDialog(true);
+    const handlePageChange = (newPage) => {
+        if (
+            newPage >= 1 &&
+            newPage <= totalPage &&
+            newPage !== page &&
+            !loading
+        ) {
+            setPage(newPage);
+        }
     };
 
-    const handleCancel = () => {
-        setForm({ storeName: '', address: '', phoneNumber: '' });
-        setEditingId(null);
-        setShowDialog(false);
+    // ✅ HELPER FUNCTIONS
+    const formatDate = (dateString) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('vi-VN');
     };
 
-    // Dialog styles
-    const dialogOverlayStyle = {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: showDialog ? 'flex' : 'none',
-        justifyContent: 'center',
-        alignItems: 'center',
-        zIndex: 1000
+    const formatPhone = (phone) => {
+        if (!phone) return '-';
+        const cleaned = phone.replace(/\D/g, '');
+        if (cleaned.length === 10) {
+            return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(7)}`;
+        }
+        return phone;
     };
 
-    const dialogStyle = {
-        backgroundColor: 'white',
-        padding: '30px',
-        borderRadius: '8px',
-        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-        maxWidth: '400px',
-        width: '90%'
+    const formatWorkingHours = (openTime, closeTime) => {
+        if (!openTime || !closeTime) return 'Chưa cập nhật';
+        return `${openTime.slice(0, 5)} - ${closeTime.slice(0, 5)}`;
     };
 
-    const inputStyle = {
-        width: '100%',
-        padding: '10px',
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        fontSize: '14px',
-        marginBottom: '15px'
-    };
+    // ✅ LOADING STATE
+    if (loadingData) {
+        return (
+            <div className='loading-state'>
+                <div className='loading-text'>🔄 Đang tải dữ liệu...</div>
+            </div>
+        );
+    }
 
-    const buttonGroupStyle = {
-        display: 'flex',
-        gap: '10px',
-        justifyContent: 'flex-end',
-        marginTop: '10px'
-    };
-
-    const buttonStyle = {
-        padding: '10px 20px',
-        border: 'none',
-        borderRadius: '4px',
-        cursor: 'pointer',
-        fontSize: '14px'
-    };
-
-    const primaryButtonStyle = {
-        ...buttonStyle,
-        backgroundColor: '#007bff',
-        color: 'white'
-    };
-
-    const secondaryButtonStyle = {
-        ...buttonStyle,
-        backgroundColor: '#6c757d',
-        color: 'white'
-    };
-
+    // ✅ MAIN RENDER
     return (
-        <div style={{ maxWidth: 600, margin: '0 auto', padding: 20 }}>
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: 20
-                }}
-            >
-                <h2>Quản lý cửa hàng</h2>
-                <button
-                    onClick={handleAddNew}
-                    style={{
-                        padding: '10px 20px',
-                        backgroundColor: '#28a745',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        fontSize: '14px'
-                    }}
+        <div className='prodetail-container'>
+            {/* Message Alert */}
+            {message && (
+                <div
+                    className={`message ${
+                        message.includes('✅') ? 'success' : 'error'
+                    }`}
                 >
-                    + Thêm cửa hàng mới
+                    {message}
+                    <button onClick={() => setMessage('')}>×</button>
+                </div>
+            )}
+
+            {/* Header */}
+            <div className='header'>
+                <h2>🏪 Quản lý cửa hàng</h2>
+                <button
+                    className='btn btn-success'
+                    onClick={openCreateModal}
+                    disabled={loading}
+                >
+                    ➕ Thêm cửa hàng
                 </button>
             </div>
 
-            {/* Dialog */}
-            <div style={dialogOverlayStyle} onClick={handleCancel}>
-                <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
-                    <h3 style={{ marginTop: 0, marginBottom: 20 }}>
-                        {editingId ? 'Cập nhật cửa hàng' : 'Thêm cửa hàng mới'}
-                    </h3>
-                    <form onSubmit={handleSubmit}>
-                        <input
-                            name='storeName'
-                            placeholder='Tên cửa hàng'
-                            value={form.storeName}
-                            onChange={handleChange}
-                            required
-                            style={inputStyle}
-                        />
-                        <input
-                            name='address'
-                            placeholder='Địa chỉ'
-                            value={form.address}
-                            onChange={handleChange}
-                            required
-                            style={inputStyle}
-                        />
-                        <input
-                            name='phoneNumber'
-                            placeholder='Số điện thoại'
-                            value={form.phoneNumber}
-                            onChange={handleChange}
-                            style={inputStyle}
-                        />
-                        <div style={buttonGroupStyle}>
-                            <button
-                                type='button'
-                                onClick={handleCancel}
-                                style={secondaryButtonStyle}
-                            >
-                                Hủy
-                            </button>
-                            <button type='submit' style={primaryButtonStyle}>
-                                {editingId ? 'Cập nhật' : 'Thêm mới'}
-                            </button>
-                        </div>
-                    </form>
+            {/* Search Bar */}
+            <div className='search-bar'>
+                <div className='search-info'>
+                    Tổng <strong>{totalItems}</strong> cửa hàng
                 </div>
+                <form className='search-form' onSubmit={handleSearchSubmit}>
+                    <input
+                        name='search'
+                        className='search-input'
+                        placeholder='Tìm kiếm cửa hàng...'
+                        defaultValue={search}
+                    />
+                    <button type='submit' className='btn-search'>
+                        🔍 Tìm kiếm
+                    </button>
+                </form>
             </div>
 
-            <table border='1' cellPadding='8' style={{ width: '100%' }}>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Tên cửa hàng</th>
-                        <th>Địa chỉ</th>
-                        <th>SĐT</th>
-                        <th>Hành động</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {stores.map((store) => (
-                        <tr key={store.id}>
-                            <td>{store.id}</td>
-                            <td>{store.storeName}</td>
-                            <td>{store.address}</td>
-                            <td>{store.phoneNumber}</td>
-                            <td>
-                                <button onClick={() => handleEdit(store)}>
-                                    Sửa
-                                </button>
-                                <button onClick={() => handleDelete(store.id)}>
-                                    Xóa
-                                </button>
-                            </td>
+            {/* Stores Table */}
+            <div className='table-container'>
+                <table className='data-table'>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Hình ảnh</th>
+                            <th>Tên cửa hàng</th>
+                            <th>Địa chỉ</th>
+                            <th>Điện thoại</th>
+                            <th>Giờ hoạt động</th>
+                            <th>Ngày tạo</th>
+                            <th>Hành động</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {loading ? (
+                            <tr>
+                                <td
+                                    colSpan='8'
+                                    style={{
+                                        textAlign: 'center',
+                                        padding: '40px'
+                                    }}
+                                >
+                                    🔄 Đang tải...
+                                </td>
+                            </tr>
+                        ) : stores.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan='8'
+                                    style={{
+                                        textAlign: 'center',
+                                        padding: '40px',
+                                        color: '#999'
+                                    }}
+                                >
+                                    🏪 Không có dữ liệu
+                                </td>
+                            </tr>
+                        ) : (
+                            stores.map((item) => (
+                                <tr key={item.id}>
+                                    <td className='table-id'>{item.id}</td>
+                                    <td className='store-image'>
+                                        {item.image ? (
+                                            <img
+                                                src={item.image}
+                                                alt={item.storeName}
+                                                style={{
+                                                    width: '50px',
+                                                    height: '50px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '4px',
+                                                    border: '1px solid #ddd'
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.style.display =
+                                                        'none';
+                                                    e.target.nextElementSibling.style.display =
+                                                        'flex';
+                                                }}
+                                            />
+                                        ) : null}
+                                        <div
+                                            style={{
+                                                width: '50px',
+                                                height: '50px',
+                                                backgroundColor: '#f0f0f0',
+                                                display: item.image
+                                                    ? 'none'
+                                                    : 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                borderRadius: '4px',
+                                                fontSize: '20px'
+                                            }}
+                                        >
+                                            🏪
+                                        </div>
+                                    </td>
+                                    <td className='store-name'>
+                                        <div
+                                            style={{
+                                                fontWeight: 'bold',
+                                                fontSize: '14px',
+                                                maxWidth: '150px'
+                                            }}
+                                        >
+                                            {item.storeName || '-'}
+                                        </div>
+                                    </td>
+                                    <td className='store-address'>
+                                        <div
+                                            style={{
+                                                maxWidth: '200px',
+                                                fontSize: '12px',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap'
+                                            }}
+                                            title={item.address}
+                                        >
+                                            {item.address || '-'}
+                                        </div>
+                                    </td>
+                                    <td className='store-phone'>
+                                        <div style={{ fontSize: '12px' }}>
+                                            {formatPhone(item.phoneNumber)}
+                                        </div>
+                                    </td>
+                                    <td className='store-hours'>
+                                        <div
+                                            style={{
+                                                fontSize: '12px',
+                                                color: '#666'
+                                            }}
+                                        >
+                                            {formatWorkingHours(
+                                                item.openTime,
+                                                item.closeTime
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className='date'>
+                                        {formatDate(item.createdAt)}
+                                    </td>
+                                    <td className='actions'>
+                                        <div className='action-buttons'>
+                                            <button
+                                                className='btn-edit'
+                                                onClick={() =>
+                                                    openEditModal(item)
+                                                }
+                                                disabled={loading}
+                                            >
+                                                ✏️ Sửa
+                                            </button>
+                                            <button
+                                                className='btn-delete'
+                                                onClick={() =>
+                                                    handleDelete(item.id)
+                                                }
+                                                disabled={loading}
+                                            >
+                                                🗑️ Xóa
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Pagination */}
+            {totalItems > 0 && (
+                <div className='pagination'>
+                    <div className='pagination-info'>
+                        Trang {page} / {totalPage} - Tổng {totalItems} cửa hàng
+                    </div>
+                    <div className='pagination-controls'>
+                        <button
+                            className='btn-nav'
+                            onClick={() => handlePageChange(1)}
+                            disabled={page === 1 || loading}
+                        >
+                            ⏪ Đầu
+                        </button>
+                        <button
+                            className='btn-nav'
+                            onClick={() => handlePageChange(page - 1)}
+                            disabled={page === 1 || loading}
+                        >
+                            ⬅️ Trước
+                        </button>
+
+                        {Array.from(
+                            { length: Math.min(5, totalPage) },
+                            (_, i) => {
+                                const startPage = Math.max(1, page - 2);
+                                const pageNum = startPage + i;
+                                if (pageNum > totalPage) return null;
+
+                                return (
+                                    <button
+                                        key={pageNum}
+                                        className={`btn-page ${
+                                            page === pageNum ? 'active' : ''
+                                        }`}
+                                        onClick={() =>
+                                            handlePageChange(pageNum)
+                                        }
+                                        disabled={loading}
+                                    >
+                                        {pageNum}
+                                    </button>
+                                );
+                            }
+                        )}
+                        <button
+                            className='btn-nav'
+                            onClick={() => handlePageChange(page + 1)}
+                            disabled={page === totalPage || loading}
+                        >
+                            Tiếp ➡️
+                        </button>
+                        <button
+                            className='btn-nav'
+                            onClick={() => handlePageChange(totalPage)}
+                            disabled={page === totalPage || loading}
+                        >
+                            Cuối ⏩
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal Form */}
+            <Modal
+                show={showModal}
+                onClose={closeModal}
+                title={
+                    modalMode === 'create'
+                        ? '➕ Thêm cửa hàng mới'
+                        : `✏️ Chỉnh sửa cửa hàng #${editingId}`
+                }
+                size='lg'
+            >
+                <form onSubmit={handleSubmit}>
+                    <div className='form-row'>
+                        <div className='form-group'>
+                            <label className='form-label'>🏪 Tên cửa hàng *</label>
+                            <input
+                                name='storeName'
+                                value={form.storeName}
+                                onChange={handleChange}
+                                className={`form-input ${
+                                    errors.storeName ? 'error' : ''
+                                }`}
+                                placeholder='Nhập tên cửa hàng...'
+                                required
+                            />
+                            {errors.storeName && (
+                                <span className='form-error'>{errors.storeName}</span>
+                            )}
+                        </div>
+
+                        <div className='form-group'>
+                            <label className='form-label'>📞 Số điện thoại *</label>
+                            <input
+                                name='phoneNumber'
+                                value={form.phoneNumber}
+                                onChange={handleChange}
+                                className={`form-input ${
+                                    errors.phoneNumber ? 'error' : ''
+                                }`}
+                                placeholder='VD: 0901234567'
+                                required
+                            />
+                            {errors.phoneNumber && (
+                                <span className='form-error'>{errors.phoneNumber}</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className='form-group'>
+                        <label className='form-label'>🏠 Địa chỉ *</label>
+                        <textarea
+                            name='address'
+                            value={form.address}
+                            onChange={handleChange}
+                            className={`form-input ${
+                                errors.address ? 'error' : ''
+                            }`}
+                            placeholder='Nhập địa chỉ cửa hàng...'
+                            rows='3'
+                            required
+                        />
+                        {errors.address && (
+                            <span className='form-error'>{errors.address}</span>
+                        )}
+                    </div>
+
+                    <div className='form-row'>
+                        <div className='form-group'>
+                            <label className='form-label'>🕐 Giờ mở cửa</label>
+                            <input
+                                name='openTime'
+                                type='time'
+                                value={form.openTime}
+                                onChange={handleChange}
+                                className='form-input'
+                            />
+                        </div>
+
+                        <div className='form-group'>
+                            <label className='form-label'>🕕 Giờ đóng cửa</label>
+                            <input
+                                name='closeTime'
+                                type='time'
+                                value={form.closeTime}
+                                onChange={handleChange}
+                                className={`form-input ${
+                                    errors.closeTime ? 'error' : ''
+                                }`}
+                            />
+                            {errors.closeTime && (
+                                <span className='form-error'>{errors.closeTime}</span>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className='form-group'>
+                        <label className='form-label'>🖼️ Hình ảnh</label>
+                        <input
+                            name='image'
+                            value={form.image}
+                            onChange={handleChange}
+                            className={`form-input ${
+                                errors.image ? 'error' : ''
+                            }`}
+                            placeholder='URL hình ảnh...'
+                            type='url'
+                        />
+                        {errors.image && (
+                            <span className='form-error'>{errors.image}</span>
+                        )}
+                        {form.image && (
+                            <div style={{ marginTop: '8px' }}>
+                                <img
+                                    src={form.image}
+                                    alt='Preview'
+                                    style={{
+                                        width: '100px',
+                                        height: '100px',
+                                        objectFit: 'cover',
+                                        borderRadius: '4px',
+                                        border: '1px solid #ddd'
+                                    }}
+                                    onError={(e) => {
+                                        e.target.style.display = 'none';
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Form Buttons */}
+                    <div className='form-buttons'>
+                        <button
+                            type='button'
+                            className='btn btn-secondary'
+                            onClick={closeModal}
+                            disabled={loading}
+                        >
+                            ❌ Hủy
+                        </button>
+                        <button
+                            type='submit'
+                            className='btn btn-success'
+                            disabled={loading}
+                        >
+                            {loading
+                                ? '⏳ Đang xử lý...'
+                                : modalMode === 'edit'
+                                ? '💾 Cập nhật'
+                                : '➕ Thêm mới'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
         </div>
     );
 }
 
-export default Store;
+export default StoreComponent;

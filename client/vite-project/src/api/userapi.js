@@ -1,5 +1,4 @@
 import User from '@models/user';
-import { use } from 'react';
 
 class UserAPI {
     static baseUrl = 'http://localhost:3003/api/users';
@@ -136,7 +135,7 @@ class UserAPI {
             console.log('Raw response from create:', data);
 
             const userResponse = data.data || data.user || data;
-            return new User.fromApiResponse(userResponse);
+            return User.fromApiResponse(userResponse);
         } catch (error) {
             console.error('Error creating user:', error);
             throw error;

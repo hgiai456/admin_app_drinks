@@ -4,7 +4,7 @@ class Product {
         name = '',
         description = '',
         image = '',
-        brand_id = 0,
+        brand_id = 1,
         category_id = 0,
         createdAt = null,
         updatedAt = null
@@ -31,7 +31,7 @@ class Product {
             data.name || '',
             data.description || '',
             data.image || '',
-            data.brand_id || 0,
+            data.brand_id || 1,
             data.category_id || 0,
             data.createdAt,
             data.updatedAt
@@ -93,10 +93,6 @@ class Product {
             style: 'currency',
             currency: 'VND'
         }).format(this.price || 0);
-    }
-
-    getStatusText() {
-        return this.status === 1 ? 'Hoạt động' : 'Ngừng hoạt động';
     }
 
     getImageUrl() {

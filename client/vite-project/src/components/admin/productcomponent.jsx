@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import ProductAPI from '@api/productapi';
 import CategoryAPI from '@api/categoryapi';
+import BrandAPI from '@api/brandapi';
 import Modal from './ModelComponent.jsx';
 import '@styles/pages/_admin.scss';
 
 function ProductComponent() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [brands, setBrands] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('create');
     const [editingId, setEditingId] = useState(null);
@@ -33,7 +35,10 @@ function ProductComponent() {
             console.log('🔄 Đang tải dữ liệu ban đầu...');
             const categoriesData = await CategoryAPI.getAll();
             setCategories(categoriesData || []);
-            console.log('✅ Đã tải categories:', categoriesData);
+            const brandsData = await BrandAPI.getAll();
+            setBrands(brandsData || []);
+            console.log('✅ Đã tải brands:', categoriesData);
+            console.log('✅ Đã tải categories:', brandsData);
         } catch (error) {
             console.error('❌ Lỗi tải dữ liệu ban đầu:', error);
             setMessage('❌ Lỗi tải dữ liệu: ' + error.message);
@@ -177,10 +182,6 @@ function ProductComponent() {
             newErrors.name = 'Tên sản phẩm là bắt buộc';
         } else if (form.name.length > 255) {
             newErrors.name = 'Tên sản phẩm không được dài quá 255 ký tự';
-        }
-
-        if (!form.brand_id) {
-            newErrors.brand_id = 'Thương hiệu là bắt buộc';
         }
 
         if (!form.category_id) {
@@ -367,7 +368,6 @@ function ProductComponent() {
                             <th>Danh mục</th>
                             <th>Brand ID</th>
                             <th>Giá</th>
-
                             <th>Ngày tạo</th>
                             <th>Hành động</th>
                         </tr>
@@ -677,19 +677,23 @@ function ProductComponent() {
                         </div>
 
                         <div className='form-group'>
-                            <label className='form-label'>🏷️ Brand ID *</label>
-                            <input
-                                type='number'
+                            <label className='form-label'>🏷️ Thương hiệu</label>
+                            <select
                                 name='brand_id'
                                 value={form.brand_id}
                                 onChange={handleChange}
                                 className={`form-input ${
                                     errors.brand_id ? 'error' : ''
                                 }`}
-                                placeholder='Nhập Brand ID...'
                                 required
-                                min='1'
-                            />
+                            >
+                                <option value=''>-- Chọn danh mục --</option>
+                                {brands.map((brand) => (
+                                    <option key={brand.id} value={brand.id}>
+                                        [{brand.id}] {brand.name}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.brand_id && (
                                 <span className='form-error'>
                                     {errors.brand_id}
