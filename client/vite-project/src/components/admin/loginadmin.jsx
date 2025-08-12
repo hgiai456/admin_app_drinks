@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import '@styles/pages/_login.scss';
 
-export default function LoginAdmin({ onLogin }) {
+export default function LoginAdmin({ onLogin, onSwitchToRegister }) {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -82,9 +82,9 @@ export default function LoginAdmin({ onLogin }) {
                                 }}
                             />
                         </div>
-                        <h1 className='login-title'>Admin Dashboard</h1>
+                        <h1 className='login-title'>Đăng nhập</h1>
                         <p className='login-subtitle'>
-                            Đăng nhập để truy cập hệ thống quản lý
+                            Đăng nhập trải ngiệm dịch vụ của chúng tôi
                         </p>
                     </div>
                     {error && (
@@ -152,14 +152,20 @@ export default function LoginAdmin({ onLogin }) {
                         <div className='btn-ripple'></div>
                     </button>
 
-                    {/* Footer */}
                     <div className='login-footer'>
-                        <div className='security-badge'>
-                            <span className='security-icon'>🔐</span>
-                            <span className='security-text'>
-                                Chỉ dành cho quản trị viên
-                            </span>
-                        </div>
+                        <p className='footer-text'>
+                            Bạn chưa có tài khoản ?
+                            <button
+                                type='button'
+                                onClick={() =>
+                                    onSwitchToRegister && onSwitchToRegister()
+                                }
+                                className='register-link'
+                                disabled={loading}
+                            >
+                                Đăng ký ngay
+                            </button>
+                        </p>
                     </div>
                 </form>
             </div>

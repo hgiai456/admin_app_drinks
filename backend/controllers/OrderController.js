@@ -129,7 +129,7 @@ export async function getOrderById(req, res) {
                 include: [
                     {
                         model: db.ProDetail,
-                        as: 'product_detail'
+                        as: 'product_details'
                     }
                 ]
             }

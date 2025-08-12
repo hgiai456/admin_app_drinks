@@ -1,0 +1,687 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as m;
+@use 'sass:color';
+
+// ✅ REGISTER CONTAINER - TƯƠNG TỰ LOGIN
+.register-container {
+    min-height: 100vh;
+    @include m.flex-center;
+    position: relative;
+    overflow: hidden;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        sans-serif;
+}
+
+// ✅ ANIMATED BACKGROUND - GIỐNG LOGIN
+.register-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        135deg,
+        $admin-primary 0%,
+        $admin-secondary 50%,
+        $admin-light 100%
+    );
+    z-index: 1;
+
+    .bg-shapes {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            animation: floatSmooth 8s ease-in-out infinite;
+
+            &.shape-1 {
+                width: 120px;
+                height: 120px;
+                top: 15%;
+                left: 8%;
+                animation-delay: 0s;
+            }
+
+            &.shape-2 {
+                width: 80px;
+                height: 80px;
+                top: 70%;
+                right: 12%;
+                animation-delay: 3s;
+            }
+
+            &.shape-3 {
+                width: 150px;
+                height: 150px;
+                bottom: 20%;
+                left: 15%;
+                animation-delay: 6s;
+            }
+
+            &.shape-4 {
+                width: 90px;
+                height: 90px;
+                top: 8%;
+                right: 25%;
+                animation-delay: 1.5s;
+            }
+        }
+    }
+}
+
+// ✅ ANIMATION KEYFRAMES
+@keyframes floatSmooth {
+    0%,
+    100% {
+        transform: translateY(0px) translateX(0px) scale(1);
+        opacity: 0.6;
+    }
+    33% {
+        transform: translateY(-15px) translateX(10px) scale(1.05);
+        opacity: 0.8;
+    }
+    66% {
+        transform: translateY(10px) translateX(-8px) scale(0.95);
+        opacity: 0.7;
+    }
+}
+
+// ✅ REGISTER CONTENT
+.register-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 500px; // Wider than login for more fields
+    padding: 0 $spacing-xxl;
+}
+
+// ✅ REGISTER FORM
+.register-form {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: $spacing-xxl;
+    padding: 40px 36px; // Adjusted for more content
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    position: relative;
+    overflow: hidden;
+    max-height: 90vh; // Prevent overflow on small screens
+    overflow-y: auto; // Enable scrolling if needed
+
+    // Top gradient border
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(
+            90deg,
+            $admin-primary,
+            $admin-secondary,
+            $success-color
+        );
+        z-index: 1;
+    }
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: rgba($admin-light, 0.3);
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: rgba($admin-primary, 0.3);
+        border-radius: 3px;
+
+        &:hover {
+            background: rgba($admin-primary, 0.5);
+        }
+    }
+}
+
+// ✅ REGISTER HEADER
+.register-header {
+    text-align: center;
+    margin-bottom: 32px; // Reduced margin for more content
+    position: relative;
+    z-index: 2;
+
+    .logo-container {
+        margin-bottom: $spacing-xl;
+        @include m.flex-center;
+
+        .register-logo {
+            width: 70px; // Slightly smaller
+            height: 70px;
+            object-fit: contain;
+            border-radius: 18px;
+            background: rgba($admin-primary, 0.1);
+            padding: 8px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+
+            &:hover {
+                transform: scale(1.05) rotate(2deg);
+                box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            }
+        }
+
+        .logo-fallback {
+            font-size: 3.5rem;
+            background: linear-gradient(
+                135deg,
+                $admin-primary,
+                $admin-secondary
+            );
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+            display: none;
+        }
+    }
+
+    .register-title {
+        font-size: 1.8rem; // Slightly smaller
+        font-weight: $font-weight-bold;
+        margin: 0 0 6px 0;
+        background: linear-gradient(135deg, $admin-primary, $admin-secondary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: -0.5px;
+    }
+
+    .register-subtitle {
+        color: $admin-text-light;
+        margin: 0;
+        font-size: 0.9rem;
+        font-weight: $font-weight-medium;
+        opacity: 0.8;
+    }
+}
+
+// ✅ MESSAGE STYLES
+.register-message {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: slideInMessage 0.4s ease;
+
+    &.error-message {
+        background: linear-gradient(135deg, #f8d7da 0%, #f5c2c7 100%);
+        border: 1px solid #f5c2c7;
+        color: #721c24;
+    }
+
+    &.success-message {
+        background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+        border: 1px solid #c3e6cb;
+        color: #155724;
+    }
+
+    .message-icon {
+        font-size: 16px;
+    }
+
+    .message-text {
+        flex: 1;
+        line-height: 1.4;
+    }
+}
+
+@keyframes slideInMessage {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+// ✅ FORM FIELDS
+.form-fields {
+    margin-bottom: 28px; // Reduced margin
+
+    .form-group {
+        margin-bottom: $spacing-xl; // Reduced spacing between fields
+
+        .form-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 10px;
+            color: $admin-text;
+            font-weight: $font-weight-semibold;
+            font-size: 13px; // Slightly smaller
+            transition: color 0.3s ease;
+
+            .required {
+                color: #dc3545;
+                font-weight: bold;
+            }
+        }
+
+        .input-wrapper {
+            position: relative;
+
+            .form-input {
+                width: 100%;
+                padding: 14px 18px; // Reduced padding
+                border: 2px solid rgba($admin-primary, 0.15);
+                border-radius: 12px;
+                font-size: 15px; // Slightly smaller
+                font-weight: $font-weight-medium;
+                background: rgba(255, 255, 255, 0.9);
+                transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                color: $admin-text;
+                box-sizing: border-box;
+                outline: none;
+
+                &::placeholder {
+                    color: rgba($admin-text-light, 0.6);
+                    transition: opacity 0.3s ease;
+                    font-size: 14px;
+                }
+
+                &:focus {
+                    border-color: $admin-primary;
+                    background: white;
+                    box-shadow: 0 0 0 3px rgba($admin-primary, 0.1),
+                        0 4px 20px rgba($admin-primary, 0.15);
+                    transform: translateY(-1px);
+
+                    &::placeholder {
+                        opacity: 0.4;
+                    }
+                }
+
+                &:hover:not(:focus):not(:disabled) {
+                    border-color: rgba($admin-primary, 0.3);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+                }
+
+                &:disabled {
+                    background: $admin-light;
+                    color: $admin-text-light;
+                    cursor: not-allowed;
+                    border-color: rgba($admin-secondary, 0.2);
+                    opacity: 0.7;
+                }
+
+                // Error state
+                &.error {
+                    border-color: #dc3545;
+                    background-color: #fff5f5;
+
+                    &:focus {
+                        border-color: #dc3545;
+                        box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+                    }
+                }
+            }
+
+            // Textarea specific styles
+            .form-textarea {
+                resize: vertical;
+                min-height: 70px;
+                line-height: 1.5;
+                font-family: inherit;
+            }
+
+            .input-border {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(
+                    90deg,
+                    $admin-primary,
+                    $admin-secondary
+                );
+                transition: all 0.3s ease;
+                transform: translateX(-50%);
+            }
+
+            .form-input:focus + .input-border {
+                width: 100%;
+            }
+        }
+
+        .field-error {
+            display: block;
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 6px;
+            margin-left: 4px;
+            font-weight: 500;
+            animation: shake 0.3s ease;
+        }
+
+        // Focus animation
+        &:focus-within {
+            .form-label {
+                color: $admin-primary;
+            }
+        }
+    }
+}
+
+@keyframes shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+// ✅ SUBMIT BUTTON
+.register-submit-btn {
+    width: 100%;
+    padding: 16px $spacing-xl;
+    background: linear-gradient(135deg, $admin-primary, $admin-secondary);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: $font-weight-semibold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    box-shadow: 0 6px 20px rgba($admin-primary, 0.3);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba($admin-primary, 0.4);
+        background: linear-gradient(
+            135deg,
+            color.adjust($admin-primary, $lightness: 5%),
+            $admin-primary
+        );
+    }
+
+    &:active:not(:disabled) {
+        transform: translateY(0);
+        transition: transform 0.1s ease;
+    }
+
+    &:disabled {
+        background: linear-gradient(
+            135deg,
+            $admin-secondary,
+            rgba($admin-secondary, 0.8)
+        );
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: 0 4px 12px rgba($admin-secondary, 0.2);
+        opacity: 0.7;
+    }
+
+    .btn-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        position: relative;
+        z-index: 2;
+
+        .btn-icon,
+        .btn-spinner {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        .btn-text {
+            transition: opacity 0.3s ease;
+            font-weight: 600;
+        }
+    }
+
+    .btn-ripple {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transition: all 0.6s ease;
+        transform: translate(-50%, -50%);
+    }
+
+    &:active:not(:disabled) .btn-ripple {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// ✅ REGISTER FOOTER
+.register-footer {
+    text-align: center;
+    padding-top: 16px;
+    border-top: 1px solid #e9ecef;
+
+    .footer-text {
+        color: $admin-text-light;
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.5;
+    }
+
+    .login-link {
+        background: none;
+        border: none;
+        color: $admin-primary;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-left: 6px;
+        padding: 4px 8px;
+        border-radius: 6px;
+
+        &:hover:not(:disabled) {
+            color: $admin-secondary;
+            background: rgba($admin-primary, 0.1);
+            transform: translateY(-1px);
+        }
+
+        &:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+}
+
+// ✅ RESPONSIVE DESIGN
+@media (max-width: 768px) {
+    .register-content {
+        max-width: 95%;
+        padding: 15px;
+    }
+
+    .register-form {
+        padding: 32px 24px;
+        border-radius: 16px;
+        max-height: 95vh;
+    }
+
+    .register-header {
+        margin-bottom: 24px;
+
+        .register-title {
+            font-size: 1.6rem;
+        }
+
+        .register-logo {
+            width: 60px;
+            height: 60px;
+        }
+    }
+
+    .form-fields .form-group {
+        margin-bottom: 18px;
+
+        .input-wrapper .form-input {
+            padding: 12px 16px;
+            font-size: 16px; // Prevent zoom on iOS
+        }
+    }
+
+    .register-submit-btn {
+        padding: 14px 20px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .register-form {
+        padding: 24px 18px;
+        margin: 10px;
+    }
+
+    .form-fields {
+        gap: 14px;
+    }
+
+    .register-header .register-title {
+        font-size: 1.4rem;
+    }
+
+    .bg-shapes {
+        opacity: 0.4; // Reduce background distraction
+    }
+}
+
+// ✅ DARK MODE SUPPORT
+@media (prefers-color-scheme: dark) {
+    .register-form {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+
+        .register-title {
+            color: #fff;
+        }
+
+        .register-subtitle {
+            color: $admin-text-light;
+        }
+
+        .form-label {
+            color: #fff;
+        }
+
+        .form-input {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+
+            &::placeholder {
+                color: rgba(255, 255, 255, 0.5);
+            }
+
+            &:focus {
+                background: rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        .footer-text {
+            color: $admin-text-light;
+        }
+    }
+
+    .register-message {
+        &.success-message {
+            background: linear-gradient(
+                135deg,
+                rgba(40, 167, 69, 0.2) 0%,
+                rgba(40, 167, 69, 0.1) 100%
+            );
+            border-color: rgba(40, 167, 69, 0.3);
+            color: #95d5a0;
+        }
+
+        &.error-message {
+            background: linear-gradient(
+                135deg,
+                rgba(220, 53, 69, 0.2) 0%,
+                rgba(220, 53, 69, 0.1) 100%
+            );
+            border-color: rgba(220, 53, 69, 0.3);
+            color: #f5a3a3;
+        }
+    }
+}
+
+// ✅ ACCESSIBILITY
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+// ✅ HIGH CONTRAST MODE
+@media (prefers-contrast: high) {
+    .register-form {
+        border: 3px solid $admin-primary;
+
+        .form-input {
+            border-width: 2px;
+
+            &:focus {
+                border-width: 3px;
+            }
+        }
+
+        .register-submit-btn {
+            border: 2px solid $admin-primary;
+        }
+    }
+}

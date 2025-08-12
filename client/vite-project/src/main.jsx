@@ -14,6 +14,7 @@ import SizeComponent from '@components/admin/SizeComponent.jsx';
 import OrderComponent from '@components/admin/OrderComponent.jsx';
 import ImageComponent from '@components/admin/ImageComponent.jsx';
 import LoginAdmin from '@components/admin/LoginAdmin.jsx';
+import RegisterComponent from './components/customer/RegisterComponent';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -173,17 +174,7 @@ function Header({ currentPage }) {
     const pageInfo = getCurrentPageInfo();
     return (
         <header className='main-header'>
-            <div className='header-content'>
-                <div className='page-info'>
-                    <h1 className='page-title'>{pageInfo.title}</h1>
-                    <p className='page-subtitle'>{pageInfo.subtitle}</p>
-                </div>
-                <div className='header-actions'>
-                    <div className='current-time'>
-                        {new Date().toLocaleString('vi-VN')}
-                    </div>
-                </div>
-            </div>
+            <div className='header-content'></div>
         </header>
     );
 }
@@ -213,6 +204,42 @@ function AdminLayout({
                 </main>
             </div>
         </div>
+    );
+}
+
+export default function AuthContainer({ onLogin }) {
+    const [currentView, setCurrentView] = useState('login');
+    const [successMessage, setSuccessMessage] = useState('');
+    //Chuyển sang Register
+    const handleSwitchToRegister = () => {
+        setCurrentView('register');
+        setSuccessMessage('');
+    };
+    //Xử lý khi đăng ký thành công hoặc click "Đăng nhập ngay"
+    const handleRegisterSuccess = (user) => {
+        if (user) {
+            setSuccessMessage('Đăng ký thành công', user);
+            setCurrentView('login');
+        } else {
+            setCurrentView('login');
+            setSuccessMessage('');
+        }
+    };
+    const handleClearMessage = () => {
+        setSuccessMessage('');
+    };
+
+    if (currentView === 'register') {
+        return <RegisterComponent onRegisterSuccess={handleRegisterSuccess} />;
+    }
+
+    return (
+        <LoginAdmin
+            onLogin={onLogin}
+            onSwitchToRegister={handleSwitchToRegister}
+            successMessage={successMessage}
+            onClearMessage={handleClearMessage}
+        />
     );
 }
 
@@ -253,9 +280,9 @@ function App() {
             setCurrentPage('Quản lý đơn hàng');
         }
     };
-
+    //Route từ login sang Register
     if (!admin) {
-        return <LoginAdmin onLogin={handleLogin} />;
+        return <AuthContainer onLogin={handleLogin} />;
     }
 
     const renderPage = () => {
