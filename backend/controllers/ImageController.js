@@ -8,11 +8,9 @@ import {
 } from 'firebase/storage';
 import { getStorage } from 'firebase/storage';
 import config from '../config/firebaseConfig';
-import { error } from 'console';
 import db from '../models/index.js';
-import { where } from 'sequelize';
 
-const storage = getStorage();
+const storage = getStorage(config);
 
 export async function uploadImages(req, res) {
     if (req.files.length === 0) {

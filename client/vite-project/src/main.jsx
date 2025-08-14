@@ -15,6 +15,7 @@ import OrderComponent from '@components/admin/OrderComponent.jsx';
 import ImageComponent from '@components/admin/ImageComponent.jsx';
 import LoginAdmin from '@components/admin/LoginAdmin.jsx';
 import RegisterComponent from './components/customer/RegisterComponent';
+import HomePage from '@components/customer/HomePage.jsx';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -245,17 +246,22 @@ export default function AuthContainer({ onLogin }) {
 
 function App() {
     const [currentPage, setCurrentPage] = useState('Order');
-    const [admin, setAdmin] = useState(null);
+    const [user, setUser] = useState(null);
 
     // Kiểm tra token và user khi load lại trang
     useEffect(() => {
         const token = localStorage.getItem('admin_token');
-        const user = localStorage.getItem('admin_user');
-        if (token && user) {
+        const userData = localStorage.getItem('admin_user');
+        if (token && userData) {
             try {
-                const userObj = JSON.parse(user);
-                if (userObj.role === 2) {
-                    setAdmin(userObj);
+                const userObj = JSON.parse(userData);
+                if (userObj.role === 1 || userObj.role === 2) {
+                    setUser(userObj);
+                } else {
+                    console.warn('⚠️ Invalid role: ', userObj.role);
+                    // Xóa token không hợp lệ
+                    localStorage.removeItem('admin_token');
+                    localStorage.removeItem('admin_user');
                 }
             } catch (e) {
                 // Nếu lỗi parse, xóa luôn token/user
@@ -266,109 +272,120 @@ function App() {
     }, []);
 
     // Hàm xử lý khi đăng nhập thành công
-    const handleLogin = (user) => {
-        setAdmin(user);
-        localStorage.setItem('admin_user', JSON.stringify(user));
+    const handleLogin = (userData) => {
+        setUser(userData);
+        localStorage.setItem('admin_user', JSON.stringify(userData));
+
+        if (userData.role === 2) {
+            setCurrentPage('Quản lý đơn hàng');
+        }
     };
 
     // Hàm đăng xuất
     const handleLogout = () => {
+        const roleText = user?.role === 1 ? 'Khách hàng' : 'admin';
         if (confirm('bạn có chắc muốn đăng xuất?')) {
-            setAdmin(null);
+            setUser(null);
             localStorage.removeItem('admin_token');
             localStorage.removeItem('admin_user');
             setCurrentPage('Quản lý đơn hàng');
         }
     };
     //Route từ login sang Register
-    if (!admin) {
+    if (!user) {
         return <AuthContainer onLogin={handleLogin} />;
     }
 
-    const renderPage = () => {
-        // ✅ CẬP NHẬT COMPONENT NAMES THEO TÊN MỚI
-        switch (currentPage) {
-            case 'Quản lý đơn hàng':
-                return (
-                    <StyledComponentWrapper>
-                        <OrderComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý cửa hàng':
-                return (
-                    <StyledComponentWrapper>
-                        <StoreComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý thương hiệu':
-                return (
-                    <StyledComponentWrapper>
-                        <BrandComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý danh mục':
-                return (
-                    <StyledComponentWrapper>
-                        <CategoryComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý sản phẩm':
-                return (
-                    <StyledComponentWrapper>
-                        <ProductComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý người dùng':
-                return (
-                    <StyledComponentWrapper>
-                        <UserComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý kích thước':
-                return (
-                    <StyledComponentWrapper>
-                        <SizeComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý banner':
-                return (
-                    <StyledComponentWrapper>
-                        <BannerComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý chi tiết sản phẩm':
-                return (
-                    <StyledComponentWrapper>
-                        <ProdetailComponent />
-                    </StyledComponentWrapper>
-                );
-            case 'Quản lý hình ảnh':
-                return (
-                    <StyledComponentWrapper
-                        title='Quản lý hình ảnh'
-                        description='Upload và quản lý ảnh'
-                    >
-                        <ImageComponent />
-                    </StyledComponentWrapper>
-                );
-            default:
-                return (
-                    <StyledComponentWrapper>
-                        <OrderComponent />
-                    </StyledComponentWrapper>
-                );
-        }
-    };
+    if (user.role === 1) {
+        return <HomePage user={user} onLogout={handleLogout} />;
+    }
 
-    return (
-        <AdminLayout
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            onLogout={handleLogout}
-        >
-            {renderPage()}
-        </AdminLayout>
-    );
+    if (user.role === 2) {
+        const renderPage = () => {
+            // ✅ CẬP NHẬT COMPONENT NAMES THEO TÊN MỚI
+            switch (currentPage) {
+                case 'Quản lý đơn hàng':
+                    return (
+                        <StyledComponentWrapper>
+                            <OrderComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý cửa hàng':
+                    return (
+                        <StyledComponentWrapper>
+                            <StoreComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý thương hiệu':
+                    return (
+                        <StyledComponentWrapper>
+                            <BrandComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý danh mục':
+                    return (
+                        <StyledComponentWrapper>
+                            <CategoryComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý sản phẩm':
+                    return (
+                        <StyledComponentWrapper>
+                            <ProductComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý người dùng':
+                    return (
+                        <StyledComponentWrapper>
+                            <UserComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý kích thước':
+                    return (
+                        <StyledComponentWrapper>
+                            <SizeComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý banner':
+                    return (
+                        <StyledComponentWrapper>
+                            <BannerComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý chi tiết sản phẩm':
+                    return (
+                        <StyledComponentWrapper>
+                            <ProdetailComponent />
+                        </StyledComponentWrapper>
+                    );
+                case 'Quản lý hình ảnh':
+                    return (
+                        <StyledComponentWrapper
+                            title='Quản lý hình ảnh'
+                            description='Upload và quản lý ảnh'
+                        >
+                            <ImageComponent />
+                        </StyledComponentWrapper>
+                    );
+                default:
+                    return (
+                        <StyledComponentWrapper>
+                            <OrderComponent />
+                        </StyledComponentWrapper>
+                    );
+            }
+        };
+
+        return (
+            <AdminLayout
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+                onLogout={handleLogout}
+            >
+                {renderPage()}
+            </AdminLayout>
+        );
+    }
 }
 
 createRoot(document.getElementById('root')).render(

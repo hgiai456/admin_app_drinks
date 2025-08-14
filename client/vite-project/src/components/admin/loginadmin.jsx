@@ -19,14 +19,15 @@ export default function LoginAdmin({ onLogin, onSwitchToRegister }) {
             });
             const data = await res.json();
             if (res.ok) {
-                if (res.ok && data.data?.user?.role === 2) {
+                if (
+                    (res.ok && data.data?.user?.role === 2) ||
+                    data.data?.user?.role === 1
+                ) {
                     localStorage.setItem('admin_token', data.data.token);
                     onLogin(data.data.user);
                 } else {
                     console.log('❌ Not admin role:', data.data?.user?.role);
-                    setError(
-                        'Sai tài khoản hoặc mật khẩu, hoặc không phải admin!'
-                    );
+                    setError('Sai tài khoản hoặc mật khẩu.');
                 }
             } else {
                 if (res.status === 401) {
