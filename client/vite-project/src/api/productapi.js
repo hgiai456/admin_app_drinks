@@ -53,6 +53,117 @@ class ProductAPI {
         }
     }
 
+    static async getByCategory(categoryId, params = {}) {
+        try {
+            const { page = 1, limit = 12, search = '' } = params;
+
+            const queryParams = new URLSearchParams({
+                category_id: categoryId,
+                page: page.toString(),
+                limit: limit.toString(),
+                ...(search && { search })
+            });
+
+            console.log(
+                `🔄 Fetching products by category ${categoryId}:`,
+                queryParams.toString()
+            );
+
+            const response = await fetch(
+                `http://localhost:3003/api/products-by-category?${queryParams}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.getAuthHeader()
+                    }
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.log('✅ Products by category response:', result);
+
+            return {
+                data: result.data || [],
+                totalProducts: result.totalProducts || 0,
+                pagination: {
+                    currentPage: page,
+                    totalPage: Math.ceil((result.totalProducts || 0) / limit),
+                    totalItems: result.totalProducts || 0
+                }
+            };
+        } catch (error) {
+            console.error('❌ Error fetching products by category:', error);
+            throw error;
+        }
+    }
+    static async getCustomizePage({
+        page = 1,
+        search = '',
+        pageSize = 4
+    } = {}) {
+        try {
+            const queryParams = new URLSearchParams({
+                page: page.toString(),
+                pageSize: pageSize.toString(),
+                ...(search && { search: search.toString() })
+            });
+
+            const url = `http://localhost:3003/api/products-customize-page?${queryParams}`;
+            console.log('🔗 Đang gọi API Products Customize Page:', url);
+
+            const res = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeader()
+                }
+            });
+
+            console.log(
+                '📊 Products Customize Page Status:',
+                res.status,
+                res.statusText
+            );
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error(
+                    '❌ Lỗi từ server Products Customize:',
+                    errorText
+                );
+                throw new Error(`HTTP ${res.status}: ${errorText}`);
+            }
+
+            const data = await res.json();
+            console.log('✅ Raw Products Customize Page Data:', data);
+
+            // ✅ XỬ LÝ RESPONSE THEO CẤU TRÚC BACKEND
+            const response = {
+                data: data.data || [],
+                pagination: data.pagination || {
+                    currentPage: data.currentPage || parseInt(page),
+                    totalPage: data.totalPage || 1,
+                    totalItems: data.totalProducts || 0,
+                    pageSize: data.pageSize || parseInt(pageSize),
+                    hasNextPage: data.pagination?.hasNextPage || false,
+                    hasPrevPage: data.pagination?.hasPrevPage || false,
+                    nextPage: data.pagination?.nextPage || null,
+                    prevPage: data.pagination?.prevPage || null
+                }
+            };
+
+            console.log('✅ Processed Customize Page Response:', response);
+            return response;
+        } catch (error) {
+            console.error('❌ Lỗi trong Products getCustomizePage:', error);
+            throw error;
+        }
+    }
     static async getPaging({ page = 1, search = '' } = {}) {
         try {
             const url = `${this.baseUrl}?search=${encodeURIComponent(

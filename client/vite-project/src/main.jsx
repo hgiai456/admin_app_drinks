@@ -16,6 +16,7 @@ import ImageComponent from '@components/admin/ImageComponent.jsx';
 import LoginAdmin from '@components/admin/LoginAdmin.jsx';
 import RegisterComponent from './components/customer/RegisterComponent';
 import HomePage from '@components/customer/HomePage.jsx';
+import ProductPage from '@components/customer/ProductPage.jsx';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -297,7 +298,7 @@ function App() {
     }
 
     if (user.role === 1) {
-        return <HomePage user={user} onLogout={handleLogout} />;
+        return <CustomerRouter user={user} onLogout={handleLogout} />;
     }
 
     if (user.role === 2) {
@@ -385,6 +386,35 @@ function App() {
                 {renderPage()}
             </AdminLayout>
         );
+    }
+}
+
+function CustomerRouter({ user, onLogout }) {
+    const [currentPage, setCurrentPage] = useState('home');
+
+    // ✅ LISTEN TO URL HASH CHANGES
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.replace('#', '') || 'home';
+            setCurrentPage(hash);
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        handleHashChange(); // Set initial page
+
+        return () => {
+            window.removeEventListener('hashchange', handleHashChange);
+        };
+    }, []);
+
+    // ✅ RENDER PAGES BASED ON HASH
+    switch (currentPage) {
+        case 'home':
+            return <HomePage user={user} onLogout={onLogout} />;
+        case 'menu':
+            return <ProductPage user={user} onLogout={onLogout} />;
+        default:
+            return <HomePage user={user} onLogout={onLogout} />;
     }
 }
 

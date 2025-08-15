@@ -46,6 +46,10 @@ export function AppRoute(app) {
         '/products-by-category',
         asyncHandle(ProductController.getAllProductsByCategory)
     );
+    router.get(
+        '/products-customize-page',
+        asyncHandle(ProductController.getProductsCustomizeSizePage)
+    ); //here
     router.post(
         '/products',
         requireRoles([UserRole.ADMIN]), //Quyền Admin thì mới có quyền thêm sản phẩm

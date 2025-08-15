@@ -4,7 +4,7 @@ const { Op } = Sequelize;
 
 export async function getProducts(req, res) {
     const { search = '', page = 1 } = req.query;
-    const pageSize = 5;
+    const pageSize = 4;
     const offset = (page - 1) * pageSize;
 
     let whereClause = {};
@@ -44,6 +44,92 @@ export async function getProducts(req, res) {
         totalPage: Math.ceil(totalProducts / pageSize), //ceil(11 / 5) = 2.1 => 3 (Lam tron)
         totalProducts
     });
+}
+
+export async function getProductsCustomizeSizePage(req, res) {
+    const { search = '', page = 1, pageSize = 4 } = req.query;
+
+    // ✅ DANH SÁCH CÁC GIÀY TRỊ CHO PHÉP (có thể mở rộng)
+    const allowedPageSizes = [4, 8, 12, 16, 20, 24];
+
+    // ✅ VALIDATE PAGE SIZE
+    let validatedPageSize = parseInt(pageSize, 10);
+
+    if (isNaN(validatedPageSize) || validatedPageSize < 1) {
+        validatedPageSize = 4; // Default
+    } else if (!allowedPageSizes.includes(validatedPageSize)) {
+        // Tìm giá trị gần nhất trong allowedPageSizes
+        validatedPageSize = allowedPageSizes.reduce((prev, curr) =>
+            Math.abs(curr - validatedPageSize) <
+            Math.abs(prev - validatedPageSize)
+                ? curr
+                : prev
+        );
+    }
+
+    // ✅ VALIDATE PAGE
+    let validatedPage = parseInt(page, 10);
+    if (isNaN(validatedPage) || validatedPage < 1) {
+        validatedPage = 1;
+    }
+
+    const offset = (validatedPage - 1) * validatedPageSize;
+
+    let whereClause = {};
+    if (search.trim() !== '') {
+        whereClause = {
+            [Op.or]: [
+                { name: { [Op.like]: `%${search}%` } },
+                { description: { [Op.like]: `%${search}%` } }
+            ]
+        };
+    }
+
+    try {
+        const [products, totalProducts] = await Promise.all([
+            db.Product.findAll({
+                where: whereClause,
+                limit: validatedPageSize,
+                offset: offset,
+                include: [
+                    {
+                        model: db.ProDetail,
+                        as: 'product_details',
+                        attributes: ['price'],
+                        limit: 1,
+                        order: [['price', 'ASC']]
+                    }
+                ],
+                order: [['createdAt', 'DESC']]
+            }),
+            db.Product.count({
+                where: whereClause
+            })
+        ]);
+
+        const totalPages = Math.ceil(totalProducts / validatedPageSize);
+
+        res.status(200).json({
+            message: 'Lấy danh sách sản phẩm thành công',
+            data: products,
+            pagination: {
+                currentPage: validatedPage,
+                pageSize: validatedPageSize,
+                totalPage: totalPages,
+                totalProducts: totalProducts,
+                hasNextPage: validatedPage < totalPages,
+                hasPrevPage: validatedPage > 1,
+                nextPage: validatedPage < totalPages ? validatedPage + 1 : null,
+                prevPage: validatedPage > 1 ? validatedPage - 1 : null
+            }
+        });
+    } catch (error) {
+        console.error('❌ Error in getProductsCustomizeSizePage:', error);
+        res.status(500).json({
+            message: 'Lỗi server khi lấy danh sách sản phẩm',
+            error: error.message
+        });
+    }
 }
 
 export async function getAllProductsByCategory(req, res) {

@@ -1,29 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { BannerAPI } from '@api/bannerapi';
-import ProductAPI from '@api/productapi'; // ✅ Import đúng
-import '@styles/pages/_homepage.scss';
+import ProductAPI from '@api/productapi';
 import CategoryAPI from '@api/categoryapi';
-import Footer from '@components/common/Footer.jsx';
-import Header from '@components/common/Header.jsx';
+import Layout from '@components/common/Layout.jsx';
+import '@styles/pages/_homepage.scss';
 
-export default function HomePage({ user, onLogout }) {
-    const [banners, setBanners] = useState([]);
+export default function ProductPage({ user, onLogout }) {
+    // ✅ STATES (giữ nguyên states từ code trước)
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [productsLoading, setProductsLoading] = useState(true);
-    const [currentSlide, setCurrentSlide] = useState(0);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-
-    // ✅ PAGINATION STATES
     const [page, setPage] = useState(1);
     const [totalPage, setTotalPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [search, setSearch] = useState('');
-
-    // ✅ FILTER STATES
     const [selectedCategory, setSelectedCategory] = useState('all');
-    const [filteredProducts, setFilteredProducts] = useState([]);
+    const [pageSize, setPageSize] = useState(4);
+    const [showPageSizeDropdown, setShowPageSizeDropdown] = useState(false);
+
+    const pageSizeOptions = [
+        { value: 4, label: ' 4 sản phẩm' },
+        { value: 8, label: '8 sản phẩm' },
+        { value: 12, label: '12 sản phẩm' }
+    ];
+
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -55,28 +55,25 @@ export default function HomePage({ user, onLogout }) {
         };
         fetchCategories();
     }, []);
-
-    // ✅ FETCH PRODUCTS WITH PAGINATION
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 setProductsLoading(true);
-                console.log(
-                    `🔄 Fetching products - page: ${page}, search: "${search}"`
-                );
                 let response;
                 if (selectedCategory === 'all') {
-                    response = await ProductAPI.getPaging({
+                    response = await ProductAPI.getCustomizePage({
                         page: page || 1,
-                        search: search || ''
+                        search: search || '',
+                        pageSize: pageSize || 4
                     });
                 } else {
-                    // ✅ LẤY SẢN PHẨM THEO CATEGORY
+                    // ✅ GIỮ NGUYÊN API CHO FILTER CATEGORY
                     response = await ProductAPI.getByCategory(
                         selectedCategory,
                         {
                             page: page || 1,
-                            search: search || ''
+                            search: search || '',
+                            limit: pageSize || 4
                         }
                     );
                 }
@@ -94,123 +91,36 @@ export default function HomePage({ user, onLogout }) {
                 const productsData = response.data || [];
                 const pagination = response.pagination || {};
 
-                // ✅ TRANSFORM DATA - XỬ LÝ PRICE VÀ BRAND NULL
+                // ✅ TRANSFORM DATA - XỬ LÝ PRICE
                 const transformedProducts = productsData.map((product) => ({
                     id: product.id,
                     name: product.name,
                     description: product.description,
                     image: product.image,
                     category_id: product.category_id,
-                    brand_id: product.brand_id || null, // ✅ Handle null brand
-                    // ✅ LẤY PRICE TỪ product_details[0].price
-                    price:
-                        product.product_details &&
-                        product.product_details.length > 0
-                            ? product.product_details[0].price
-                            : 0,
+                    brand_id: product.brand_id || null,
+                    // ✅ LẤY PRICE TỪ product_details
+                    price: product.product_details?.[0]?.price || 0,
                     createdAt: product.createdAt,
                     updatedAt: product.updatedAt
                 }));
 
-                console.log('✅ Transformed products:', transformedProducts);
-
-                // ✅ SET STATES
+                // ✅ UPDATE STATES
                 setProducts(transformedProducts);
-                setPage(pagination.currentPage || page || 1);
                 setTotalPage(pagination.totalPage || 1);
                 setTotalItems(pagination.totalItems || 0);
+                setPage(pagination.currentPage || page);
             } catch (error) {
                 console.error('❌ Error fetching products:', error);
-                setError('Không thể tải danh sách sản phẩm');
-
-                // ✅ Fallback data
-                setProducts([
-                    {
-                        id: 1,
-                        name: 'Cà phê đen đá',
-                        description:
-                            'Cà phê truyền thống Việt Nam, đậm đà hương vị',
-                        image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&q=80&fit=crop',
-                        category_id: 1,
-                        brand_id: null, // ✅ Brand có thể null
-                        price: 25000
-                    },
-                    {
-                        id: 2,
-                        name: 'Cappuccino',
-                        description: 'Cà phê Ý với lớp foam sữa mịn màng',
-                        image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=300&h=300&q=80&fit=crop',
-                        category_id: 1,
-                        brand_id: 1,
-                        price: 45000
-                    }
-                ]);
-                setTotalPage(1);
-                setTotalItems(2);
+                setError('Không thể tải sản phẩm');
+                setProducts([]);
             } finally {
-                setProductsLoading(false);
+                setProductsLoading(false); // ✅ QUAN TRỌNG: Thêm finally block
             }
         };
         fetchProducts();
-    }, [page, search, selectedCategory]);
-
-    // ✅ FILTER PRODUCTS BY CATEGORY
-    useEffect(() => {
-        if (selectedCategory === 'all') {
-            setFilteredProducts(products);
-        } else {
-            const categoryId = parseInt(selectedCategory);
-            const filtered = products.filter((product) => {
-                return product.category_id === categoryId;
-            });
-            setFilteredProducts(filtered);
-        }
-    }, [products, selectedCategory]);
-
-    // ✅ Fetch banners
-    useEffect(() => {
-        const fetchBanners = async () => {
-            try {
-                setLoading(true);
-                const data = await BannerAPI.getAll();
-                setBanners(data || []);
-                setError('');
-            } catch (error) {
-                console.error('Error fetching banners:', error);
-                setError('Không thể tải banner');
-                setBanners([
-                    {
-                        id: 1,
-                        title: 'HG Coffee',
-                        subtitle: 'Khám phá hương vị đặc biệt',
-                        description:
-                            'Trải nghiệm không gian thư giãn với những thức uống chất lượng cao',
-                        image: 'https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f',
-                        buttonText: 'Khám phá ngay'
-                    }
-                ]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchBanners();
-    }, []);
-
-    useEffect(() => {
-        if (banners.length <= 1) return;
-        const interval = setInterval(() => {
-            setCurrentSlide((prev) => (prev + 1) % banners.length);
-        }, 3000);
-        return () => clearInterval(interval);
-    }, [banners.length]);
-
-    // ✅ EVENT HANDLERS
-    const goToSlide = (index) => setCurrentSlide(index);
-    const nextSlide = () =>
-        setCurrentSlide((prev) => (prev + 1) % banners.length);
-    const prevSlide = () =>
-        setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
-
+    }, [page, search, selectedCategory, pageSize]);
+    // ✅ THÊM MISSING HANDLERS
     const handleAddToCart = (product) => {
         alert(
             `Đã thêm "${product.name}" vào giỏ hàng!\nGiá: ${formatPrice(
@@ -227,6 +137,10 @@ export default function HomePage({ user, onLogout }) {
             )}`
         );
         console.log('👁️ View product:', product);
+    };
+    const handlePageSizeChange = (newPageSize) => {
+        setPageSize(newPageSize);
+        setPage(1);
     };
 
     // ✅ PAGINATION HANDLERS
@@ -296,149 +210,36 @@ export default function HomePage({ user, onLogout }) {
         return iconMap[categoryId] || '🍽️';
     };
 
-    if (loading) {
-        return (
-            <div className='homepage-loading'>
-                <div className='loading-spinner'>☕</div>
-                <p>Đang tải...</p>
-            </div>
-        );
-    }
     return (
-        <div className='homepage'>
-            {/* ✅ ENHANCED HEADER */}
-            <Header user={user} onLogout={onLogout} currentPage='home' />
-
-            {/* ✅ HERO SLIDER (giữ nguyên) */}
-            <section className='hero-slider'>
-                <div className='slider-container'>
-                    {banners.map((banner, index) => (
-                        <div
-                            key={banner.id || index}
-                            className={`slide ${
-                                index === currentSlide ? 'active' : ''
-                            }`}
-                        >
-                            <div className='slide-background'>
-                                <img
-                                    src={banner.image}
-                                    alt={banner.title || 'Banner'}
-                                    onError={(e) => {
-                                        const fallbackImages = [
-                                            'https://images.unsplash.com/photo-1507226983735-a4af7b65e7c3?w=1400&h=700&q=80&fit=crop',
-                                            'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1400&h=700&q=80&fit=crop',
-                                            'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=1400&h=700&q=80&fit=crop'
-                                        ];
-                                        e.target.src =
-                                            fallbackImages[
-                                                index % fallbackImages.length
-                                            ];
-                                    }}
-                                />
-                                <div className='slide-overlay'></div>
-                            </div>
-                            <div className='slide-content'>
-                                <div className='content-wrapper'>
-                                    <div className='slide-text'>
-                                        <div className='slide-badge'>
-                                            <span>🔥 HOT</span>
-                                        </div>
-                                        <h2 className='slide-title'>
-                                            {banner.title || 'HG COFFEE'}
-                                        </h2>
-                                        <h3 className='slide-subtitle'>
-                                            {banner.subtitle ||
-                                                'Khám phá hương vị đặc biệt'}
-                                        </h3>
-                                        <p className='slide-description'>
-                                            {banner.description ||
-                                                'Trải nghiệm không gian thư giãn với những thức uống chất lượng cao'}
-                                        </p>
-                                        <div className='slide-buttons'>
-                                            <button className='btn-primary'>
-                                                <span className='btn-icon'>
-                                                    🎯
-                                                </span>
-                                                <span>
-                                                    {banner.buttonText ||
-                                                        'Khám phá ngay'}
-                                                </span>
-                                            </button>
-                                            <button className='btn-secondary'>
-                                                <span className='btn-icon'>
-                                                    📍
-                                                </span>
-                                                <span>Tìm cửa hàng</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className='slide-visual'>
-                                        <div className='product-showcase'></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+        <Layout user={user} onLogout={onLogout} currentPage='menu'>
+            {error && (
+                <div
+                    className='error-message'
+                    style={{
+                        background: '#fee',
+                        color: '#c33',
+                        padding: '1rem',
+                        textAlign: 'center',
+                        borderBottom: '1px solid #fcc'
+                    }}
+                >
+                    {error}
                 </div>
+            )}
 
-                {/* Slider controls */}
-                {banners.length > 1 && (
-                    <>
-                        <button
-                            className='slider-btn prev-btn'
-                            onClick={prevSlide}
-                        >
-                            <span>‹</span>
-                        </button>
-                        <button
-                            className='slider-btn next-btn'
-                            onClick={nextSlide}
-                        >
-                            <span>›</span>
-                        </button>
-                        <div className='slider-pagination'>
-                            {banners.map((_, index) => (
-                                <button
-                                    key={index}
-                                    className={`pagination-dot ${
-                                        index === currentSlide ? 'active' : ''
-                                    }`}
-                                    onClick={() => goToSlide(index)}
-                                >
-                                    <span className='dot-number'>
-                                        {index + 1}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                        <div className='slider-progress'>
-                            <div
-                                className='progress-bar'
-                                style={{
-                                    width: `${
-                                        ((currentSlide + 1) / banners.length) *
-                                        100
-                                    }%`
-                                }}
-                            />
-                        </div>
-                    </>
-                )}
-            </section>
-
-            {/* ✅ SỬA PRODUCTS SECTION - GENERATE FILTER BUTTONS TỪ API */}
-
-            {/* ✅ PRODUCTS SECTION - CẢI THIỆN FILTER */}
-            <section className='products-section'>
+            <section
+                className='products-section'
+                style={{ paddingTop: '2rem' }}
+            >
                 <div className='container'>
                     <div className='section-header'>
-                        <h2 className='section-title'>MENU SẢN PHẨM</h2>
+                        <h2 className='section-title'>THỰC ĐƠN SẢN PHẨM</h2>
                         <p className='section-subtitle'>
-                            Khám phá những thức uống được yêu thích nhất tại HG
-                            Coffee
+                            Khám phá toàn bộ bộ sưu tập thức uống đặc biệt tại
+                            HG Coffee
                         </p>
 
-                        {/* ✅ SEARCH BAR - CẢI THIỆN */}
+                        {/* ✅ SEARCH BAR */}
                         <div className='search-bar'>
                             <div className='search-info'>
                                 {selectedCategory === 'all' ? (
@@ -465,6 +266,10 @@ export default function HomePage({ user, onLogout }) {
                                         )}
                                     </>
                                 )}
+                                <span className='page-size-info'>
+                                    | Hiển thị <strong>{pageSize}</strong> sản
+                                    phẩm/trang
+                                </span>
                             </div>
                             <form
                                 className='search-form'
@@ -473,13 +278,7 @@ export default function HomePage({ user, onLogout }) {
                                 <input
                                     name='search'
                                     className='search-input'
-                                    placeholder={
-                                        selectedCategory === 'all'
-                                            ? 'Tìm kiếm sản phẩm...'
-                                            : `Tìm trong ${getCategoryName(
-                                                  parseInt(selectedCategory)
-                                              ).replace(/^[^\s]+\s/, '')}...`
-                                    }
+                                    placeholder='Tìm kiếm sản phẩm...'
                                     defaultValue={search}
                                 />
                                 <button type='submit' className='btn-search'>
@@ -501,7 +300,67 @@ export default function HomePage({ user, onLogout }) {
                             </form>
                         </div>
 
-                        {/* ✅ CATEGORY FILTERS - CẢI THIỆN */}
+                        {/* ✅ PAGE SIZE SELECTOR */}
+                        <div className='page-size-dropdown-container'>
+                            <span className='selector-label'>
+                                📄 Số sản phẩm mỗi trang:
+                            </span>
+                            <div className='page-size-dropdown'>
+                                <button
+                                    className='page-size-dropdown-trigger'
+                                    onClick={() =>
+                                        setShowPageSizeDropdown(
+                                            !showPageSizeDropdown
+                                        )
+                                    }
+                                >
+                                    <span className='current-size'>
+                                        {pageSize} sản phẩm/trang
+                                    </span>
+                                    <span
+                                        className={`dropdown-arrow ${
+                                            showPageSizeDropdown ? 'open' : ''
+                                        }`}
+                                    >
+                                        ▼
+                                    </span>
+                                </button>
+
+                                {showPageSizeDropdown && (
+                                    <div className='page-size-dropdown-menu'>
+                                        {pageSizeOptions.map((option) => (
+                                            <button
+                                                key={option.value}
+                                                className={`dropdown-item ${
+                                                    pageSize === option.value
+                                                        ? 'active'
+                                                        : ''
+                                                }`}
+                                                onClick={() => {
+                                                    handlePageSizeChange(
+                                                        option.value
+                                                    );
+                                                    setShowPageSizeDropdown(
+                                                        false
+                                                    );
+                                                }}
+                                            >
+                                                <span className='item-text'>
+                                                    {option.label}
+                                                </span>
+                                                {pageSize === option.value && (
+                                                    <span className='check-mark'>
+                                                        ✓
+                                                    </span>
+                                                )}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* ✅ CATEGORY FILTERS */}
                         <div className='section-actions'>
                             <button
                                 className={`filter-btn ${
@@ -557,30 +416,20 @@ export default function HomePage({ user, onLogout }) {
                         )}
                     </div>
 
+                    {/* ✅ PRODUCTS GRID */}
                     {productsLoading ? (
                         <div className='products-loading'>
                             <div className='loading-spinner'>☕</div>
-                            <p>Đang tải menu...</p>
+                            <p>Đang tải thực đơn...</p>
                         </div>
                     ) : products.length === 0 ? (
                         <div className='no-products'>
                             <div className='no-products-icon'>📭</div>
                             <h3>Không tìm thấy sản phẩm</h3>
                             <p>
-                                {selectedCategory === 'all'
-                                    ? 'Không có sản phẩm nào khớp với từ khóa tìm kiếm của bạn.'
-                                    : `Không có sản phẩm nào trong danh mục "${getCategoryName(
-                                          parseInt(selectedCategory)
-                                      ).replace(/^[^\s]+\s/, '')}".`}
+                                Không có sản phẩm nào khớp với tiêu chí tìm
+                                kiếm.
                             </p>
-                            {selectedCategory !== 'all' && (
-                                <button
-                                    className='reset-filter-btn'
-                                    onClick={() => handleCategoryFilter('all')}
-                                >
-                                    Xem tất cả sản phẩm
-                                </button>
-                            )}
                         </div>
                     ) : (
                         <div
@@ -659,17 +508,8 @@ export default function HomePage({ user, onLogout }) {
                             <div className='pagination'>
                                 <div className='pagination-info'>
                                     Trang {page} / {totalPage} - Tổng{' '}
-                                    {totalItems} sản phẩm
-                                    {selectedCategory !== 'all' && (
-                                        <span>
-                                            {' '}
-                                            (danh mục:{' '}
-                                            {getCategoryName(
-                                                parseInt(selectedCategory)
-                                            ).replace(/^[^\s]+\s/, '')}
-                                            )
-                                        </span>
-                                    )}
+                                    {totalItems} sản phẩm | Hiển thị {pageSize}{' '}
+                                    sản phẩm/trang
                                 </div>
                                 <div className='pagination-controls'>
                                     <button
@@ -750,8 +590,6 @@ export default function HomePage({ user, onLogout }) {
                         )}
                 </div>
             </section>
-
-            <Footer />
-        </div>
+        </Layout>
     );
 }
