@@ -57,3 +57,11 @@ $box-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
 // ✅ Biến transition
 $transition-fast: 0.15s ease-in-out;
 $transition-normal: 0.3s ease-out;
+
+//reponsive size
+// ✅ IMPROVED RESPONSIVE BREAKPOINTS
+$mobile-small: 320px;
+$mobile: 480px;
+$tablet: 768px;
+$tablet-large: 1024px;
+$desktop: 1200px;

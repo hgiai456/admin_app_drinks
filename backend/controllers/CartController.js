@@ -135,6 +135,72 @@ export async function getCartByUserId(req, res) {
         });
     }
 }
+
+export async function getCartBySessionId(req, res) {
+    try {
+        const { session_id } = req.query;
+
+        if (!session_id) {
+            return res.status(400).json({
+                message: 'Vui lòng cung cấp user_id'
+            });
+        }
+
+        const cart = await db.Cart.findOne({
+            where: { session_id },
+            include: [
+                {
+                    model: db.CartItem,
+                    as: 'cart_items',
+                    include: [
+                        {
+                            model: db.ProDetail,
+                            as: 'product_details',
+                            include: [
+                                {
+                                    model: db.Product,
+                                    as: 'product',
+                                    attributes: ['id', 'name', 'image']
+                                },
+                                {
+                                    model: db.Size,
+                                    as: 'sizes',
+                                    attributes: ['id', 'name']
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Không tìm thấy giỏ hàng cho user này'
+            });
+        }
+
+        // Calculate total amount
+        const totalAmount = cart.cart_items.reduce((total, item) => {
+            return total + item.quantity * item.product_details.price;
+        }, 0);
+
+        res.status(200).json({
+            message: 'Lấy giỏ hàng theo user thành công',
+            data: {
+                ...cart.toJSON(),
+                totalAmount,
+                totalItems: cart.cart_items.length
+            }
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Lỗi khi lấy giỏ hàng',
+            error: error.message
+        });
+    }
+}
+
 export async function insertCart(req, res) {
     try {
         const { session_id, user_id } = req.body;

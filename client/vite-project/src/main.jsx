@@ -18,6 +18,7 @@ import RegisterComponent from './components/customer/RegisterComponent';
 import HomePage from '@components/customer/HomePage.jsx';
 import ProductPage from '@components/customer/ProductPage.jsx';
 import ProductDetailPage from './components/customer/ProductDetailPage';
+import CartPage from '@components/customer/CartPage.jsx';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {

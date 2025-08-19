@@ -3,29 +3,61 @@ import Layout from '@components/common/Layout.jsx';
 import CartAPI from '@api/cartapi.js';
 import '@styles/pages/_cart.scss';
 
-export default function cartPage({ user, Logout }) {
+export default function CartPage({ user, onLogout }) {
     const [cart, setCart] = useState(null);
-    const [CartItems, setCartItems] = useState([]);
+    const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [updating, setUpdating] = useState({}); // Track updating items by ID
+    const [updating, setUpdating] = useState({});
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
 
     useEffect(() => {
         loadCartData();
     }, [user]);
+
     const loadCartData = async () => {
         try {
             setLoading(true);
             setError('');
             console.log('🔄 Loading cart data for user:', user?.id);
-            //GET OR CREATE CART
+
+            // ✅ GET OR CREATE CART
             const cartData = await CartAPI.getOrCreateCart(user?.id);
             setCart(cartData);
 
-            //GET CART ITEMS
+            // ✅ GET CART ITEMS
             const itemsData = await CartAPI.getCartItems(cartData.id);
-            setCartItems(Array.isArray(itemsData) ? itemsData : []);
+
+            // ✅ SỬA: TRANSFORM DỮ LIỆU TỪ API RESPONSE
+            const transformedItems = Array.isArray(itemsData)
+                ? itemsData.map((item) => ({
+                      id: item.id,
+                      cart_id: item.cart_id,
+                      product_detail_id: item.product_detail_id,
+                      quantity: item.quantity,
+                      // ✅ LẤY DỮ LIỆU TỪ product_details
+                      product_id: item.product_details?.product?.id,
+                      product_name: item.product_details?.product?.name,
+                      product_image: item.product_details?.product?.image,
+                      product_description:
+                          item.product_details?.product?.description,
+                      // ✅ LẤY THÔNG TIN SIZE VÀ GIÁ
+                      size_id: item.product_details?.size_id,
+                      size_name: `Size ${
+                          item.product_details?.size_id === 1
+                              ? 'S'
+                              : item.product_details?.size_id === 2
+                              ? 'M'
+                              : 'L'
+                      }`,
+                      price: item.product_details?.price,
+                      oldprice: item.product_details?.oldprice,
+                      stock_quantity: item.product_details?.quantity
+                  }))
+                : [];
+
+            setCartItems(transformedItems);
+            console.log('✅ Transformed cart items:', transformedItems);
         } catch (error) {
             console.error('❌ Error loading cart:', error);
             setError('Không thể tải giỏ hàng: ' + error.message);
@@ -40,10 +72,12 @@ export default function cartPage({ user, Logout }) {
         try {
             setUpdating((prev) => ({ ...prev, [cartItemId]: true }));
             setMessage('');
+
             console.log('🔄 Updating quantity:', { cartItemId, newQuantity });
 
             await CartAPI.updateCartItem(cartItemId, newQuantity);
-            //UPDATE LOCAL STATE
+
+            // ✅ UPDATE LOCAL STATE
             setCartItems((prevItems) =>
                 prevItems.map((item) =>
                     item.id === cartItemId
@@ -51,6 +85,7 @@ export default function cartPage({ user, Logout }) {
                         : item
                 )
             );
+
             setMessage('✅ Đã cập nhật số lượng');
             setTimeout(() => setMessage(''), 3000);
         } catch (error) {
@@ -72,10 +107,11 @@ export default function cartPage({ user, Logout }) {
             console.log('🗑️ Removing item:', cartItemId);
             await CartAPI.removeFromCart(cartItemId);
 
-            //UPDATE LOCAL STATE
+            // ✅ UPDATE LOCAL STATE
             setCartItems((prevItems) =>
                 prevItems.filter((item) => item.id !== cartItemId)
             );
+
             setMessage('✅ Đã xóa sản phẩm khỏi giỏ hàng');
             setTimeout(() => setMessage(''), 3000);
         } catch (error) {
@@ -87,15 +123,14 @@ export default function cartPage({ user, Logout }) {
     };
 
     const handleClearCart = async () => {
-        if (
-            !confirm(
-                'Bạn có chắc muốn xóa hết tất cả sản phẩm trong giỏ hàng không ?'
-            )
-        )
+        if (!confirm('Bạn có chắc muốn xóa tất cả sản phẩm trong giỏ hàng?'))
             return;
+
         try {
             setLoading(true);
             setMessage('');
+
+            console.log('🗑️ Clearing cart:', cart.id);
             await CartAPI.clearCart(cart.id);
 
             // ✅ UPDATE LOCAL STATE
@@ -155,9 +190,7 @@ export default function cartPage({ user, Logout }) {
             setMessage('❌ Giỏ hàng trống, không thể thanh toán');
             return;
         }
-        // TODO: Navigate to checkout page
         alert('Chức năng thanh toán đang được phát triển!');
-        // window.location.hash = 'checkout';
     };
 
     // ✅ LOADING STATE
@@ -281,13 +314,10 @@ export default function cartPage({ user, Logout }) {
                                         <img
                                             src={
                                                 item.product_image ||
-                                                item.image ||
                                                 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=100&h=100&q=80&fit=crop'
                                             }
                                             alt={
-                                                item.product_name ||
-                                                item.name ||
-                                                'Sản phẩm'
+                                                item.product_name || 'Sản phẩm'
                                             }
                                             onError={(e) => {
                                                 e.target.src =
@@ -311,17 +341,25 @@ export default function cartPage({ user, Logout }) {
                                                 )
                                             }
                                         >
-                                            {item.product_name ||
-                                                item.name ||
-                                                'Sản phẩm'}
+                                            {item.product_name || 'Sản phẩm'}
                                         </h3>
                                         <div className='item-details'>
                                             <span className='item-size'>
-                                                Size: {item.size_name || 'M'}
+                                                {item.size_name}
                                             </span>
                                             <span className='item-price-unit'>
-                                                {formatPrice(item.price || 0)}
+                                                {formatPrice(item.price)}
                                             </span>
+                                            {/* ✅ HIỂN THỊ GIÁ CŨ NẾU CÓ */}
+                                            {item.oldprice &&
+                                                item.oldprice > item.price && (
+                                                    <span className='item-old-price'>
+                                                        Giá gốc:{' '}
+                                                        {formatPrice(
+                                                            item.oldprice
+                                                        )}
+                                                    </span>
+                                                )}
                                         </div>
                                     </div>
 
@@ -360,6 +398,7 @@ export default function cartPage({ user, Logout }) {
                                                 }
                                             }}
                                             min='1'
+                                            max={item.stock_quantity}
                                             className='quantity-input'
                                             disabled={updating[item.id]}
                                         />
@@ -371,7 +410,11 @@ export default function cartPage({ user, Logout }) {
                                                     (item.quantity || 1) + 1
                                                 )
                                             }
-                                            disabled={updating[item.id]}
+                                            disabled={
+                                                updating[item.id] ||
+                                                item.quantity >=
+                                                    item.stock_quantity
+                                            }
                                         >
                                             +
                                         </button>
@@ -384,6 +427,18 @@ export default function cartPage({ user, Logout }) {
                                                 calculateItemTotal(item)
                                             )}
                                         </span>
+                                        {/* ✅ HIỂN THỊ TIẾT KIỆM NẾU CÓ */}
+                                        {item.oldprice &&
+                                            item.oldprice > item.price && (
+                                                <span className='savings'>
+                                                    Tiết kiệm:{' '}
+                                                    {formatPrice(
+                                                        (item.oldprice -
+                                                            item.price) *
+                                                            item.quantity
+                                                    )}
+                                                </span>
+                                            )}
                                     </div>
 
                                     {/* ✅ REMOVE BUTTON */}
@@ -423,6 +478,39 @@ export default function cartPage({ user, Logout }) {
                                         {getTotalItems()} sản phẩm
                                     </span>
                                 </div>
+
+                                {/* ✅ HIỂN THỊ TỔNG TIẾT KIỆM */}
+                                {(() => {
+                                    const totalSavings = cartItems.reduce(
+                                        (total, item) => {
+                                            if (
+                                                item.oldprice &&
+                                                item.oldprice > item.price
+                                            ) {
+                                                return (
+                                                    total +
+                                                    (item.oldprice -
+                                                        item.price) *
+                                                        item.quantity
+                                                );
+                                            }
+                                            return total;
+                                        },
+                                        0
+                                    );
+
+                                    return totalSavings > 0 ? (
+                                        <div className='total-row savings-row'>
+                                            <span className='total-label'>
+                                                Tổng tiết kiệm:
+                                            </span>
+                                            <span className='total-value savings'>
+                                                -{formatPrice(totalSavings)}
+                                            </span>
+                                        </div>
+                                    ) : null;
+                                })()}
+
                                 <div className='total-row grand-total'>
                                     <span className='total-label'>
                                         Tổng cộng:

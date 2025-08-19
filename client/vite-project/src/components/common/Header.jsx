@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import CartAPI from '@api/cartapi.js';
+import CartButton from '@components/customer/CartButton';
+import '@styles/common/_header.scss';
 
 export default function Header({ user, onLogout, currentPage = 'home' }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const [cartLoading, setCartLoading] = useState(false);
 
     // ✅ LOAD CART ITEM COUNT
     useEffect(() => {
@@ -108,14 +111,7 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
                     >
                         CỬA HÀNG
                     </a>
-                    <a
-                        href='#rewards'
-                        className={`nav-link ${
-                            currentPage === 'rewards' ? 'active' : ''
-                        }`}
-                    >
-                        REWARDS
-                    </a>
+
                     <a
                         href='#news'
                         className={`nav-link ${
@@ -130,25 +126,19 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
                             currentPage === 'contact' ? 'active' : ''
                         }`}
                     >
-                        LIÊN HỆ
+                        VỀ CHÚNG TÔI
                     </a>
                 </nav>
-                {/* ✅ CART BUTTON - HIGHLIGHT */}
-                <button
-                    className={`cart-btn ${
-                        currentPage === 'cart' ? 'active' : ''
-                    }`}
-                    onClick={handleCartClick}
-                    title='Xem giỏ hàng'
-                >
-                    <div className='cart-icon-wrapper'>
-                        <span className='cart-icon'>🛒</span>
-                        {cartItemCount > 0 && (
-                            <span className='cart-badge'>{cartItemCount}</span>
-                        )}
-                    </div>
-                    <span className='cart-text'>Giỏ hàng</span>
-                </button>
+                <div className='header-actions'>
+                    <CartButton
+                        cartItemCount={cartItemCount}
+                        currentPage={currentPage}
+                        onCartClick={handleCartClick}
+                        variant='default' // hoặc "minimal", "outlined"
+                        onRefreshCount={loadCartCount}
+                    />
+                </div>
+
                 {/* ✅ USER MENU */}
                 <div className='user-section'>
                     <div

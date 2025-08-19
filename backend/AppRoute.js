@@ -269,6 +269,10 @@ export function AppRoute(app) {
         '/carts/user/:user_id',
         asyncHandle(CartController.getCartByUserId)
     );
+    router.get(
+        '/carts-by-session',
+        asyncHandle(CartController.getCartBySessionId)
+    );
     router.post(
         '/carts',
         validate(InsertCartRequest),
