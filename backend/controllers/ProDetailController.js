@@ -67,6 +67,35 @@ export async function getProDetailBySizeAndProduct(req, res) {
     });
 }
 
+export async function getProDetailByProductId(req, res) {
+    const { product_id } = req.query;
+
+    if (!product_id) {
+        return res.status(400).json({ message: 'Thiếu product_id. ' });
+    }
+
+    const whereClause = {
+        product_id: Number(product_id)
+    };
+
+    console.log(' whereClause:', whereClause);
+
+    const proDetail = await db.ProDetail.findAll({
+        where: whereClause
+    });
+
+    if (!proDetail) {
+        return res.status(404).json({
+            message: 'Không tìm thấy ProDetail với product_id và size_id đã cho'
+        });
+    }
+
+    return res.status(200).json({
+        message: 'Tìm thấy chi tiết sản phẩm',
+        data: proDetail
+    });
+}
+
 // Lấy sản phẩm chi tiết theo ID
 export async function getProDetailById(req, res) {
     const { id } = req.params;

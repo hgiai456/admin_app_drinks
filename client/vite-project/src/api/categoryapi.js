@@ -52,6 +52,50 @@ class CategoryAPI {
         }
     }
 
+    static async getAllCategories() {
+        try {
+            console.log('🔗 Đang gọi API Categories getAll:', this.baseUrl);
+
+            const res = await fetch(`${this.baseUrl}-all`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeader()
+                }
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('❌ Lỗi Categories getAll:', errorText);
+                throw new Error(`HTTP ${res.status}: ${errorText}`);
+            }
+
+            const data = await res.json();
+            console.log('✅ Dữ liệu Categories getAll:', data);
+
+            // Xử lý response data
+            const categories = data.data || data.categories || data || [];
+
+            return Array.isArray(categories)
+                ? categories.map((item) =>
+                      Category && Category.fromApiResponse
+                          ? Category.fromApiResponse(item)
+                          : {
+                                id: item.id,
+                                name: item.name,
+                                image: item.image,
+                                createdAt: item.createdAt,
+                                updatedAt: item.updatedAt,
+                                ...item
+                            }
+                  )
+                : [];
+        } catch (error) {
+            console.error('❌ Lỗi Categories getAll:', error);
+            throw new Error('Lỗi khi tải danh sách danh mục: ' + error.message);
+        }
+    }
+
     static async getPaging({ page = 1, search = '' } = {}) {
         try {
             const url = `${this.baseUrl}?search=${encodeURIComponent(

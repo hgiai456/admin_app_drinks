@@ -1,7 +1,15 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
+import CartAPI from '@api/cartapi.js';
 
 export default function Header({ user, onLogout, currentPage = 'home' }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [cartItemCount, setCartItemCount] = useState(0);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    // ✅ LOAD CART ITEM COUNT
+    useEffect(() => {
+        loadCartCount();
+    }, [user]);
 
     const handleEditProfile = () => {
         alert('Chức năng chỉnh sửa thông tin đang được phát triển.');
@@ -11,6 +19,38 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
     const handleLogout = () => {
         onLogout();
         setShowUserMenu(false);
+    };
+
+    const loadCartCount = async () => {
+        try {
+            const cart = await CartAPI.getOrCreateCart(user?.id);
+            const cartItems = await CartAPI.getCartItems(cart.id);
+
+            const totalItems = Array.isArray(cartItems)
+                ? cartItems.reduce(
+                      (total, item) => total + (item.quantity || 0),
+                      0
+                  )
+                : 0;
+
+            setCartItemCount(totalItems);
+        } catch (error) {
+            console.error('❌ Error loading cart count:', error);
+            setCartItemCount(0);
+        }
+    };
+
+    const handleNavigation = (hash) => {
+        window.location.hash = hash;
+        setIsMenuOpen(false);
+    };
+
+    const handleCartClick = () => {
+        handleNavigation('cart');
+    };
+
+    const toggleMenu = () => {
+        setIsMenuOpen(!isMenuOpen);
     };
 
     return (
@@ -93,7 +133,22 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
                         LIÊN HỆ
                     </a>
                 </nav>
-
+                {/* ✅ CART BUTTON - HIGHLIGHT */}
+                <button
+                    className={`cart-btn ${
+                        currentPage === 'cart' ? 'active' : ''
+                    }`}
+                    onClick={handleCartClick}
+                    title='Xem giỏ hàng'
+                >
+                    <div className='cart-icon-wrapper'>
+                        <span className='cart-icon'>🛒</span>
+                        {cartItemCount > 0 && (
+                            <span className='cart-badge'>{cartItemCount}</span>
+                        )}
+                    </div>
+                    <span className='cart-text'>Giỏ hàng</span>
+                </button>
                 {/* ✅ USER MENU */}
                 <div className='user-section'>
                     <div

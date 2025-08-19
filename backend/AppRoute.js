@@ -46,6 +46,8 @@ export function AppRoute(app) {
         '/products-by-category',
         asyncHandle(ProductController.getAllProductsByCategory)
     );
+    router.get('/products-all', asyncHandle(ProductController.getAllProducts));
+
     router.get(
         '/products-customize-page',
         asyncHandle(ProductController.getProductsCustomizeSizePage)
@@ -89,6 +91,10 @@ export function AppRoute(app) {
     ///Category
     router.get('/categories', asyncHandle(CategoryController.getCategories));
     router.get(
+        '/categories-all',
+        asyncHandle(CategoryController.getAllCategories)
+    );
+    router.get(
         '/categories/:id',
         asyncHandle(CategoryController.getCategoryById)
     );
@@ -109,7 +115,7 @@ export function AppRoute(app) {
         validateImageExists,
         asyncHandle(CategoryController.updateCategory)
     );
-
+    //
     router.get(
         '/orders/user/:user_id',
         asyncHandle(OrderController.getOrdersByUserId)
@@ -270,7 +276,9 @@ export function AppRoute(app) {
     ); // Thêm mới giỏ hàng
     router.post('/carts/checkout', asyncHandle(CartController.checkoutCart)); //Checkout
     router.delete('/carts/:id', asyncHandle(CartController.deleteCart)); // Xoá giỏ hàng theo ID
+    router.delete('/carts/:id/clear', asyncHandle(CartController.clearCart)); // Xoá giỏ hàng theo ID
 
+    // clearCart
     //Routes for CartItemController
     router.get('/cart-items', asyncHandle(CartItemController.getCartItems)); // Lấy danh sách item theo cart_id
     router.get(
@@ -302,6 +310,11 @@ export function AppRoute(app) {
         '/prodetails/:id',
         asyncHandle(ProDetailController.getProDetailById)
     ); // Lấy thông tin chi tiết sản phẩm theo ID
+    router.get(
+        '/prodetails-by-product',
+        asyncHandle(ProDetailController.getProDetailByProductId)
+    );
+    //getProDetailByProductId
     router.get(
         '/prodetail',
         asyncHandle(ProDetailController.findProDetailByProductAndSize)

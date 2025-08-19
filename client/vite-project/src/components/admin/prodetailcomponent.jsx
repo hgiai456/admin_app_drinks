@@ -49,7 +49,7 @@ function ProdetailComponent() {
             console.log('🔄 Đang tải dữ liệu ban đầu...');
 
             const [productsData, sizesData, storesData] = await Promise.all([
-                ProductAPI.getAll().catch((err) => {
+                ProductAPI.getAllProducts().catch((err) => {
                     console.warn('⚠️ Không thể tải products:', err.message);
                     return [];
                 }),
@@ -321,7 +321,17 @@ function ProdetailComponent() {
         const store = stores.find((s) => s.id === storeId);
         return store ? store.name || store.store_name : `ID: ${storeId}`;
     };
-
+    const priceOptions = [
+        { value: 9000, label: '9.000 ₫' },
+        { value: 19000, label: '19.000 ₫' },
+        { value: 25000, label: '25.000 ₫' },
+        { value: 29000, label: '29.000 ₫' },
+        { value: 35000, label: '35.000 ₫' },
+        { value: 39000, label: '39.000 ₫' },
+        { value: 45000, label: '45.000 ₫' },
+        { value: 49000, label: '49.000 ₫' },
+        { value: 55000, label: '55.000 ₫' }
+    ];
     const formatPrice = (price) => {
         if (!price) return '0 ₫';
         return new Intl.NumberFormat('vi-VN', {
@@ -683,7 +693,7 @@ function ProdetailComponent() {
                                 <option value=''>-- Chọn cửa hàng --</option>
                                 {stores.map((store) => (
                                     <option key={store.id} value={store.id}>
-                                        [{store.id}] {store.name}
+                                        [{store.id}] {store.storeName}
                                     </option>
                                 ))}
                             </select>
@@ -698,45 +708,79 @@ function ProdetailComponent() {
                     <div className='form-row'>
                         <div className='form-group'>
                             <label className='form-label'>💰 Giá bán *</label>
-                            <input
-                                type='number'
+                            <select
                                 name='price'
                                 value={form.price}
                                 onChange={handleChange}
                                 className={`form-input ${
                                     errors.price ? 'error' : ''
-                                }`}
-                                placeholder='0'
-                                min='0'
-                                step='1000'
+                                } `}
                                 required
-                            />
+                            >
+                                <option value=''>--Chọn giá bán--</option>
+                                {priceOptions.map((option) => (
+                                    <option
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.price && (
                                 <span className='form-error'>
                                     {errors.price}
                                 </span>
                             )}
+                            <small
+                                style={{
+                                    color: '#666',
+                                    fontSize: '12px',
+                                    marginTop: '4px',
+                                    display: 'block'
+                                }}
+                            >
+                                💡 Chọn từ các mức giá chuẩn
+                            </small>
                         </div>
 
                         <div className='form-group'>
                             <label className='form-label'>💸 Giá cũ</label>
-                            <input
-                                type='number'
+                            <select
                                 name='oldprice'
                                 value={form.oldprice}
                                 onChange={handleChange}
                                 className={`form-input ${
                                     errors.oldprice ? 'error' : ''
                                 }`}
-                                placeholder='0'
-                                min='0'
-                                step='1000'
-                            />
+                            >
+                                <option value=''>
+                                    -- Chọn giá cũ (nếu có) --
+                                </option>
+                                {priceOptions.map((option) => (
+                                    <option
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
                             {errors.oldprice && (
                                 <span className='form-error'>
                                     {errors.oldprice}
                                 </span>
                             )}
+                            <small
+                                style={{
+                                    color: '#666',
+                                    fontSize: '12px',
+                                    marginTop: '4px',
+                                    display: 'block'
+                                }}
+                            >
+                                🏷️ Giá cũ phải cao hơn giá hiện tại
+                            </small>
                         </div>
                     </div>
 

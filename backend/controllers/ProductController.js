@@ -46,6 +46,50 @@ export async function getProducts(req, res) {
     });
 }
 
+export async function getAllProducts(req, res) {
+    const { search = '', page = 1 } = req.query;
+    const pageSize = 100;
+    const offset = (page - 1) * pageSize;
+
+    let whereClause = {};
+    if (search.trim() !== '') {
+        whereClause = {
+            [Op.or]: [
+                { name: { [Op.like]: `%${search}%` } },
+                { description: { [Op.like]: `%${search}%` } }
+            ]
+        };
+    }
+
+    const [products, totalProducts] = await Promise.all([
+        db.Product.findAll({
+            where: whereClause,
+            limit: pageSize,
+            offset: offset,
+            include: [
+                {
+                    model: db.ProDetail,
+                    as: 'product_details',
+                    attributes: ['price'],
+                    limit: 1,
+                    order: [['price', 'ASC']]
+                }
+            ]
+        }),
+        db.Product.count({
+            where: whereClause
+        })
+    ]);
+
+    res.status(200).json({
+        message: 'Lấy danh sách sản phẩm thành công',
+        data: products,
+        currentPage: parseInt(page, 10),
+        totalPage: Math.ceil(totalProducts / pageSize), //ceil(11 / 5) = 2.1 => 3 (Lam tron)
+        totalProducts
+    });
+}
+
 export async function getProductsCustomizeSizePage(req, res) {
     const { search = '', page = 1, pageSize = 4 } = req.query;
 

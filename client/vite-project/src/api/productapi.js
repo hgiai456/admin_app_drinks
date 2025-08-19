@@ -53,6 +53,50 @@ class ProductAPI {
         }
     }
 
+    static async getAllProducts() {
+        try {
+            console.log('🔗 Đang gọi API Products getAll:', this.baseUrl);
+
+            const res = await fetch(`${this.baseUrl}-all`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeader()
+                }
+            });
+
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error('❌ Lỗi Products getAll:', errorText);
+                throw new Error(`HTTP ${res.status}: ${errorText}`);
+            }
+
+            const data = await res.json();
+            console.log('✅ Dữ liệu Products getAll:', data);
+
+            // Xử lý response data
+            const products = data.data || data.products || data || [];
+
+            return Array.isArray(products)
+                ? products.map((item) =>
+                      Product && Product.fromApiResponse
+                          ? Product.fromApiResponse(item)
+                          : {
+                                id: item.id,
+                                name: item.name,
+                                category_id: item.category_id,
+                                brand_id: item.brand_id,
+                                description: item.description,
+                                createdAt: item.createdAt,
+                                updatedAt: item.updatedAt
+                            }
+                  )
+                : [];
+        } catch (error) {
+            console.error('❌ Lỗi Products getAll:', error);
+            throw new Error('Lỗi khi tải danh sách sản phẩm: ' + error.message);
+        }
+    }
     static async getByCategory(categoryId, params = {}) {
         try {
             const { page = 1, limit = 12, search = '' } = params;
@@ -211,14 +255,37 @@ class ProductAPI {
             throw error;
         }
     }
-
     static async getById(id) {
         try {
-            const res = await fetch(`${this.baseUrl}/${id}`);
+            console.log('🔗 Getting product by ID:', id);
+
+            const res = await fetch(`${this.baseUrl}/${id}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeader()
+                }
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
+
             const data = await res.json();
-            return data.data;
+            console.log('✅ Product by ID response:', data);
+
+            // ✅ XỬ LÝ RESPONSE THEO CẤU TRÚC THỰC TẾ
+            return {
+                id: data.id,
+                name: data.name,
+                description: data.description,
+                image: data.image,
+                // ✅ THÊM sizes để ProductDetailPage sử dụng
+                sizes: data.sizes || []
+            };
         } catch (error) {
-            throw new Error('Lỗi khi tải sản phẩm: ' + error.message);
+            console.error('❌ Error getting product by ID:', error);
+            throw error;
         }
     }
 

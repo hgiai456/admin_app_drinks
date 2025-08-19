@@ -34,6 +34,38 @@ export async function getCategories(req, res) {
     });
 }
 
+export async function getAllCategories(req, res) {
+    const { search = '', page = 1 } = req.query;
+    const pageSize = 100;
+    const offset = (page - 1) * pageSize;
+
+    let whereClause = {};
+    if (search.trim() !== '') {
+        whereClause = {
+            [Op.or]: [{ name: { [Op.like]: `%${search}%` } }]
+        };
+    }
+
+    const [categories, totalCategories] = await Promise.all([
+        db.Category.findAll({
+            where: whereClause,
+            limit: pageSize,
+            offset: offset
+        }),
+        db.Category.count({
+            where: whereClause
+        })
+    ]);
+
+    res.status(200).json({
+        message: 'Lấy danh sách danh mục thành công',
+        data: categories,
+        currentPage: parseInt(page, 10),
+        totalPage: Math.ceil(totalCategories / pageSize),
+        totalCategories
+    });
+}
+
 export async function getCategoryById(req, res) {
     const { id } = req.params;
     const category = await db.Category.findByPk(id); //Tìm sản phẩm theo Id

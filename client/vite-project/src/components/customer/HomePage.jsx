@@ -219,14 +219,8 @@ export default function HomePage({ user, onLogout }) {
         );
         console.log('🛒 Add to cart:', product);
     };
-
     const handleViewProduct = (product) => {
-        alert(
-            `Xem chi tiết sản phẩm: ${product.name}\nGiá: ${formatPrice(
-                product.price
-            )}`
-        );
-        console.log('👁️ View product:', product);
+        window.location.hash = `product/${product.id}`;
     };
 
     // ✅ PAGINATION HANDLERS
@@ -589,7 +583,11 @@ export default function HomePage({ user, onLogout }) {
                             }`}
                         >
                             {products.map((product) => (
-                                <div key={product.id} className='product-card'>
+                                <div
+                                    key={product.id}
+                                    className='product-card'
+                                    onClick={() => handleViewProduct(product)}
+                                >
                                     <div className='product-image'>
                                         <img
                                             src={product.image}
@@ -602,9 +600,6 @@ export default function HomePage({ user, onLogout }) {
                                         <div className='product-overlay'>
                                             <button
                                                 className='quick-view-btn'
-                                                onClick={() =>
-                                                    handleViewProduct(product)
-                                                }
                                                 title='Xem chi tiết'
                                             >
                                                 👁️

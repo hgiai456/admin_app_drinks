@@ -288,6 +288,49 @@ export async function checkoutCart(req, res) {
     }
 }
 
+// Xóa toàn bộ cart items trong giỏ hàng nhưng giữ lại cart
+export async function clearCart(req, res) {
+    try {
+        const { id } = req.params;
+
+        // Tìm cart
+        const cart = await db.Cart.findByPk(id, {
+            include: {
+                model: db.CartItem,
+                as: 'cart_items'
+            }
+        });
+
+        if (!cart) {
+            return res.status(404).json({
+                message: 'Không tìm thấy giỏ hàng'
+            });
+        }
+
+        if (!cart.cart_items || cart.cart_items.length === 0) {
+            return res.status(200).json({
+                message: 'Giỏ hàng đã rỗng',
+                data: cart
+            });
+        }
+
+        // Xóa tất cả cart_items
+        await db.CartItem.destroy({
+            where: { cart_id: cart.id }
+        });
+
+        return res.status(200).json({
+            message: 'Xóa toàn bộ sản phẩm trong giỏ hàng thành công',
+            data: { ...cart.toJSON(), cart_items: [] }
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Lỗi khi xóa sản phẩm trong giỏ hàng',
+            error: error.message
+        });
+    }
+}
+
 export async function deleteCart(req, res) {
     const { id } = req.params;
 

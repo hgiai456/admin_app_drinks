@@ -17,6 +17,7 @@ import LoginAdmin from '@components/admin/LoginAdmin.jsx';
 import RegisterComponent from './components/customer/RegisterComponent';
 import HomePage from '@components/customer/HomePage.jsx';
 import ProductPage from '@components/customer/ProductPage.jsx';
+import ProductDetailPage from './components/customer/ProductDetailPage';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -396,7 +397,15 @@ function CustomerRouter({ user, onLogout }) {
     useEffect(() => {
         const handleHashChange = () => {
             const hash = window.location.hash.replace('#', '') || 'home';
-            setCurrentPage(hash);
+            console.log('🔄 Hash changed to:', hash);
+
+            if (hash.startsWith('product/')) {
+                console.log('📍 Setting page to product-detail');
+                setCurrentPage('product-detail');
+            } else {
+                console.log('📍 Setting page to:', hash);
+                setCurrentPage(hash);
+            }
         };
 
         window.addEventListener('hashchange', handleHashChange);
@@ -407,13 +416,44 @@ function CustomerRouter({ user, onLogout }) {
         };
     }, []);
 
+    // ✅ HELPER FUNCTION ĐỂ LẤY PRODUCT ID TỪ HASH
+    const getProductIdFromHash = () => {
+        const hash = window.location.hash.replace('#', '');
+        if (hash.startsWith('product/')) {
+            const productId = hash.split('/')[1];
+            console.log('✅ Product ID extracted:', productId);
+            return productId;
+        }
+        return null;
+    };
+
     // ✅ RENDER PAGES BASED ON HASH
     switch (currentPage) {
         case 'home':
             return <HomePage user={user} onLogout={onLogout} />;
         case 'menu':
             return <ProductPage user={user} onLogout={onLogout} />;
+        case 'product-detail':
+            const productId = getProductIdFromHash();
+            return productId ? (
+                <ProductDetailPage
+                    user={user}
+                    onLogout={onLogout}
+                    productId={productId}
+                />
+            ) : (
+                <div style={{ padding: '2rem', textAlign: 'center' }}>
+                    <h2>❌ Lỗi</h2>
+                    <p>Không tìm thấy ID sản phẩm</p>
+                    <button onClick={() => (window.location.hash = 'home')}>
+                        ← Về trang chủ
+                    </button>
+                </div>
+            );
+        case 'cart':
+            return <CartPage user={user} onLogout={onLogout} />;
         default:
+            console.log('⚠️ Unknown page, fallback to home');
             return <HomePage user={user} onLogout={onLogout} />;
     }
 }

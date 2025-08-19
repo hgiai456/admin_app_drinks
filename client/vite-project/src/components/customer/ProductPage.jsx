@@ -130,14 +130,6 @@ export default function ProductPage({ user, onLogout }) {
         console.log('🛒 Add to cart:', product);
     };
 
-    const handleViewProduct = (product) => {
-        alert(
-            `Xem chi tiết sản phẩm: ${product.name}\nGiá: ${formatPrice(
-                product.price
-            )}`
-        );
-        console.log('👁️ View product:', product);
-    };
     const handlePageSizeChange = (newPageSize) => {
         setPageSize(newPageSize);
         setPage(1);
@@ -168,6 +160,10 @@ export default function ProductPage({ user, onLogout }) {
         setSelectedCategory(categoryId);
         setPage(1);
         setSearch('');
+    };
+    const handleViewProduct = (product) => {
+        // ✅ NAVIGATE ĐẾN PRODUCT DETAIL PAGE BẰNG HASH
+        window.location.hash = `product/${product.id}`;
     };
 
     // ✅ UTILITY FUNCTIONS
