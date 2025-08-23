@@ -16,6 +16,24 @@ class CartAPI {
         return sessionId;
     }
 
+    static async getCartItemCount(userId = null) {
+        try {
+            const cart = await this.getOrCreateCart(userId);
+            const cartItems = await this.getCartItems(cart.id);
+
+            const totalItems = Array.isArray(cartItems)
+                ? cartItems.reduce(
+                      (total, item) => total + (item.quantity || 0),
+                      0
+                  )
+                : 0;
+            console.log('✅ Cart item count:', totalItems);
+            return totalItems;
+        } catch (error) {
+            console.error('❌ Error getting cart item count:', error);
+            return 0; // ✅ THÊM RETURN
+        }
+    }
     static async getOrCreateCart(userId = null) {
         try {
             console.log('🛒 Getting or creating cart...');

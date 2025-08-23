@@ -5,6 +5,7 @@ import SizeAPI from '@api/sizeapi.js';
 import CartAPI from '@api/cartapi.js';
 import ProdetailAPI from '@api/prodetails.js';
 import '@styles/pages/_productdetail.scss';
+import { triggerCartRefresh } from '../common/UtilityFunction';
 
 export default function ProductDetailPage({ user, onLogout, productId }) {
     const navigateToHash = (hash) => {
@@ -140,6 +141,7 @@ export default function ProductDetailPage({ user, onLogout, productId }) {
                     selectedSize
                 )}) vào giỏ hàng`
             );
+            triggerCartRefresh();
 
             // Reset quantity
             setQuantity(1);

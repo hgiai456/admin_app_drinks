@@ -3,8 +3,10 @@ import { BannerAPI } from '@api/bannerapi';
 import ProductAPI from '@api/productapi'; // ✅ Import đúng
 import '@styles/pages/_homepage.scss';
 import CategoryAPI from '@api/categoryapi';
+import CartAPI from '@api/cartapi.js'; // ✅ Import CartAPI
 import Footer from '@components/common/Footer.jsx';
 import Header from '@components/common/Header.jsx';
+import { triggerCartRefresh } from '../common/UtilityFunction';
 
 export default function HomePage({ user, onLogout }) {
     const [banners, setBanners] = useState([]);
@@ -14,6 +16,7 @@ export default function HomePage({ user, onLogout }) {
     const [currentSlide, setCurrentSlide] = useState(0);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const headerRef = React.useRef(); // ✅ Ref để trigger refresh cart count
 
     // ✅ PAGINATION STATES
     const [page, setPage] = useState(1);
@@ -24,6 +27,8 @@ export default function HomePage({ user, onLogout }) {
     // ✅ FILTER STATES
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [filteredProducts, setFilteredProducts] = useState([]);
+    const [addingToCart, setAddingToCart] = useState({}); // ✅ Track adding state per product
+    const [message, setMessage] = useState(''); // ✅ Message state
     useEffect(() => {
         const fetchCategories = async () => {
             try {
@@ -211,13 +216,50 @@ export default function HomePage({ user, onLogout }) {
     const prevSlide = () =>
         setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
 
-    const handleAddToCart = (product) => {
-        alert(
-            `Đã thêm "${product.name}" vào giỏ hàng!\nGiá: ${formatPrice(
-                product.price
-            )}`
-        );
-        console.log('🛒 Add to cart:', product);
+    const handleAddToCart = async (product) => {
+        try {
+            setAddingToCart((prev) => ({ ...prev, [product.id]: true }));
+            setMessage('');
+
+            // ✅ Lấy hoặc tạo giỏ hàng
+            const cart = await CartAPI.getOrCreateCart(user?.id);
+
+            // ✅ Tìm sản phẩm chi tiết đầu tiên có số lượng > 0
+            const productDetails = await ProductAPI.getById(product.id);
+
+            if (
+                !productDetails ||
+                !productDetails.sizes ||
+                productDetails.sizes.length === 0
+            ) {
+                setMessage('❌ Sản phẩm không có thông tin chi tiết');
+                return;
+            }
+
+            // ✅ Lấy size đầu tiên có quantity > 0
+            const availableSize = productDetails.sizes.find(
+                (size) => size.quantity > 0
+            );
+
+            if (!availableSize) {
+                setMessage('❌ Sản phẩm đã hết hàng');
+                return;
+            }
+
+            // ✅ Thêm vào giỏ hàng với quantity = 1
+            await CartAPI.addToCart(cart.id, availableSize.id, 1);
+
+            setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
+
+            triggerCartRefresh();
+            // ✅ Auto clear message after 3 seconds
+            setTimeout(() => setMessage(''), 3000);
+        } catch (error) {
+            console.error('❌ Error adding to cart:', error);
+            setMessage('❌ Lỗi khi thêm vào giỏ hàng: ' + error.message);
+        } finally {
+            setAddingToCart((prev) => ({ ...prev, [product.id]: false }));
+        }
     };
     const handleViewProduct = (product) => {
         window.location.hash = `product/${product.id}`;
@@ -301,7 +343,29 @@ export default function HomePage({ user, onLogout }) {
     return (
         <div className='homepage'>
             {/* ✅ ENHANCED HEADER */}
-            <Header user={user} onLogout={onLogout} currentPage='home' />
+            <Header
+                user={user}
+                onLogout={onLogout}
+                currentPage='home'
+                onCartCountChange={headerRef}
+            />
+
+            {/* ✅ MESSAGE NOTIFICATION */}
+            {message && (
+                <div
+                    className={`message-notification ${
+                        message.includes('✅') ? 'success' : 'error'
+                    }`}
+                >
+                    {message}
+                    <button
+                        onClick={() => setMessage('')}
+                        className='close-message'
+                    >
+                        ×
+                    </button>
+                </div>
+            )}
 
             {/* ✅ HERO SLIDER (giữ nguyên) */}
             <section className='hero-slider'>
@@ -630,15 +694,28 @@ export default function HomePage({ user, onLogout }) {
                                                 </span>
                                             </div>
                                             <button
-                                                className='add-to-cart-btn'
+                                                className={`add-to-cart-btn ${
+                                                    addingToCart[product.id]
+                                                        ? 'loading'
+                                                        : ''
+                                                }`}
                                                 onClick={() =>
                                                     handleAddToCart(product)
                                                 }
+                                                disabled={
+                                                    addingToCart[product.id]
+                                                }
                                             >
                                                 <span className='btn-icon'>
-                                                    🛒
+                                                    {addingToCart[product.id]
+                                                        ? '⏳'
+                                                        : '🛒'}
                                                 </span>
-                                                <span>Thêm</span>
+                                                <span>
+                                                    {addingToCart[product.id]
+                                                        ? 'Đang thêm...'
+                                                        : 'Thêm'}
+                                                </span>
                                             </button>
                                         </div>
                                     </div>

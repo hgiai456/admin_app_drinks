@@ -1,9 +1,14 @@
 import { useState, useEffect } from 'react';
 import CartAPI from '@api/cartapi.js';
 import CartButton from '@components/customer/CartButton';
-import '@styles/common/_header.scss';
+import '@styles/pages/_header.scss';
 
-export default function Header({ user, onLogout, currentPage = 'home' }) {
+export default function Header({
+    user,
+    onLogout,
+    currentPage = 'home',
+    onCartCountChange
+}) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -14,6 +19,18 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
         loadCartCount();
     }, [user]);
 
+    useEffect(() => {
+        const handleCartRefresh = () => {
+            loadCartCount();
+        };
+
+        // Listen to custom event
+        window.addEventListener('refreshCartCount', handleCartRefresh);
+
+        return () => {
+            window.removeEventListener('refreshCartCount', handleCartRefresh);
+        };
+    }, [user]);
     const handleEditProfile = () => {
         alert('Chức năng chỉnh sửa thông tin đang được phát triển.');
         setShowUserMenu(false);
@@ -25,21 +42,19 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
     };
 
     const loadCartCount = async () => {
+        if (!user?.id) {
+            setCartItemCount(0);
+            return;
+        }
+        setCartLoading(true);
         try {
-            const cart = await CartAPI.getOrCreateCart(user?.id);
-            const cartItems = await CartAPI.getCartItems(cart.id);
-
-            const totalItems = Array.isArray(cartItems)
-                ? cartItems.reduce(
-                      (total, item) => total + (item.quantity || 0),
-                      0
-                  )
-                : 0;
-
-            setCartItemCount(totalItems);
+            const count = await CartAPI.getCartItemCount(user.id);
+            setCartItemCount(count);
         } catch (error) {
             console.error('❌ Error loading cart count:', error);
             setCartItemCount(0);
+        } finally {
+            setCartLoading(false);
         }
     };
 
@@ -50,6 +65,7 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
 
     const handleCartClick = () => {
         handleNavigation('cart');
+        loadCartCount();
     };
 
     const toggleMenu = () => {
@@ -136,6 +152,7 @@ export default function Header({ user, onLogout, currentPage = 'home' }) {
                         onCartClick={handleCartClick}
                         variant='default' // hoặc "minimal", "outlined"
                         onRefreshCount={loadCartCount}
+                        cartLoading={cartLoading}
                     />
                 </div>
 

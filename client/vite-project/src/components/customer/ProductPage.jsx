@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ProductAPI from '@api/productapi';
 import CategoryAPI from '@api/categoryapi';
+import CartAPI from '@api/cartapi';
 import Layout from '@components/common/Layout.jsx';
 import '@styles/pages/_homepage.scss';
 
@@ -120,15 +121,6 @@ export default function ProductPage({ user, onLogout }) {
         };
         fetchProducts();
     }, [page, search, selectedCategory, pageSize]);
-    // ✅ THÊM MISSING HANDLERS
-    const handleAddToCart = (product) => {
-        alert(
-            `Đã thêm "${product.name}" vào giỏ hàng!\nGiá: ${formatPrice(
-                product.price
-            )}`
-        );
-        console.log('🛒 Add to cart:', product);
-    };
 
     const handlePageSizeChange = (newPageSize) => {
         setPageSize(newPageSize);
@@ -434,7 +426,11 @@ export default function ProductPage({ user, onLogout }) {
                             }`}
                         >
                             {products.map((product) => (
-                                <div key={product.id} className='product-card'>
+                                <div
+                                    key={product.id}
+                                    className='product-card'
+                                    onClick={() => handleViewProduct(product)}
+                                >
                                     <div className='product-image'>
                                         <img
                                             src={product.image}
@@ -479,12 +475,7 @@ export default function ProductPage({ user, onLogout }) {
                                                     {formatPrice(product.price)}
                                                 </span>
                                             </div>
-                                            <button
-                                                className='add-to-cart-btn'
-                                                onClick={() =>
-                                                    handleAddToCart(product)
-                                                }
-                                            >
+                                            <button className='add-to-cart-btn'>
                                                 <span className='btn-icon'>
                                                     🛒
                                                 </span>

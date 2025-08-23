@@ -6,11 +6,17 @@ export default function Layout({
     children,
     user,
     onLogout,
-    currentPage = 'home'
+    currentPage = 'home',
+    onCartCountChange
 }) {
     return (
         <div className='homepage'>
-            <Header user={user} onLogout={onLogout} currentPage={currentPage} />
+            <Header
+                user={user}
+                onLogout={onLogout}
+                currentPage={currentPage}
+                onCartCountChange={onCartCountChange}
+            />
             <main>{children}</main>
             <Footer />
         </div>
