@@ -211,7 +211,7 @@ function AdminLayout({
     );
 }
 
-export default function AuthContainer({ onLogin }) {
+export default function AuthContainer({ onLogin, onGuestMode }) {
     const [currentView, setCurrentView] = useState('login');
     const [successMessage, setSuccessMessage] = useState('');
     //Chuyển sang Register
@@ -240,6 +240,7 @@ export default function AuthContainer({ onLogin }) {
     return (
         <LoginAdmin
             onLogin={onLogin}
+            onGuestMode={onGuestMode}
             onSwitchToRegister={handleSwitchToRegister}
             successMessage={successMessage}
             onClearMessage={handleClearMessage}
@@ -250,6 +251,7 @@ export default function AuthContainer({ onLogin }) {
 function App() {
     const [currentPage, setCurrentPage] = useState('Order');
     const [user, setUser] = useState(null);
+    const [isGuestMode, setIsGuestMode] = useState(false);
 
     // Kiểm tra token và user khi load lại trang
     useEffect(() => {
@@ -277,18 +279,23 @@ function App() {
     // Hàm xử lý khi đăng nhập thành công
     const handleLogin = (userData) => {
         setUser(userData);
+        setIsGuestMode(false);
         localStorage.setItem('admin_user', JSON.stringify(userData));
 
         if (userData.role === 2) {
             setCurrentPage('Quản lý đơn hàng');
         }
     };
-
+    const handleGuestMode = () => {
+        setIsGuestMode(true);
+        setUser(null);
+    };
     // Hàm đăng xuất
     const handleLogout = () => {
         const roleText = user?.role === 1 ? 'Khách hàng' : 'admin';
         if (confirm('bạn có chắc muốn đăng xuất?')) {
             setUser(null);
+            setIsGuestMode(false);
             localStorage.removeItem('admin_token');
             localStorage.removeItem('admin_user');
             setCurrentPage('Quản lý đơn hàng');
@@ -296,11 +303,23 @@ function App() {
     };
     //Route từ login sang Register
     if (!user) {
-        return <AuthContainer onLogin={handleLogin} />;
+        return (
+            <AuthContainer
+                onLogin={handleLogin}
+                onGuestMode={handleGuestMode}
+            />
+        );
     }
-
+    if (isGuestMode || (user && user.role === 1)) {
+    }
     if (user.role === 1) {
-        return <CustomerRouter user={user} onLogout={handleLogout} />;
+        return (
+            <CustomerRouter
+                user={user}
+                onLogout={handleLogout}
+                isGuest={isGuestMode}
+            />
+        );
     }
 
     if (user.role === 2) {
