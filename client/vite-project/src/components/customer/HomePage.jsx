@@ -8,7 +8,13 @@ import Footer from '@components/common/Footer.jsx';
 import Header from '@components/common/Header.jsx';
 import { triggerCartRefresh } from '../common/UtilityFunction';
 
-export default function HomePage({ user, onLogout }) {
+export default function HomePage({
+    user,
+    onLogout,
+    isGuest = false,
+    onLogin,
+    onRegister
+}) {
     const [banners, setBanners] = useState([]);
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -217,12 +223,15 @@ export default function HomePage({ user, onLogout }) {
         setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
 
     const handleAddToCart = async (product) => {
+        // ✅ KIỂM TRA GUEST MODE
+
         try {
             setAddingToCart((prev) => ({ ...prev, [product.id]: true }));
             setMessage('');
+            const userId = user?.id || null;
 
             // ✅ Lấy hoặc tạo giỏ hàng
-            const cart = await CartAPI.getOrCreateCart(user?.id);
+            const cart = await CartAPI.getOrCreateCart(userId);
 
             // ✅ Tìm sản phẩm chi tiết đầu tiên có số lượng > 0
             const productDetails = await ProductAPI.getById(product.id);
@@ -251,6 +260,14 @@ export default function HomePage({ user, onLogout }) {
 
             setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
 
+            // ✅ THÔNG BÁO KHÁC NHAU CHO USER VÀ GUEST
+            if (isGuest) {
+                setMessage(
+                    `✅ Đã thêm "${product.name}" vào giỏ hàng (khách vãng lai)`
+                );
+            } else {
+                setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
+            }
             triggerCartRefresh();
             // ✅ Auto clear message after 3 seconds
             setTimeout(() => setMessage(''), 3000);
@@ -347,7 +364,9 @@ export default function HomePage({ user, onLogout }) {
                 user={user}
                 onLogout={onLogout}
                 currentPage='home'
-                onCartCountChange={headerRef}
+                isGuest={isGuest}
+                onLogin={onLogin}
+                onRegister={onRegister}
             />
 
             {/* ✅ MESSAGE NOTIFICATION */}
@@ -694,11 +713,7 @@ export default function HomePage({ user, onLogout }) {
                                                 </span>
                                             </div>
                                             <button
-                                                className={`add-to-cart-btn ${
-                                                    addingToCart[product.id]
-                                                        ? 'loading'
-                                                        : ''
-                                                }`}
+                                                className='add-to-cart-btn'
                                                 onClick={() =>
                                                     handleAddToCart(product)
                                                 }
@@ -711,10 +726,12 @@ export default function HomePage({ user, onLogout }) {
                                                         ? '⏳'
                                                         : '🛒'}
                                                 </span>
-                                                <span>
+                                                <span className='btn-text'>
                                                     {addingToCart[product.id]
                                                         ? 'Đang thêm...'
-                                                        : 'Thêm'}
+                                                        : isGuest
+                                                        ? 'Xem chi tiết'
+                                                        : 'Xem chi tiết'}
                                                 </span>
                                             </button>
                                         </div>

@@ -7,7 +7,10 @@ export default function Layout({
     user,
     onLogout,
     currentPage = 'home',
-    onCartCountChange
+    onCartCountChange,
+    isGuest = false,
+    onLogin,
+    onRegister
 }) {
     return (
         <div className='homepage'>
@@ -16,6 +19,9 @@ export default function Layout({
                 onLogout={onLogout}
                 currentPage={currentPage}
                 onCartCountChange={onCartCountChange}
+                isGuest={isGuest}
+                onLogin={onLogin}
+                onRegister={onRegister}
             />
             <main>{children}</main>
             <Footer />

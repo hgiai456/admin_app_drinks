@@ -6,8 +6,15 @@ import CartAPI from '@api/cartapi.js';
 import ProdetailAPI from '@api/prodetails.js';
 import '@styles/pages/_productdetail.scss';
 import { triggerCartRefresh } from '../common/UtilityFunction';
-
-export default function ProductDetailPage({ user, onLogout, productId }) {
+//Đang bị lỗi cart không tải được khách vãng lai
+export default function ProductDetailPage({
+    user,
+    onLogout,
+    productId,
+    isGuest = false, // ✅ THÊM PROP
+    onLogin, // ✅ THÊM PROP
+    onRegister
+}) {
     const navigateToHash = (hash) => {
         window.location.hash = hash;
     };
@@ -127,22 +134,24 @@ export default function ProductDetailPage({ user, onLogout, productId }) {
 
             setAddingToCart(true);
             setMessage('');
+            const userId = user?.id || null;
 
             // ✅ SỬA TÊN HÀM: getOrCreatCart -> getOrCreateCart
-            const cart = await CartAPI.getOrCreateCart(user?.id);
+            const cart = await CartAPI.getOrCreateCart(userId);
+
             await CartAPI.addToCart(
                 cart.id,
                 selectedProductDetail.id,
                 quantity
             );
-
+            // ✅ THÔNG BÁO KHÁC NHAU CHO USER VÀ GUEST
+            const guestText = isGuest ? ' (khách vãng lai)' : '';
             setMessage(
                 `✅ Đã thêm ${quantity} ${product.name} (${getSizeName(
                     selectedSize
-                )}) vào giỏ hàng`
+                )}) vào giỏ hàng${guestText}`
             );
             triggerCartRefresh();
-
             // Reset quantity
             setQuantity(1);
         } catch (error) {
@@ -234,7 +243,14 @@ export default function ProductDetailPage({ user, onLogout, productId }) {
     const availableImages = getAvailableImages();
     const discount = calculateDiscount();
     return (
-        <Layout user={user} onLogout={onLogout} currentPage='product-detail'>
+        <Layout
+            user={user}
+            onLogout={onLogout}
+            currentPage='product-detail'
+            isGuest={isGuest} // ✅ PASS PROP
+            onLogin={onLogin} // ✅ PASS PROP
+            onRegister={onRegister}
+        >
             <div className='product-detail-container'>
                 {/* ✅ BREADCRUMB */}
                 <div className='breadcrumb'>

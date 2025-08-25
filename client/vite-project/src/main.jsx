@@ -251,7 +251,7 @@ export default function AuthContainer({ onLogin, onGuestMode }) {
 function App() {
     const [currentPage, setCurrentPage] = useState('Order');
     const [user, setUser] = useState(null);
-    const [isGuestMode, setIsGuestMode] = useState(false);
+    const [isGuestMode, setIsGuestMode] = useState(true);
 
     // Kiểm tra token và user khi load lại trang
     useEffect(() => {
@@ -262,6 +262,7 @@ function App() {
                 const userObj = JSON.parse(userData);
                 if (userObj.role === 1 || userObj.role === 2) {
                     setUser(userObj);
+                    setIsGuestMode(false);
                 } else {
                     console.warn('⚠️ Invalid role: ', userObj.role);
                     // Xóa token không hợp lệ
@@ -275,7 +276,11 @@ function App() {
             }
         }
     }, []);
-
+    // ✅ HÀM XỬ LÝ KHI MUỐN ĐĂNG NHẬP TỪ GUEST MODE
+    const handleGuestToLogin = () => {
+        setIsGuestMode(false);
+        setUser(null);
+    };
     // Hàm xử lý khi đăng nhập thành công
     const handleLogin = (userData) => {
         setUser(userData);
@@ -295,29 +300,28 @@ function App() {
         const roleText = user?.role === 1 ? 'Khách hàng' : 'admin';
         if (confirm('bạn có chắc muốn đăng xuất?')) {
             setUser(null);
-            setIsGuestMode(false);
+            setIsGuestMode(true);
             localStorage.removeItem('admin_token');
             localStorage.removeItem('admin_user');
             setCurrentPage('Quản lý đơn hàng');
         }
     };
     //Route từ login sang Register
-    if (!user) {
+    if (!user && !isGuestMode) {
         return (
             <AuthContainer
                 onLogin={handleLogin}
-                onGuestMode={handleGuestMode}
+                onGuestMode={() => setIsGuestMode(true)}
             />
         );
     }
     if (isGuestMode || (user && user.role === 1)) {
-    }
-    if (user.role === 1) {
         return (
             <CustomerRouter
                 user={user}
                 onLogout={handleLogout}
                 isGuest={isGuestMode}
+                onLogin={handleGuestToLogin}
             />
         );
     }
@@ -408,9 +412,19 @@ function App() {
             </AdminLayout>
         );
     }
+
+    // ✅ FALLBACK - KHÔNG BAO GIỜ XẢY RA NHƯNG AN TOÀN
+    return (
+        <CustomerRouter
+            user={null}
+            onLogout={handleLogout}
+            isGuest={true}
+            onLogin={handleGuestToLogin}
+        />
+    );
 }
 
-function CustomerRouter({ user, onLogout }) {
+function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     const [currentPage, setCurrentPage] = useState('home');
 
     // ✅ LISTEN TO URL HASH CHANGES
@@ -436,6 +450,26 @@ function CustomerRouter({ user, onLogout }) {
         };
     }, []);
 
+    // ✅ HÀM XỬ LÝ ĐĂNG NHẬP (TỪ GUEST MODE)
+    const handleLoginFromGuest = () => {
+        console.log('🔄 Switching from guest to login mode');
+        if (onLogin) {
+            onLogin(); // ✅ CHUYỂN SANG LOGIN FORM
+        } else {
+            console.warn('⚠️ No onLogin handler in CustomerRouter');
+        }
+    };
+
+    // ✅ HÀM XỬ LÝ ĐĂNG KÝ (TỪ GUEST MODE)
+    const handleRegisterFromGuest = () => {
+        console.log('🔄 Switching from guest to register mode');
+        if (onLogin) {
+            onLogin(); // ✅ CHUYỂN SANG LOGIN FORM, SAU ĐÓ CÓ THỂ CHUYỂN REGISTER
+        } else {
+            console.warn('⚠️ No onLogin handler in CustomerRouter');
+        }
+    };
+
     // ✅ HELPER FUNCTION ĐỂ LẤY PRODUCT ID TỪ HASH
     const getProductIdFromHash = () => {
         const hash = window.location.hash.replace('#', '');
@@ -450,9 +484,25 @@ function CustomerRouter({ user, onLogout }) {
     // ✅ RENDER PAGES BASED ON HASH
     switch (currentPage) {
         case 'home':
-            return <HomePage user={user} onLogout={onLogout} />;
+            return (
+                <HomePage
+                    user={user}
+                    onLogout={onLogout}
+                    isGuest={isGuest}
+                    onLogin={handleLoginFromGuest}
+                    onRegister={handleRegisterFromGuest}
+                />
+            );
         case 'menu':
-            return <ProductPage user={user} onLogout={onLogout} />;
+            return (
+                <ProductPage
+                    user={user}
+                    onLogout={onLogout}
+                    isGuest={isGuest}
+                    onLogin={handleLoginFromGuest}
+                    onRegister={handleRegisterFromGuest}
+                />
+            );
         case 'product-detail':
             const productId = getProductIdFromHash();
             return productId ? (
@@ -460,6 +510,9 @@ function CustomerRouter({ user, onLogout }) {
                     user={user}
                     onLogout={onLogout}
                     productId={productId}
+                    isGuest={isGuest}
+                    onLogin={handleLoginFromGuest}
+                    onRegister={handleRegisterFromGuest}
                 />
             ) : (
                 <div style={{ padding: '2rem', textAlign: 'center' }}>
@@ -471,10 +524,25 @@ function CustomerRouter({ user, onLogout }) {
                 </div>
             );
         case 'cart':
-            return <CartPage user={user} onLogout={onLogout} />;
+            return (
+                <CartPage
+                    user={user}
+                    onLogout={onLogout}
+                    isGuest={isGuest}
+                    onLogin={handleLoginFromGuest}
+                />
+            );
         default:
             console.log('⚠️ Unknown page, fallback to home');
-            return <HomePage user={user} onLogout={onLogout} />;
+            return (
+                <HomePage
+                    user={user}
+                    onLogout={onLogout}
+                    isGuest={isGuest}
+                    onLogin={handleLoginFromGuest}
+                    onRegister={handleRegisterFromGuest}
+                />
+            );
     }
 }
 

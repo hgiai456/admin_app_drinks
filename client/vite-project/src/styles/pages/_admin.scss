@@ -25,6 +25,57 @@ body {
     background: linear-gradient(135deg, $admin-light 0%, #e9ecef 100%);
 }
 
+.auth-section {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.auth-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+
+    .btn-icon {
+        font-size: 1rem;
+    }
+
+    &.login-btn {
+        background: transparent;
+        color: var(--primary-color, #8b4513);
+        border: 2px solid var(--primary-color, #8b4513);
+
+        &:hover {
+            background: var(--primary-color, #8b4513);
+            color: white;
+            transform: translateY(-1px);
+        }
+    }
+
+    &.register-btn {
+        background: var(--primary-color, #8b4513);
+        color: white;
+
+        &:hover {
+            background: var(--primary-dark, #6b3410);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
+        }
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
 // ✅ SIDEBAR STYLES
 .sidebar {
     position: fixed;

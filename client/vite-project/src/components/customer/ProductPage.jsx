@@ -1,11 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import ProductAPI from '@api/productapi';
 import CategoryAPI from '@api/categoryapi';
-import CartAPI from '@api/cartapi';
 import Layout from '@components/common/Layout.jsx';
 import '@styles/pages/_homepage.scss';
 
-export default function ProductPage({ user, onLogout }) {
+export default function ProductPage({
+    user,
+    onLogout,
+    isGuest = false, // ✅ THÊM PROP
+    onLogin, // ✅ THÊM PROP
+    onRegister
+}) {
     // ✅ STATES (giữ nguyên states từ code trước)
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
@@ -199,7 +204,14 @@ export default function ProductPage({ user, onLogout }) {
     };
 
     return (
-        <Layout user={user} onLogout={onLogout} currentPage='menu'>
+        <Layout
+            user={user}
+            onLogout={onLogout}
+            currentPage='menu'
+            isGuest={isGuest} // ✅ PASS PROP
+            onLogin={onLogin} // ✅ PASS PROP
+            onRegister={onRegister}
+        >
             {error && (
                 <div
                     className='error-message'

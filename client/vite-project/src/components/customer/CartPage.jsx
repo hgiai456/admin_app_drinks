@@ -3,7 +3,7 @@ import Layout from '@components/common/Layout.jsx';
 import CartAPI from '@api/cartapi.js';
 import '@styles/pages/_cart.scss';
 
-export default function CartPage({ user, onLogout }) {
+export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
     const [cart, setCart] = useState(null);
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -13,16 +13,17 @@ export default function CartPage({ user, onLogout }) {
 
     useEffect(() => {
         loadCartData();
-    }, [user]);
+    }, [user, isGuest]);
 
     const loadCartData = async () => {
         try {
             setLoading(true);
             setError('');
             console.log('🔄 Loading cart data for user:', user?.id);
-
+            // ✅ LẤY CART CHO CẢ USER VÀ GUEST
+            const userId = user?.id || null;
             // ✅ GET OR CREATE CART
-            const cartData = await CartAPI.getOrCreateCart(user?.id);
+            const cartData = await CartAPI.getOrCreateCart(userId);
             setCart(cartData);
 
             // ✅ GET CART ITEMS
@@ -190,9 +191,24 @@ export default function CartPage({ user, onLogout }) {
             setMessage('❌ Giỏ hàng trống, không thể thanh toán');
             return;
         }
+
+        if (isGuest) {
+            if (onLogin) {
+                const confirmLogin = confirm(
+                    'Bạn cần đăng nhập để thanh toán. Bạn có muốn đăng nhập ngay không?'
+                );
+                if (confirmLogin) {
+                    // ✅ LƯU GIỎ HÀNG TRƯỚC KHI CHUYỂN SANG LOGIN
+                    onLogin();
+                }
+            } else {
+                alert('Vui lòng đăng nhập để thanh toán!');
+            }
+            return;
+        }
+
         alert('Chức năng thanh toán đang được phát triển!');
     };
-
     // ✅ LOADING STATE
     if (loading) {
         return (
@@ -225,15 +241,16 @@ export default function CartPage({ user, onLogout }) {
             <div className='cart-container'>
                 {/* ✅ BREADCRUMB */}
                 <div className='breadcrumb'>
-                    <span onClick={handleGoHome} className='breadcrumb-link'>
+                    <span
+                        onClick={() => (window.location.hash = 'home')}
+                        className='breadcrumb-link'
+                    >
                         🏠 Trang chủ
                     </span>
-                    <span className='breadcrumb-separator'>›</span>
-                    <span onClick={handleGoMenu} className='breadcrumb-link'>
-                        📱 Menu
+                    <span className='separator'>{'>'}</span>
+                    <span className='current'>
+                        🛒 Giỏ hàng {isGuest && '(Khách vãng lai)'}
                     </span>
-                    <span className='breadcrumb-separator'>›</span>
-                    <span className='breadcrumb-current'>Giỏ hàng</span>
                 </div>
 
                 {/* ✅ PAGE HEADER */}

@@ -1,7 +1,13 @@
 import React, { useState } from 'react';
 import '@styles/pages/_login.scss';
 
-export default function LoginAdmin({ onLogin, onSwitchToRegister }) {
+export default function LoginAdmin({
+    onLogin,
+    onSwitchToRegister,
+    onGuestMode,
+    successMessage,
+    onClearMessage
+}) {
     const [phone, setPhone] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -53,6 +59,14 @@ export default function LoginAdmin({ onLogin, onSwitchToRegister }) {
         if (error) setError('');
     };
 
+    const handleBackToHome = () => {
+        if (onGuestMode) {
+            onGuestMode();
+        } else {
+            window.location.hash = 'home';
+        }
+    };
+
     const handlePasswordChange = (e) => {
         setPassword(e.target.value);
         if (error) setError('');
@@ -68,6 +82,15 @@ export default function LoginAdmin({ onLogin, onSwitchToRegister }) {
                 </div>
             </div>
             <div className='login-content'>
+                <button
+                    className='back-to-home-btn'
+                    onClick={handleBackToHome}
+                    disabled={loading}
+                    title='Trở về trang chủ'
+                >
+                    <span className='btn-icon'>{'<<'}</span>
+                    <span className='btn-text'> Trang chủ</span>
+                </button>
                 <form className='login-form' onSubmit={handleSubmit}>
                     {/* Header voi logo */}
                     <div className='login-header'>

@@ -10,6 +10,122 @@
     overflow: hidden;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
         sans-serif;
+
+    // ✅ BACK TO HOME BUTTON
+    .back-to-home-btn {
+        position: absolute;
+        top: 1.5rem;
+        left: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.75rem;
+        color: $brown-color;
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+
+        .btn-icon {
+            font-size: 1.1rem;
+        }
+
+        .btn-text {
+            font-weight: 600;
+        }
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 768px) {
+            top: 1rem;
+            left: 1rem;
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+
+            .btn-text {
+                display: none; // Chỉ hiển thị icon trên mobile
+            }
+        }
+    }
+    // ✅ GUEST STYLES FOR LOGIN FORM
+    .guest-section {
+        margin-top: 1.5rem;
+        text-align: center;
+
+        .divider {
+            position: relative;
+            margin: 1rem 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: #e0e0e0;
+            }
+
+            span {
+                background: white;
+                padding: 0 1rem;
+                color: #666;
+                font-size: 0.9rem;
+            }
+        }
+
+        .guest-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 0.5rem;
+            color: #666;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+
+            &:hover {
+                background: #e8e8e8;
+                border-color: #bbb;
+                color: #333;
+            }
+
+            .guest-icon {
+                font-size: 1.2rem;
+            }
+        }
+
+        .guest-note {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            color: #888;
+        }
+    }
 }
 
 // ✅ ANIMATED BACKGROUND

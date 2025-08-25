@@ -7,7 +7,10 @@ export default function Header({
     user,
     onLogout,
     currentPage = 'home',
-    onCartCountChange
+    onCartCountChange,
+    isGuest = false,
+    onLogin,
+    onRegister
 }) {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [cartItemCount, setCartItemCount] = useState(0);
@@ -17,7 +20,7 @@ export default function Header({
     // ✅ LOAD CART ITEM COUNT
     useEffect(() => {
         loadCartCount();
-    }, [user]);
+    }, [user, isGuest]);
 
     useEffect(() => {
         const handleCartRefresh = () => {
@@ -30,7 +33,31 @@ export default function Header({
         return () => {
             window.removeEventListener('refreshCartCount', handleCartRefresh);
         };
-    }, [user]);
+    }, [user, isGuest]);
+    // ✅ SỬA HÀM XỬ LÝ ĐĂNG NHẬP - KHÔNG RELOAD TRANG
+    const handleLoginClick = () => {
+        console.log('🔄 Guest login clicked, onLogin:', onLogin);
+        if (onLogin) {
+            onLogin(); // ✅ CHUYỂN SANG LOGIN FORM
+        } else {
+            console.warn('⚠️ No onLogin handler provided');
+            alert('Chức năng đăng nhập đang được phát triển.');
+        }
+    };
+
+    // ✅ SỬA HÀM XỬ LÝ ĐĂNG KÝ - KHÔNG RELOAD TRANG
+    const handleRegisterClick = () => {
+        console.log('🔄 Guest register clicked, onRegister:', onRegister);
+        if (onRegister) {
+            onRegister(); // ✅ CHUYỂN SANG REGISTER FORM
+        } else if (onLogin) {
+            onLogin(); // ✅ FALLBACK: CHUYỂN SANG LOGIN FORM
+        } else {
+            console.warn('⚠️ No onRegister/onLogin handler provided');
+            alert('Chức năng đăng ký đang được phát triển.');
+        }
+    };
+
     const handleEditProfile = () => {
         alert('Chức năng chỉnh sửa thông tin đang được phát triển.');
         setShowUserMenu(false);
@@ -42,14 +69,14 @@ export default function Header({
     };
 
     const loadCartCount = async () => {
-        if (!user?.id) {
-            setCartItemCount(0);
-            return;
-        }
         setCartLoading(true);
         try {
-            const count = await CartAPI.getCartItemCount(user.id);
+            const userId = user?.id || null;
+            const count = await CartAPI.getCartItemCount(userId);
             setCartItemCount(count);
+            console.log(
+                `📊 Cart count loaded: ${count} (${userId ? 'user' : 'guest'})`
+            );
         } catch (error) {
             console.error('❌ Error loading cart count:', error);
             setCartItemCount(0);
@@ -64,6 +91,12 @@ export default function Header({
     };
 
     const handleCartClick = () => {
+        // ✅ CHO PHÉP GUEST XEM GIỎ HÀNG (NẾU CÓ SẢN PHẨM)
+        if (isGuest && cartItemCount === 0) {
+            alert('Giỏ hàng trống. Vui lòng thêm sản phẩm để xem giỏ hàng!');
+            return;
+        }
+
         handleNavigation('cart');
         loadCartCount();
     };
@@ -75,6 +108,7 @@ export default function Header({
     return (
         <header className='homepage-header'>
             <div className='header-container'>
+                {/* ✅ LOGO SECTION */}
                 <div className='logo-section'>
                     <div className='logo-container'>
                         <img
@@ -94,6 +128,7 @@ export default function Header({
                     </div>
                 </div>
 
+                {/* ✅ NAVIGATION */}
                 <nav className='main-nav'>
                     <a
                         href='#home'
@@ -127,7 +162,6 @@ export default function Header({
                     >
                         CỬA HÀNG
                     </a>
-
                     <a
                         href='#news'
                         className={`nav-link ${
@@ -145,52 +179,85 @@ export default function Header({
                         VỀ CHÚNG TÔI
                     </a>
                 </nav>
+
+                {/* ✅ RIGHT SECTION */}
                 <div className='header-actions'>
+                    {/* ✅ CART BUTTON - HIỂN THỊ CHO CẢ USER VÀ GUEST */}
                     <CartButton
                         cartItemCount={cartItemCount}
                         currentPage={currentPage}
                         onCartClick={handleCartClick}
-                        variant='default' // hoặc "minimal", "outlined"
+                        variant='default'
                         onRefreshCount={loadCartCount}
-                        cartLoading={cartLoading}
+                        loading={cartLoading}
+                        isGuest={isGuest}
                     />
-                </div>
 
-                {/* ✅ USER MENU */}
-                <div className='user-section'>
-                    <div
-                        className='user-dropdown'
-                        onClick={() => setShowUserMenu(!showUserMenu)}
-                    >
-                        <div className='user-avatar'>
-                            <span>
-                                {user?.username?.charAt(0).toUpperCase() || 'U'}
-                            </span>
-                        </div>
-                        <div className='user-info'>
-                            <span className='user-name'>
-                                {user?.username || 'User'}
-                            </span>
-                            <span className='user-role'>Khách hàng</span>
-                        </div>
-                        <div className='dropdown-arrow'>▼</div>
-                    </div>
-
-                    {showUserMenu && (
-                        <div className='user-menu'>
-                            <button
-                                className='menu-item'
-                                onClick={handleEditProfile}
+                    {/* ✅ USER SECTION HOẶC AUTH BUTTONS */}
+                    {user && !isGuest ? (
+                        // ✅ USER MENU (KHI ĐÃ ĐĂNG NHẬP)
+                        <div className='user-section'>
+                            <div
+                                className='user-dropdown'
+                                onClick={() => setShowUserMenu(!showUserMenu)}
                             >
-                                <span className='menu-icon'>👤</span>
-                                <span>Chỉnh sửa thông tin</span>
+                                <div className='user-avatar'>
+                                    <span>
+                                        {user?.username
+                                            ?.charAt(0)
+                                            .toUpperCase() || 'U'}
+                                    </span>
+                                </div>
+                                <div className='user-info'>
+                                    <span className='user-name'>
+                                        {user?.username || 'User'}
+                                    </span>
+                                    <span className='user-role'>
+                                        Khách hàng
+                                    </span>
+                                </div>
+                                <div className='dropdown-arrow'>▼</div>
+                            </div>
+
+                            {showUserMenu && (
+                                <div className='user-menu'>
+                                    <button
+                                        className='menu-item'
+                                        onClick={handleEditProfile}
+                                    >
+                                        <span className='menu-icon'>👤</span>
+                                        <span>Chỉnh sửa thông tin</span>
+                                    </button>
+                                    <button
+                                        className='menu-item logout'
+                                        onClick={handleLogout}
+                                    >
+                                        <span className='menu-icon'>🚪</span>
+                                        <span>Đăng xuất</span>
+                                    </button>
+                                    <button className='menu-item logout'>
+                                        <span className='menu-icon'></span>
+                                        <span>Xem danh sách đơn hàng</span>
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        // ✅ AUTH BUTTONS (KHI GUEST MODE)
+                        <div className='auth-section'>
+                            <button
+                                className='auth-btn login-btn'
+                                onClick={handleLoginClick}
+                            >
+                                <span className='btn-icon'>👤</span>
+                                <span>Đăng nhập</span>
                             </button>
                             <button
-                                className='menu-item logout'
-                                onClick={handleLogout}
+                                className='auth-btn register-btn'
+                                onClick={handleRegisterClick}
                             >
-                                <span className='menu-icon'>🚪</span>
-                                <span>Đăng xuất</span>
+                                <span className='btn-icon'>📝</span>
+                                <span>Đăng ký</span>
                             </button>
                         </div>
                     )}

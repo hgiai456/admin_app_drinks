@@ -8,10 +8,13 @@ class CartAPI {
     }
 
     static getSessionId() {
-        let sessionId = localStorage.getItem('session_id');
+        let sessionId = localStorage.getItem('guest_session_id');
         if (!sessionId) {
-            sessionId = Date.now().toString();
-            localStorage.setItem('session_id', sessionId);
+            // ✅ TẠO SESSION ID NGẪU NHIÊN DỰA TRÊN TIMESTAMP + RANDOM
+            sessionId =
+                Date.now().toString() + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('guest_session_id', sessionId);
+            console.log('🆔 Created new session ID:', sessionId);
         }
         return sessionId;
     }
@@ -38,6 +41,7 @@ class CartAPI {
         try {
             console.log('🛒 Getting or creating cart...');
             const sessionId = this.getSessionId();
+
             const payload = userId
                 ? { user_id: userId }
                 : { session_id: sessionId };
@@ -45,8 +49,7 @@ class CartAPI {
             const res = await fetch(`${this.baseUrl}/carts`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             });
@@ -85,8 +88,7 @@ class CartAPI {
             const res = await fetch(`${this.baseUrl}/carts/user/${userId}`, {
                 method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
+                    'Content-Type': 'application/json'
                 }
             });
 
@@ -116,8 +118,7 @@ class CartAPI {
                 {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
-                        ...this.getAuthHeader()
+                        'Content-Type': 'application/json'
                     }
                 }
             );
@@ -129,16 +130,41 @@ class CartAPI {
             const data = await res.json();
             console.log('✅ Found cart by session_id:', data);
 
-            // ✅ LẤY CART ĐẦU TIÊN TỪ DANH SÁCH
-            const carts = data.data || data || [];
-            if (Array.isArray(carts) && carts.length > 0) {
-                return carts[0];
+            // ✅ SỬA: XỬ LÝ ĐÚNG FORMAT RESPONSE TỪ API
+            if (data.data) {
+                console.log('✅ Found cart by session_id:', data.data);
+                return data.data; // Trả về cart object trực tiếp
+            } else {
+                throw new Error('No cart data in response');
             }
-
-            throw new Error('No cart found for session_id');
         } catch (error) {
             console.error('❌ Error finding cart by session_id:', error);
-            throw error;
+
+            // ✅ NẾU KHÔNG TÌM THẤY CART, TẠO MỚI
+            console.log('🔄 Cart not found for session, creating new cart...');
+            try {
+                const createRes = await fetch(`${this.baseUrl}/carts`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...this.getAuthHeader()
+                    },
+                    body: JSON.stringify({ session_id: sessionId })
+                });
+
+                if (!createRes.ok) {
+                    throw new Error(
+                        `Failed to create cart: HTTP ${createRes.status}`
+                    );
+                }
+
+                const createData = await createRes.json();
+                console.log('✅ Created new cart for session:', createData);
+                return createData.data || createData;
+            } catch (createError) {
+                console.error('❌ Error creating new cart:', createError);
+                throw createError;
+            }
         }
     }
     static async getCartItems(cartId) {
@@ -148,8 +174,7 @@ class CartAPI {
                 {
                     method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
-                        ...this.getAuthHeader()
+                        'Content-Type': 'application/json'
                     }
                 }
             );
@@ -183,8 +208,7 @@ class CartAPI {
             const res = await fetch(`${this.baseUrl}/cart-items`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(payload)
             });
@@ -231,8 +255,7 @@ class CartAPI {
                 {
                     method: 'PUT',
                     headers: {
-                        'Content-Type': 'application/json',
-                        ...this.getAuthHeader()
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ quantity })
                 }
@@ -260,8 +283,7 @@ class CartAPI {
             const res = await fetch(
                 `${this.baseUrl}/cart-items/${cartItemId}`,
                 {
-                    method: 'DELETE',
-                    headers: this.getAuthHeader()
+                    method: 'DELETE'
                 }
             );
 
@@ -285,8 +307,7 @@ class CartAPI {
             console.log('🗑️ Clearing cart:', cartId);
 
             const res = await fetch(`${this.baseUrl}/carts/${cartId}/clear`, {
-                method: 'DELETE',
-                headers: this.getAuthHeader()
+                method: 'DELETE'
             });
 
             if (!res.ok) {
