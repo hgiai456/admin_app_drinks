@@ -206,8 +206,7 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
             }
             return;
         }
-
-        alert('Chức năng thanh toán đang được phát triển!');
+        window.location.hash = 'checkout';
     };
     // ✅ LOADING STATE
     if (loading) {

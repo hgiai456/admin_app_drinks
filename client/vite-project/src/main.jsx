@@ -19,6 +19,7 @@ import HomePage from '@components/customer/HomePage.jsx';
 import ProductPage from '@components/customer/ProductPage.jsx';
 import ProductDetailPage from './components/customer/ProductDetailPage';
 import CartPage from '@components/customer/CartPage.jsx';
+import CheckoutPage from '@components/customer/CheckoutPage';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -526,6 +527,15 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
         case 'cart':
             return (
                 <CartPage
+                    user={user}
+                    onLogout={onLogout}
+                    isGuest={isGuest}
+                    onLogin={handleLoginFromGuest}
+                />
+            );
+        case 'checkout':
+            return (
+                <CheckoutPage
                     user={user}
                     onLogout={onLogout}
                     isGuest={isGuest}

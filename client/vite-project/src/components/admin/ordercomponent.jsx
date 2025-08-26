@@ -69,6 +69,7 @@ function OrderComponent() {
         }
     }, [page, search, filterStatus, loadingData]);
 
+    // ✅ SỬA LẠI HÀM fetchOrders
     const fetchOrders = async (
         pageNum = 1,
         searchTerm = '',
@@ -80,8 +81,8 @@ function OrderComponent() {
                 `🔄 fetchOrders called with: page=${pageNum}, search="${searchTerm}", status="${statusFilter}"`
             );
 
-            // Gọi API với pagination
-            const response = await getOrders(pageNum, 10); // 10 items per page
+            // ✅ GỌI API CHỈ VỚI PAGINATION - KHÔNG FILTER Ở CLIENT
+            const response = await getOrders(pageNum, 10);
 
             console.log('✅ Response từ OrderAPI:', response);
 
@@ -89,17 +90,30 @@ function OrderComponent() {
                 setOrders([]);
                 setTotalPage(1);
                 setTotalItems(0);
-                setPage(1);
+                setPage(pageNum);
                 setStats({});
                 return;
             }
 
+            // ✅ LẤY DỮ LIỆU TỪ API RESPONSE
             let ordersData = response.data.data || [];
             const totalOrdersCount = response.data.totalOrders || 0;
+            const totalPagesFromAPI = response.data.totalPage || 1;
+            const currentPageFromAPI = response.data.currentPage || pageNum;
 
-            // Filter by search term
+            console.log('📊 API Data:', {
+                ordersData: ordersData.length,
+                totalOrdersCount,
+                totalPagesFromAPI,
+                currentPageFromAPI
+            });
+
+            // ✅ APPLY CLIENT-SIDE FILTERS (CHỈ CHO HIỂN THỊ)
+            let filteredOrders = [...ordersData];
+
+            // Filter by search term (client-side for current page)
             if (searchTerm) {
-                ordersData = ordersData.filter(
+                filteredOrders = filteredOrders.filter(
                     (order) =>
                         order.phone
                             ?.toLowerCase()
@@ -115,34 +129,42 @@ function OrderComponent() {
                 );
             }
 
-            // Filter by status
+            // Filter by status (client-side for current page)
             if (statusFilter !== 'all') {
-                ordersData = ordersData.filter(
+                filteredOrders = filteredOrders.filter(
                     (order) => String(order.status) === String(statusFilter)
                 );
             }
 
-            // Calculate stats
+            // ✅ CALCULATE STATS FROM ALL DATA (ĐỂ HIỂN THỊ ĐÚNG)
             const orderStats = {};
             ordersData.forEach((order) => {
                 orderStats[order.status] = (orderStats[order.status] || 0) + 1;
             });
 
-            console.log('📊 Orders Data:', ordersData);
+            console.log('📊 Filtered Orders:', filteredOrders);
             console.log('📊 Stats:', orderStats);
 
-            setOrders(ordersData);
-            setTotalPage(Math.ceil(totalOrdersCount / 10));
+            // ✅ CẬP NHẬT STATE
+            setOrders(filteredOrders);
+            setTotalPage(totalPagesFromAPI); // ✅ DÙNG GIÁ TRỊ TỪ API
             setTotalItems(totalOrdersCount);
+            setPage(currentPageFromAPI); // ✅ DÙNG GIÁ TRỊ TỪ API
             setStats(orderStats);
 
-            console.log(`✅ State updated: ${ordersData.length} orders loaded`);
+            console.log(
+                `✅ State updated: ${filteredOrders.length} orders displayed`
+            );
+            console.log(
+                `📄 Pagination: page ${currentPageFromAPI}/${totalPagesFromAPI}`
+            );
         } catch (error) {
             console.error('❌ Error in fetchOrders:', error);
             setMessage(`❌ ${error.message}`);
             setOrders([]);
             setTotalPage(1);
             setTotalItems(0);
+            setPage(1);
             setStats({});
         } finally {
             setLoading(false);
@@ -225,15 +247,33 @@ function OrderComponent() {
         setSearch(searchTerm);
         setPage(1);
     };
-
+    // ✅ CẬP NHẬT handlePageChange VỚI SMOOTH TRANSITION
     const handlePageChange = (newPage) => {
+        console.log(
+            `🔄 handlePageChange called: newPage=${newPage}, currentPage=${page}, totalPage=${totalPage}`
+        );
+
         if (
             newPage >= 1 &&
             newPage <= totalPage &&
             newPage !== page &&
             !loading
         ) {
-            setPage(newPage);
+            console.log(`✅ Changing to page ${newPage}`);
+
+            // ✅ THÊM LOADING STATE CHO PAGINATION
+            setLoading(true);
+
+            // ✅ DELAY NHẸ ĐỂ TẠO HIỆU ỨNG SMOOTH
+            setTimeout(() => {
+                setPage(newPage);
+                // ✅ SCROLL TO TOP KHI CHUYỂN TRANG
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 100);
+        } else {
+            console.warn(
+                `❌ Invalid page change: newPage=${newPage}, constraints: 1-${totalPage}, loading=${loading}`
+            );
         }
     };
 
@@ -323,76 +363,6 @@ function OrderComponent() {
                         📊 Tổng: <strong>{totalItems}</strong> đơn hàng
                     </div>
                 </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div
-                style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                    gap: '16px',
-                    marginBottom: '24px'
-                }}
-            >
-                {Object.entries(orderStatusMap).map(([key, label]) => {
-                    const color = statusColors[key] || '#666';
-                    const icon = statusIcons[key] || '❓';
-                    const count = stats[key] || 0;
-
-                    return (
-                        <div
-                            key={key}
-                            style={{
-                                background: 'white',
-                                border: `2px solid ${color}22`,
-                                borderRadius: '12px',
-                                padding: '16px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '12px',
-                                cursor: 'pointer',
-                                transition: 'all 0.3s ease',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.08)'
-                            }}
-                            onClick={() => handleStatusFilterChange(key)}
-                        >
-                            <div
-                                style={{
-                                    width: '48px',
-                                    height: '48px',
-                                    borderRadius: '12px',
-                                    backgroundColor: color + '22',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    fontSize: '20px'
-                                }}
-                            >
-                                {icon}
-                            </div>
-                            <div>
-                                <div
-                                    style={{
-                                        fontWeight: 'bold',
-                                        color: color,
-                                        fontSize: '14px'
-                                    }}
-                                >
-                                    {label}
-                                </div>
-                                <div
-                                    style={{
-                                        fontSize: '24px',
-                                        fontWeight: 'bold',
-                                        color: '#333'
-                                    }}
-                                >
-                                    {count}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
             </div>
 
             {/* Search Bar và Filter */}
@@ -492,28 +462,6 @@ function OrderComponent() {
                                         <div style={{ fontSize: '14px' }}>
                                             📞 {order.phone || 'N/A'}
                                         </div>
-                                        {order.user_id && (
-                                            <div
-                                                style={{
-                                                    fontSize: '12px',
-                                                    color: '#666'
-                                                }}
-                                            >
-                                                👤 User: {order.user_id}
-                                            </div>
-                                        )}
-                                        {order.session_id && (
-                                            <div
-                                                style={{
-                                                    fontSize: '12px',
-                                                    color: '#666'
-                                                }}
-                                            >
-                                                🔗 Session:{' '}
-                                                {order.session_id.slice(0, 8)}
-                                                ...
-                                            </div>
-                                        )}
                                     </td>
                                     <td>
                                         <div
@@ -576,65 +524,164 @@ function OrderComponent() {
                     </tbody>
                 </table>
             </div>
-
-            {/* Pagination */}
             {totalItems > 0 && (
                 <div className='pagination'>
-                    <div className='pagination-info'>
-                        Trang {page} / {totalPage} - Tổng {totalItems} đơn hàng
-                    </div>
-                    <div className='pagination-controls'>
+                    <div
+                        className={`pagination-controls ${
+                            loading ? 'loading' : ''
+                        }`}
+                    >
                         <button
-                            className='btn-nav'
+                            className='btn-nav btn-first'
                             onClick={() => handlePageChange(1)}
                             disabled={page === 1 || loading}
+                            title='Trang đầu'
                         >
-                            ⏪ Đầu
+                            <span className='btn-icon'>⏪</span>
+                            <span className='btn-text'>Đầu</span>
                         </button>
                         <button
-                            className='btn-nav'
+                            className='btn-nav btn-prev'
                             onClick={() => handlePageChange(page - 1)}
                             disabled={page === 1 || loading}
+                            title='Trang trước'
                         >
-                            ⬅️ Trước
+                            <span className='btn-icon'>⬅️</span>
+                            <span className='btn-text'>Trước</span>
                         </button>
 
-                        {Array.from(
-                            { length: Math.min(5, totalPage) },
-                            (_, i) => {
-                                const startPage = Math.max(1, page - 2);
-                                const pageNum = startPage + i;
-                                if (pageNum > totalPage) return null;
+                        {/* ✅ PROGRESSIVE PAGINATION LOGIC */}
+                        {(() => {
+                            const maxVisiblePages = 3;
+                            const pageButtons = [];
 
-                                return (
-                                    <button
-                                        key={pageNum}
-                                        className={`btn-page ${
-                                            page === pageNum ? 'active' : ''
-                                        }`}
-                                        onClick={() =>
-                                            handlePageChange(pageNum)
-                                        }
-                                        disabled={loading}
-                                    >
-                                        {pageNum}
-                                    </button>
-                                );
+                            if (totalPage <= maxVisiblePages) {
+                                for (let i = 1; i <= totalPage; i++) {
+                                    pageButtons.push(
+                                        <button
+                                            key={i}
+                                            className={`btn-page ${
+                                                page === i ? 'active' : ''
+                                            }`}
+                                            onClick={() => handlePageChange(i)}
+                                            disabled={loading}
+                                        >
+                                            {i}
+                                        </button>
+                                    );
+                                }
+                            } else {
+                                let startPage, endPage;
+
+                                if (page <= 2) {
+                                    startPage = 1;
+                                    endPage = 3;
+                                } else if (page >= totalPage - 1) {
+                                    startPage = totalPage - 2;
+                                    endPage = totalPage;
+                                } else {
+                                    startPage = page - 1;
+                                    endPage = page + 1;
+                                }
+
+                                if (startPage > 1) {
+                                    pageButtons.push(
+                                        <button
+                                            key={1}
+                                            className={`btn-page ${
+                                                page === 1 ? 'active' : ''
+                                            }`}
+                                            onClick={() => handlePageChange(1)}
+                                            disabled={loading}
+                                        >
+                                            1
+                                        </button>
+                                    );
+
+                                    if (startPage > 2) {
+                                        pageButtons.push(
+                                            <span
+                                                key='ellipsis-start'
+                                                className='pagination-ellipsis'
+                                            >
+                                                ⋯
+                                            </span>
+                                        );
+                                    }
+                                }
+
+                                for (let i = startPage; i <= endPage; i++) {
+                                    if (i > 1 || startPage === 1) {
+                                        pageButtons.push(
+                                            <button
+                                                key={i}
+                                                className={`btn-page ${
+                                                    page === i ? 'active' : ''
+                                                }`}
+                                                onClick={() =>
+                                                    handlePageChange(i)
+                                                }
+                                                disabled={loading}
+                                            >
+                                                {i}
+                                            </button>
+                                        );
+                                    }
+                                }
+
+                                if (endPage < totalPage) {
+                                    if (endPage < totalPage - 1) {
+                                        pageButtons.push(
+                                            <span
+                                                key='ellipsis-end'
+                                                className='pagination-ellipsis'
+                                            >
+                                                ⋯
+                                            </span>
+                                        );
+                                    }
+
+                                    if (endPage < totalPage) {
+                                        pageButtons.push(
+                                            <button
+                                                key={totalPage}
+                                                className={`btn-page ${
+                                                    page === totalPage
+                                                        ? 'active'
+                                                        : ''
+                                                }`}
+                                                onClick={() =>
+                                                    handlePageChange(totalPage)
+                                                }
+                                                disabled={loading}
+                                            >
+                                                {totalPage}
+                                            </button>
+                                        );
+                                    }
+                                }
                             }
-                        )}
+
+                            return pageButtons;
+                        })()}
+
                         <button
-                            className='btn-nav'
+                            className='btn-nav btn-next'
                             onClick={() => handlePageChange(page + 1)}
-                            disabled={page === totalPage || loading}
+                            disabled={page >= totalPage || loading}
+                            title='Trang tiếp'
                         >
-                            Tiếp ➡️
+                            <span className='btn-text'>Tiếp</span>
+                            <span className='btn-icon'>➡️</span>
                         </button>
                         <button
-                            className='btn-nav'
+                            className='btn-nav btn-last'
                             onClick={() => handlePageChange(totalPage)}
-                            disabled={page === totalPage || loading}
+                            disabled={page >= totalPage || loading}
+                            title='Trang cuối'
                         >
-                            Cuối ⏩
+                            <span className='btn-text'>Cuối</span>
+                            <span className='btn-icon'>⏩</span>
                         </button>
                     </div>
                 </div>

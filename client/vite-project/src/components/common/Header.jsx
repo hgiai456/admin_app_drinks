@@ -225,19 +225,16 @@ export default function Header({
                                         className='menu-item'
                                         onClick={handleEditProfile}
                                     >
-                                        <span className='menu-icon'>👤</span>
                                         <span>Chỉnh sửa thông tin</span>
                                     </button>
                                     <button
                                         className='menu-item logout'
                                         onClick={handleLogout}
                                     >
-                                        <span className='menu-icon'>🚪</span>
                                         <span>Đăng xuất</span>
                                     </button>
                                     <button className='menu-item logout'>
-                                        <span className='menu-icon'></span>
-                                        <span>Xem danh sách đơn hàng</span>
+                                        <span>Danh sách đơn hàng</span>
                                     </button>
                                 </div>
                             )}
