@@ -279,7 +279,8 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
                         {message}
                         <button
                             onClick={() => setMessage('')}
-                            className='close-message'
+                            cla
+                            ssName='close-message'
                         >
                             ×
                         </button>
@@ -330,14 +331,14 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
                                         <img
                                             src={
                                                 item.product_image ||
-                                                'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=100&h=100&q=80&fit=crop'
+                                                'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=80&h=80&q=80&fit=crop'
                                             }
                                             alt={
                                                 item.product_name || 'Sản phẩm'
                                             }
                                             onError={(e) => {
                                                 e.target.src =
-                                                    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=100&h=100&q=80&fit=crop';
+                                                    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=80&h=80&q=80&fit=crop';
                                             }}
                                             onClick={() =>
                                                 handleViewProduct(
@@ -345,120 +346,138 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
                                                 )
                                             }
                                         />
+                                        {item.oldprice &&
+                                            item.oldprice > item.price && (
+                                                <div className='discount-badge'>
+                                                    -
+                                                    {Math.round(
+                                                        ((item.oldprice -
+                                                            item.price) /
+                                                            item.oldprice) *
+                                                            100
+                                                    )}
+                                                    %
+                                                </div>
+                                            )}
                                     </div>
 
-                                    {/* ✅ PRODUCT INFO */}
-                                    <div className='item-info'>
-                                        <h3
-                                            className='item-name'
-                                            onClick={() =>
-                                                handleViewProduct(
-                                                    item.product_id
-                                                )
-                                            }
-                                        >
-                                            {item.product_name || 'Sản phẩm'}
-                                        </h3>
-                                        <div className='item-details'>
+                                    {/* ✅ PRODUCT INFO & PRICING */}
+                                    <div className='item-details'>
+                                        <div className='product-info'>
+                                            <h3
+                                                className='item-name'
+                                                onClick={() =>
+                                                    handleViewProduct(
+                                                        item.product_id
+                                                    )
+                                                }
+                                            >
+                                                {item.product_name ||
+                                                    'Sản phẩm'}
+                                            </h3>
                                             <span className='item-size'>
                                                 {item.size_name}
                                             </span>
-                                            <span className='item-price-unit'>
-                                                {formatPrice(item.price)}
-                                            </span>
-                                            {/* ✅ HIỂN THỊ GIÁ CŨ NẾU CÓ */}
+                                        </div>
+
+                                        <div className='pricing-section'>
+                                            <div className='price-group'>
+                                                <span className='current-price'>
+                                                    {formatPrice(item.price)}
+                                                </span>
+                                                {item.oldprice &&
+                                                    item.oldprice >
+                                                        item.price && (
+                                                        <span className='old-price'>
+                                                            {formatPrice(
+                                                                item.oldprice
+                                                            )}
+                                                        </span>
+                                                    )}
+                                            </div>
+
+                                            {/* ✅ SAVINGS AMOUNT */}
                                             {item.oldprice &&
                                                 item.oldprice > item.price && (
-                                                    <span className='item-old-price'>
-                                                        Giá gốc:{' '}
+                                                    <div className='savings-amount'>
+                                                        Tiết kiệm:{' '}
                                                         {formatPrice(
-                                                            item.oldprice
+                                                            item.oldprice -
+                                                                item.price
                                                         )}
-                                                    </span>
+                                                    </div>
                                                 )}
                                         </div>
                                     </div>
 
                                     {/* ✅ QUANTITY CONTROLS */}
                                     <div className='item-quantity'>
-                                        <button
-                                            className='quantity-btn'
-                                            onClick={() =>
-                                                handleUpdateQuantity(
-                                                    item.id,
-                                                    (item.quantity || 1) - 1
-                                                )
-                                            }
-                                            disabled={
-                                                updating[item.id] ||
-                                                (item.quantity || 1) <= 1
-                                            }
-                                        >
-                                            −
-                                        </button>
-                                        <input
-                                            type='number'
-                                            value={item.quantity || 1}
-                                            onChange={(e) => {
-                                                const newQuantity =
-                                                    parseInt(e.target.value) ||
-                                                    1;
-                                                if (
-                                                    newQuantity !==
-                                                    item.quantity
-                                                ) {
+                                        <div className='quantity-controls'>
+                                            <button
+                                                className='quantity-btn minus'
+                                                onClick={() =>
                                                     handleUpdateQuantity(
                                                         item.id,
-                                                        newQuantity
-                                                    );
+                                                        (item.quantity || 1) - 1
+                                                    )
                                                 }
-                                            }}
-                                            min='1'
-                                            max={item.stock_quantity}
-                                            className='quantity-input'
-                                            disabled={updating[item.id]}
-                                        />
-                                        <button
-                                            className='quantity-btn'
-                                            onClick={() =>
-                                                handleUpdateQuantity(
-                                                    item.id,
-                                                    (item.quantity || 1) + 1
-                                                )
-                                            }
-                                            disabled={
-                                                updating[item.id] ||
-                                                item.quantity >=
-                                                    item.stock_quantity
-                                            }
-                                        >
-                                            +
-                                        </button>
+                                                disabled={
+                                                    updating[item.id] ||
+                                                    (item.quantity || 1) <= 1
+                                                }
+                                            >
+                                                −
+                                            </button>
+                                            <span className='quantity-display'>
+                                                {item.quantity || 1}
+                                            </span>
+                                            <button
+                                                className='quantity-btn plus'
+                                                onClick={() =>
+                                                    handleUpdateQuantity(
+                                                        item.id,
+                                                        (item.quantity || 1) + 1
+                                                    )
+                                                }
+                                                disabled={
+                                                    updating[item.id] ||
+                                                    item.quantity >=
+                                                        item.stock_quantity
+                                                }
+                                            >
+                                                +
+                                            </button>
+                                        </div>
+
+                                        {/* ✅ STOCK INFO */}
+                                        <div className='stock-info'>
+                                            Còn {item.stock_quantity} sản phẩm
+                                        </div>
                                     </div>
 
-                                    {/* ✅ TOTAL PRICE */}
-                                    <div className='item-total'>
-                                        <span className='total-price'>
-                                            {formatPrice(
-                                                calculateItemTotal(item)
-                                            )}
-                                        </span>
-                                        {/* ✅ HIỂN THỊ TIẾT KIỆM NẾU CÓ */}
-                                        {item.oldprice &&
-                                            item.oldprice > item.price && (
-                                                <span className='savings'>
-                                                    Tiết kiệm:{' '}
-                                                    {formatPrice(
-                                                        (item.oldprice -
-                                                            item.price) *
-                                                            item.quantity
-                                                    )}
-                                                </span>
-                                            )}
-                                    </div>
+                                    {/* ✅ TOTAL & ACTIONS */}
+                                    <div className='item-total-actions'>
+                                        <div className='total-section'>
+                                            <div className='item-total-price'>
+                                                {formatPrice(
+                                                    calculateItemTotal(item)
+                                                )}
+                                            </div>
 
-                                    {/* ✅ REMOVE BUTTON */}
-                                    <div className='item-actions'>
+                                            {/* ✅ TOTAL SAVINGS */}
+                                            {item.oldprice &&
+                                                item.oldprice > item.price && (
+                                                    <div className='total-savings'>
+                                                        Tiết kiệm:{' '}
+                                                        {formatPrice(
+                                                            (item.oldprice -
+                                                                item.price) *
+                                                                item.quantity
+                                                        )}
+                                                    </div>
+                                                )}
+                                        </div>
+
                                         <button
                                             className='btn-remove'
                                             onClick={() =>
@@ -467,7 +486,7 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
                                             disabled={updating[item.id]}
                                             title='Xóa sản phẩm'
                                         >
-                                            {updating[item.id] ? '🔄' : '🗑️'}
+                                            {updating[item.id] ? '⏳' : '🗑️'}
                                         </button>
                                     </div>
 

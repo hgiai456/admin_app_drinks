@@ -10,7 +10,7 @@ export default defineConfig({
             '@': path.resolve(__dirname, 'src'), //Trỏ thẳng tới thư mục góc Pro_Drinks
             '@components': path.resolve(__dirname, 'src/components'),
             '@models': path.resolve(__dirname, 'src/models'),
-            '@api': path.resolve(__dirname, 'src/api'),
+            '@api': path.resolve(__dirname, 'src/service'),
             '@styles': path.resolve(__dirname, 'src/styles')
         }
     }
