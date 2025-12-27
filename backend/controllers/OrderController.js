@@ -1,4 +1,4 @@
-import { Sequelize, where } from 'sequelize';
+import {  Sequelize, where } from 'sequelize';
 import db from '../models';
 import { OrderStatus } from '../constants';
 const { Op } = Sequelize;
@@ -25,28 +25,47 @@ export async function getOrders(req, res) {
         db.Order.findAll({
             where: whereClause,
             limit: pageSize,
-            offset: offset
-            // include: [
-            //     {
-            //         model: db.OrderDetail,
-            //         as: 'order_details',
-            //         include: [
-            //             {
-            //                 model: db.ProDetail,
-            //                 as: 'prodetail'
-            //             }
-            //         ]
-            //     }
-            // ]
+            offset: offset,
+            attributes: [
+                'id', 
+                'user_id', 
+                'phone', 
+                'address', 
+                'note', 
+                'total', 
+                'status',             
+                'createdAt', 
+                'updatedAt'
+            ],
+            include: [
+                {
+                    model: db.Payment, as: 'payments',
+                    attributes: ['id', 'payment_method', 'status', 'transaction_id'],
+                    required: false // LEFT JOIN - order không có payment vẫn hiển thị
+                }
+            ],
+
+         order: [['createdAt', 'DESC']]
         }),
         db.Order.count({
             where: whereClause
         })
     ]);
+    const transformedOrders = orders.map(order => {
+        const orderData = order.toJSON();
+        const payment = orderData.payments?.[0]; 
+
+        return {
+            ...orderData,
+            payment_method: payment?.payment_method || 'cod',
+            payment_status: payment?.status || 'pending',
+            transaction_id: payment?.transaction_id || null
+        };
+    });
 
     res.status(200).json({
         message: 'Lấy danh sách sản phẩm thành công',
-        data: orders,
+        data: transformedOrders,
         currentPage: parseInt(page, 10),
         totalPage: Math.ceil(totalOrders / pageSize), //ceil(11 / 5) = 2.1 => 3 (Lam tron)
         totalOrders
@@ -132,6 +151,12 @@ export async function getOrderById(req, res) {
                         as: 'product_details'
                     }
                 ]
+            },
+             // ✅ THÊM INCLUDE PAYMENT - ĐÂY LÀ PHẦN BỊ THIẾU
+            {
+                model: db.Payment,
+                as: 'payments',
+                attributes: ['id', 'payment_method', 'status', 'transaction_id', 'amount']
             }
         ]
     });
@@ -141,10 +166,17 @@ export async function getOrderById(req, res) {
             message: 'Đơn hàng không tìm thấy.'
         });
     }
+    const orderData = order.toJSON();
+    const payment = orderData.payments?.[0];
 
     res.status(200).json({
         message: 'Lấy thông tin đơn hàng thành công.',
-        data: order
+        data: {
+            ...orderData,
+            payment_method: payment?.payment_method || 'cod',
+            payment_status: payment?.status || 'pending',
+            transaction_id: payment?.transaction_id || null
+        }
     });
 }
 

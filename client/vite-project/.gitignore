@@ -1,5 +1,34 @@
-# Logs
-logs
+# ========================
+# 📦 DEPENDENCIES
+# ========================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ========================
+# 📁 BUILD & DIST
+# ========================
+dist/
+dist-ssr/
+build/
+.cache/
+*.local
+
+# ========================
+# 🔐 ENVIRONMENT
+# ========================
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.env
+
+# ========================
+# 📝 LOGS
+# ========================
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -7,18 +36,45 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# ========================
+# 💻 IDE & EDITOR
+# ========================
+.idea/
 .vscode/*
 !.vscode/extensions.json
-.idea
+!.vscode/settings.json
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ========================
+# 🖥️ OS FILES
+# ========================
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ========================
+# 🧪 TESTING
+# ========================
+coverage/
+.nyc_output/
+*.lcov
+
+# ========================
+# 🔧 MISC
+# ========================
+*.pid
+*.pid.lock
+.npm/
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity

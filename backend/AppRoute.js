@@ -17,6 +17,7 @@ import * as UserController from './controllers/UserController.js'; //CartControl
 import * as CartController from './controllers/CartController.js';
 import * as CartItemController from './controllers/CartItemController.js';
 
+import * as PaymentController from './controllers/PaymentController.js';
 import asyncHandle from './middlewares/asyncHandle.js';
 import InsertProductRequest from './dtos/requests/product/InsertProductRequest.js';
 import InsertCartItemRequest from './dtos/requests/cart_item/InserCartItemRequest.js';
@@ -358,5 +359,19 @@ export function AppRoute(app) {
 
     router.get('/images/:fileName', asyncHandle(ImageController.viewImages));
 
+    //Payment routes
+    router.post('/payments/create', asyncHandle(PaymentController.createPayment));
+
+    // PayOS webhook
+    router.post('/payments/payos/webhook', PaymentController.paymentWebhook);
+
+    // VNPAY IPN
+    router.get('/payments/vnpay/ipn', PaymentController.vnpayIPN);
+    router.get('/payments/vnpay/return', PaymentController.vnpayReturn);
+
+    
+    router.get('/payments/verify', asyncHandle(PaymentController.verifyPayment));
+    router.get('/payments/status/:orderId', asyncHandle(PaymentController.getPaymentStatus));
+    //Lam toi buoc 8, chua test duoc
     app.use('/api/', router);
 }

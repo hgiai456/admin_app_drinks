@@ -9,7 +9,8 @@ const development = {
     port: Number(process.env.DB_PORT) || 3306,
     dialect: process.env.DB_DEV_DIALECT || 'mysql'
 };
-
-module.exports = {
+// ✅ SỬA EXPORT SYNTAX CHO SEQUELIZE CLI
+export { development };
+export default {
     development
 };

@@ -19,6 +19,14 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'order_id',
                 as: 'order_details' // PHẢI có as này để match với include
             });
+
+            Order.hasMany(models.Payment, {
+                foreignKey: 'order_id',
+                as: 'payments'
+            });
+
+
+
         }
     }
     Order.init(
@@ -29,7 +37,9 @@ module.exports = (sequelize, DataTypes) => {
             note: DataTypes.TEXT,
             total: DataTypes.INTEGER,
             address: DataTypes.TEXT,
-            phone: DataTypes.STRING
+            phone: DataTypes.STRING, 
+            // ✅ THÊM TRƯỜNG NÀY NẾU CHƯA CÓ
+            
         },
         {
             sequelize,

@@ -1,2 +1,92 @@
-node_modules
+# ========================
+# 📦 DEPENDENCIES
+# ========================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
+# ========================
+# 🔐 ENVIRONMENT & SECRETS
+# ========================
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.env
+
+# Firebase/Google credentials
+*.json
+!package.json
+!eslint.config.js
+serviceAccountKey.json
+firebase-adminsdk*.json
+*-firebase-adminsdk-*.json
+
+# ========================
+# 📁 BUILD & DIST
+# ========================
+dist/
+build/
+.cache/
+
+# ========================
+# 📤 UPLOADS & MEDIA
+# ========================
+uploads/*
+!uploads/.gitkeep
+
+# ========================
+# 📝 LOGS
+# ========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ========================
+# 💻 IDE & EDITOR
+# ========================
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+*~
+
+# ========================
+# 🖥️ OS FILES
+# ========================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ========================
+# 🧪 TESTING
+# ========================
+coverage/
+.nyc_output/
+*.lcov
+
+# ========================
+# 🔧 MISC
+# ========================
+*.pid
+*.seed
+*.pid.lock
+.npm/
+.eslintcache
+.node_repl_history
+*.tgz
+.yarn-integrity

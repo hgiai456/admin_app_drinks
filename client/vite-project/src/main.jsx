@@ -20,6 +20,7 @@ import ProductPage from '@components/customer/ProductPage.jsx';
 import ProductDetailPage from './components/customer/ProductDetailPage';
 import CartPage from '@components/customer/CartPage.jsx';
 import CheckoutPage from '@components/customer/CheckoutPage';
+import PaymentResult from './components/customer/PaymentResult';
 
 // ✅ THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -428,7 +429,14 @@ function App() {
 function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     const [currentPage, setCurrentPage] = useState('home');
 
-    // ✅ LISTEN TO URL HASH CHANGES
+    const getHashRoute = () => {
+        const hash = window.location.hash.replace('#', '');
+        // Tách route và query params
+        const [route, queryString] = hash.split('?');
+        return route || 'home';
+    }
+
+    const [currentRoute, setCurrentRoute] = useState(getHashRoute());
     useEffect(() => {
         const handleHashChange = () => {
             const hash = window.location.hash.replace('#', '') || 'home';
@@ -449,6 +457,15 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
         return () => {
             window.removeEventListener('hashchange', handleHashChange);
         };
+    }, []);
+    
+    useEffect(() => {
+        const handleHashChange = () => {
+            setCurrentRoute(getHashRoute());
+        };
+
+        window.addEventListener('hashchange', handleHashChange);
+        return () => window.removeEventListener('hashchange', handleHashChange);
     }, []);
 
     // ✅ HÀM XỬ LÝ ĐĂNG NHẬP (TỪ GUEST MODE)
@@ -542,6 +559,13 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
                     onLogin={handleLoginFromGuest}
                 />
             );
+        case 'payment-result':
+            return (
+            <PaymentResult 
+                user={user} 
+                onLogout={onLogout} 
+            />
+        );
         default:
             console.log('⚠️ Unknown page, fallback to home');
             return (

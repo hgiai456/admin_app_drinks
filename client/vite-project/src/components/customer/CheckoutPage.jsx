@@ -3,6 +3,8 @@ import Layout from '@components/common/Layout.jsx';
 import CartAPI from '@api/cartapi.js';
 import CheckoutAPI from '@api/checkoutapi.js';
 import '@styles/pages/_checkout.scss';
+import { Description } from '@mui/icons-material';
+import { Redo2 } from 'lucide-react';
 
 export default function CheckoutPage({
     user,
@@ -20,10 +22,33 @@ export default function CheckoutPage({
     const [formData, setFormData] = useState({
         phone: user?.phone || '',
         address: '',
-        note: ''
+        note: '',
+        payment_method: 'cod'
     });
 
     const [formErrors, setFormErrors] = useState({});
+
+    const paymentMethods = [
+        {
+            id: 'cod', 
+            name: 'Thanh toán khi nhận hàng (COD)',
+            icon: '💵',
+            description: 'Thanh toán bằng tiềm mặt khi nhận hàng'
+        },
+        {
+            id: 'vnpay',
+            name: 'VNPAY',
+            icon: '🏦',
+            description: 'Thanh toán qua VNPAY (ATM/Visa/MasterCard)'
+        },
+        {
+            id: 'payos',
+            name: 'PayOS',
+            icon: '📱',
+            description: 'Thanh toán qua PayOS (QR Code/Chuyển khoản)'
+        }
+    ];
+
     useEffect(() => {
         if (isGuest) {
             if (onLogin) {
@@ -103,6 +128,13 @@ export default function CheckoutPage({
         }
     };
 
+    const handlePaymentMethodChange = (methodId) => {
+       setFormData((prev) => ({
+           ...prev,
+           payment_method: methodId
+       }));
+    };
+
     const validateForm = () => {
         const errors = {};
         //phone validation
@@ -150,40 +182,76 @@ export default function CheckoutPage({
                 user_id: user.id,
                 phone: formData.phone.trim(),
                 address: formData.address.trim(),
-                note: formData.note.trim() || null
+                payment_method: formData.payment_method,
+                note: formData.note.trim() || null,
+                total_amount: calculateCartTotal()
             };
-
-            console.log('📦 Checkout data being sent:', checkoutData);
+           
 
             // ✅ VALIDATE DATA BEFORE SENDING
-            const validationErrors =
-                CheckoutAPI.validateCheckoutData(checkoutData);
+            const validationErrors = CheckoutAPI.validateCheckoutData(checkoutData);
             if (validationErrors.length > 0) {
                 setError(
                     '❌ Thông tin không hợp lệ: ' + validationErrors.join(', ')
                 );
                 return;
             }
-            const result = await CheckoutAPI.checkout(checkoutData);
-            console.log('✅ Checkout result:', result);
+          
+           
+            if(formData.payment_method === 'cod') {
+                const res = await CheckoutAPI.checkout(checkoutData);
 
-            setSuccess('✅ Đặt hàng thành công! Cảm ơn bạn đã mua hàng.');
-            // ✅ CLEAR FORM
-            setFormData({
-                phone: user?.phone || '',
-                address: '',
-                note: ''
-            });
+                const isSuccess = res.status === 'success' || res.success === true || res.message?.toLowerCase().includes('thành công');
 
+                if(!isSuccess){
+                    throw new Error(res.message || 'Lỗi khi đặt hàng');
+                }
+
+                setSuccess(' Đặt hàng thành công! Cảm ơn bạn đã mua hàng.');
+                setCartItems([]);
+                setFormData({
+                    phone: user?.phone || '',
+                    address: '',
+                    note: '',
+                    payment_method: 'cod'
+                });
+
+                setTimeout(() => {
+                    window.location.hash = 'orders';
+                }, 2000);
+
+                return;
+
+            
+            }else if(formData.payment_method === 'vnpay' || formData.payment_method === 'payos') {
+                const response = await fetch('http://localhost:3003/api/payments/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem("admin_token")}`,
+                    },
+                    body: JSON.stringify(checkoutData)
+                });
+
+                const result = await response.json();
+
+                const paymentUrl = result.data?.payment_url;
+                console.log(' Payment URL received:', paymentUrl);
+                if(paymentUrl){
+                    setSuccess(' Chuyển hướng đến trang thanh toán...');
+                    setTimeout(() => {
+                        window.location.href =paymentUrl
+                    }, 1000);
+                    return;
+                }else {
+                    throw new Error('Không nhận được URL thanh toán từ server');
+                }
+            }
             // ✅ CLEAR CART ITEMS (OPTIONAL)
-            setCartItems([]);
+            
 
-            // ✅ REDIRECT TO SUCCESS PAGE OR HOME
-            setTimeout(() => {
-                window.location.hash = 'home';
-            }, 3000);
         } catch (error) {
-            console.error('❌ Checkout error:', error);
+              console.error(' Payment error:', error);
             setError('Lỗi khi đặt hàng: ' + error.message);
         } finally {
             setSubmitting(false);
@@ -440,6 +508,63 @@ export default function CheckoutPage({
                                 </div>
                             </div>
 
+                            <div className='form-section'>
+                                <h3>💳 Phương thức thanh toán</h3>
+                                
+                                <div className='payment-methods'>
+                                    {paymentMethods.map((method) => (
+                                        <div
+                                            key={method.id}
+                                            className={`payment-method-card ${formData.payment_method === method.id ? 'selected' : ''}`}
+                                            onClick={() => !submitting && handlePaymentMethodChange(method.id)}
+                                        >
+                                            <div className='method-radio'>
+                                                <input 
+                                                    type='radio' 
+                                                    id={`payment-${method.id}`} 
+                                                    name='payment_method' 
+                                                    value={method.id} 
+                                                    checked={formData.payment_method === method.id} 
+                                                    onChange={() => handlePaymentMethodChange(method.id)} 
+                                                    disabled={submitting} 
+                                                />
+                                            </div>
+                                            <div className='method-info'>{method.icon}</div>
+                                            <div className='method-info'>
+                                                <h4>{method.name}</h4>
+                                                <p>{method.description}</p>
+                                            </div>
+                                             {formData.payment_method === method.id && (
+                                                <div className='method-check'>✓</div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                 {formData.payment_method === 'vnpay' && (
+                                    <div className='payment-info-box vnpay'>
+                                        <h4>🏦 Thông tin VNPAY Sandbox (Test)</h4>
+                                        <ul>
+                                            <li><strong>Ngân hàng:</strong> NCB</li>
+                                            <li><strong>Số thẻ:</strong> 9704198526191432198</li>
+                                            <li><strong>Tên:</strong> NGUYEN VAN A</li>
+                                            <li><strong>Ngày phát hành:</strong> 07/15</li>
+                                            <li><strong>Mật khẩu OTP:</strong> 123456</li>
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {/* ✅ THÔNG TIN THÊM CHO PAYOS */}
+                                {formData.payment_method === 'payos' && (
+                                    <div className='payment-info-box payos'>
+                                        <h4>📱 Thông tin PayOS</h4>
+                                        <p>Bạn sẽ được chuyển đến trang PayOS để thanh toán qua:</p>
+                                        <ul>
+                                            <li>Quét mã QR bằng ứng dụng ngân hàng</li>
+                                            <li>Chuyển khoản ngân hàng</li>
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
                             {/* ✅ SUBMIT BUTTONS */}
                             <div className='form-actions'>
                                 <button

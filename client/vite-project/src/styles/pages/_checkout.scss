@@ -497,3 +497,148 @@
         }
     }
 }
+
+.payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.payment-method-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+
+    &:hover {
+        border-color: #2196f3;
+        background: #f8f9ff;
+    }
+
+    &.selected {
+        border-color: #2196f3;
+        background: linear-gradient(135deg, #e3f2fd 0%, #f8f9ff 100%);
+        box-shadow: 0 4px 12px rgba(33, 150, 243, 0.15);
+    }
+
+    .method-radio {
+        input[type='radio'] {
+            width: 20px;
+            height: 20px;
+            accent-color: #2196f3;
+            cursor: pointer;
+        }
+    }
+
+    .method-icon {
+        font-size: 2rem;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f5f5f5;
+        border-radius: 0.5rem;
+    }
+
+    .method-info {
+        flex: 1;
+
+        h4 {
+            margin: 0 0 0.25rem 0;
+            font-size: 1rem;
+            color: #333;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #666;
+        }
+    }
+
+    .method-check {
+        width: 28px;
+        height: 28px;
+        background: #2196f3;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+}
+
+// ✅ PAYMENT INFO BOX
+.payment-info-box {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+
+    &.vnpay {
+        background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+        border-left: 4px solid #ff9800;
+    }
+
+    &.payos {
+        background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        border-left: 4px solid #4caf50;
+    }
+
+    h4 {
+        margin: 0 0 0.75rem 0;
+        font-size: 0.95rem;
+        color: #333;
+    }
+
+    ul {
+        margin: 0;
+        padding-left: 1.25rem;
+
+        li {
+            margin-bottom: 0.5rem;
+            color: #555;
+
+            strong {
+                color: #333;
+            }
+        }
+    }
+
+    p {
+        margin: 0 0 0.5rem 0;
+        color: #555;
+    }
+}
+
+// ✅ LOADING STATE
+.checkout-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1rem;
+
+    .spinner {
+        font-size: 3rem;
+        animation: spin 1s linear infinite;
+    }
+
+    p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

@@ -1,111 +1,105 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as m;
+@use 'sass:color';
+
+// =============================================
+// ✅ MODAL BASE STYLES
+// =============================================
 
 .modal {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 1050;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    &-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(2px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: $spacing-lg;
-        opacity: 0;
-        animation: modalFadeIn 0.3s ease-out forwards;
+// ✅ MODAL OVERLAY
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-lg;
+    animation: modalFadeIn 0.25s ease-out;
+}
+
+// ✅ MODAL CONTENT
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.3);
+    max-height: 90vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.3s ease-out;
+    width: 100%;
+    position: relative;
+
+    // ✅ Size Variants
+    &--sm {
+        max-width: 400px;
     }
 
-    &-content {
-        background-color: white;
-        border-radius: $border-radius-lg;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        max-height: 90vh;
-        width: 100%;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        transform: translateY(-20px) scale(0.95);
-        opacity: 0;
-        animation: modalSlideIn 0.3s ease-out 0.1s forwards;
-
-        // Modal sizes
-        &--sm {
-            max-width: 400px;
-        }
-
-        &--default {
-            max-width: 600px;
-        }
-
-        &--lg {
-            max-width: 900px;
-        }
-
-        &--xl {
-            max-width: 1200px;
-        }
-
-        &--full {
-            max-width: 95vw;
-            max-height: 95vh;
-        }
-
-        @media (max-width: 768px) {
-            margin: $spacing-md;
-            max-width: calc(100% - #{$spacing-md * 2}) !important;
-            max-height: calc(100vh - #{$spacing-md * 2});
-        }
+    &--default {
+        max-width: 520px;
     }
 
-    &-header {
-        padding: $spacing-xl $spacing-xxl;
-        border-bottom: 1px solid #dee2e6;
-        background-color: #f8f9fa;
-        border-radius: $border-radius-lg $border-radius-lg 0 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-shrink: 0;
+    &--lg {
+        max-width: 720px;
     }
 
-    &-title {
+    &--xl {
+        max-width: 960px;
+    }
+
+    &--full {
+        max-width: 95%;
+        max-height: 95vh;
+    }
+}
+
+// ✅ MODAL HEADER
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-lg $spacing-xl;
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    flex-shrink: 0;
+
+    .modal-title {
         margin: 0;
-        color: $dark-color;
-        font-size: $font-size-xl;
-        font-weight: $font-weight-semibold;
+        font-size: 1.25rem;
+        font-weight: $font-weight-bold;
+        color: $admin-text;
         display: flex;
         align-items: center;
         gap: $spacing-sm;
-
-        .badge {
-            font-size: $font-size-xs;
-            background-color: $info-color;
-            color: white;
-            padding: 2px $spacing-sm;
-            border-radius: $border-radius-sm;
-            font-weight: $font-weight-medium;
-        }
+        line-height: 1.3;
     }
 
-    &-close-btn {
+    .modal-close-btn {
         background: none;
         border: none;
-        font-size: 24px;
+        font-size: 1.75rem;
+        color: #999;
         cursor: pointer;
-        color: #6c757d;
         padding: 0;
-        width: 30px;
-        height: 30px;
+        width: 40px;
+        height: 40px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -113,63 +107,165 @@
         transition: all 0.2s ease;
         flex-shrink: 0;
 
-        &:hover {
-            background-color: #e9ecef;
-            color: $dark-color;
+        &:hover:not(:disabled) {
+            background: #f0f0f0;
+            color: $admin-text;
+            transform: rotate(90deg);
         }
 
-        &:focus {
-            outline: 2px solid $primary-color;
-            outline-offset: 2px;
-        }
-    }
-
-    &-body {
-        padding: $spacing-xxl;
-        overflow-y: auto;
-        flex: 1;
-
-        // Custom scrollbar
-        &::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 3px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 3px;
-
-            &:hover {
-                background: #a8a8a8;
-            }
-        }
-    }
-
-    &-footer {
-        padding: $spacing-lg $spacing-xxl;
-        border-top: 1px solid #dee2e6;
-        background-color: #f8f9fa;
-        border-radius: 0 0 $border-radius-lg $border-radius-lg;
-        display: flex;
-        justify-content: flex-end;
-        gap: $spacing-md;
-        flex-shrink: 0;
-
-        @media (max-width: 480px) {
-            flex-direction: column;
-
-            .btn {
-                width: 100%;
-            }
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
     }
 }
 
-// Animations
+// ✅ MODAL BODY
+.modal-body {
+    padding: $spacing-xl;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+
+    // Custom scrollbar
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 3px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+
+        &:hover {
+            background: #a8a8a8;
+        }
+    }
+}
+
+// ✅ MODAL FOOTER
+.modal-footer {
+    padding: $spacing-md $spacing-xl;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-md;
+    flex-shrink: 0;
+}
+
+// ✅ MODAL LOADING STATE
+.modal-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: $spacing-xxl;
+    gap: $spacing-md;
+
+    .loading-spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid #e9ecef;
+        border-top-color: $admin-primary;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    p {
+        color: $admin-text-light;
+        font-size: $font-size-md;
+    }
+}
+
+// =============================================
+// ✅ MODAL BUTTON STYLES
+// =============================================
+
+.modal-btn {
+    padding: $spacing-sm $spacing-lg;
+    border-radius: $border-radius-lg;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-sm;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    border: none;
+    min-width: 100px;
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+    }
+
+    &--primary {
+        background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -8%) 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba($success-color, 0.3);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba($success-color, 0.4);
+        }
+    }
+
+    &--secondary {
+        background: #f0f0f0;
+        color: $admin-text;
+        border: 1px solid #ddd;
+
+        &:hover:not(:disabled) {
+            background: #e0e0e0;
+            border-color: #ccc;
+        }
+    }
+
+    &--warning {
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4);
+        }
+    }
+
+    &--danger {
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        color: white;
+        box-shadow: 0 2px 8px rgba(244, 67, 54, 0.3);
+
+        &:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(244, 67, 54, 0.4);
+        }
+    }
+
+    &--outline {
+        background: transparent;
+        border: 2px solid $admin-primary;
+        color: $admin-primary;
+
+        &:hover:not(:disabled) {
+            background: $admin-primary;
+            color: white;
+        }
+    }
+}
+
+// =============================================
+// ✅ ANIMATIONS
+// =============================================
+
 @keyframes modalFadeIn {
     from {
         opacity: 0;
@@ -179,10 +275,10 @@
     }
 }
 
-@keyframes modalSlideIn {
+@keyframes modalSlideUp {
     from {
         opacity: 0;
-        transform: translateY(-20px) scale(0.95);
+        transform: translateY(30px) scale(0.95);
     }
     to {
         opacity: 1;
@@ -190,52 +286,98 @@
     }
 }
 
-.modal {
-    // Success variant
-    &--success {
-        .modal-header {
-            background-color: rgba($success-color, 0.1);
-            border-bottom-color: rgba($success-color, 0.3);
-        }
+@keyframes modalSlideUpMobile {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
-        .modal-title {
-            color: $success-color;
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+// =============================================
+// ✅ RESPONSIVE STYLES
+// =============================================
+
+@media (max-width: 768px) {
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        max-height: 90vh;
+        border-radius: 20px 20px 0 0;
+        animation: modalSlideUpMobile 0.3s ease-out;
+
+        &--sm,
+        &--default,
+        &--lg,
+        &--xl {
+            max-width: 100%;
         }
     }
 
-    // Warning variant
-    &--warning {
-        .modal-header {
-            background-color: rgba($warning-color, 0.1);
-            border-bottom-color: rgba($warning-color, 0.3);
-        }
+    .modal-header {
+        padding: $spacing-md $spacing-lg;
+        position: sticky;
+        top: 0;
+        z-index: 1;
 
         .modal-title {
-            color: $warning-color;
+            font-size: 1.1rem;
+        }
+
+        .modal-close-btn {
+            width: 36px;
+            height: 36px;
+            font-size: 1.5rem;
         }
     }
 
-    // Danger variant
-    &--danger {
-        .modal-header {
-            background-color: rgba($danger-color, 0.1);
-            border-bottom-color: rgba($danger-color, 0.3);
-        }
+    .modal-body {
+        padding: $spacing-lg;
+    }
 
+    .modal-footer {
+        padding: $spacing-md $spacing-lg;
+        flex-wrap: wrap;
+        position: sticky;
+        bottom: 0;
+
+        .modal-btn {
+            flex: 1;
+            min-width: 120px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .modal-header {
         .modal-title {
-            color: $danger-color;
+            font-size: 1rem;
         }
     }
 
-    // Info variant
-    &--info {
-        .modal-header {
-            background-color: rgba($info-color, 0.1);
-            border-bottom-color: rgba($info-color, 0.3);
-        }
+    .modal-body {
+        padding: $spacing-md;
+    }
 
-        .modal-title {
-            color: $info-color;
+    .modal-footer {
+        .modal-btn {
+            padding: $spacing-sm $spacing-md;
+            font-size: $font-size-xs;
         }
     }
 }
