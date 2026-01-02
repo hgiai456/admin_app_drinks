@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import CartAPI from '@api/cartapi.js';
+import CartService from '@services/cart.service.js';
 import CartButton from '@components/customer/CartButton';
 import '@styles/pages/_header.scss';
 
@@ -45,13 +45,13 @@ export default function Header({
         }
     };
 
-    // ✅ SỬA HÀM XỬ LÝ ĐĂNG KÝ - KHÔNG RELOAD TRANG
+    //  SỬA HÀM XỬ LÝ ĐĂNG KÝ - KHÔNG RELOAD TRANG
     const handleRegisterClick = () => {
         console.log('🔄 Guest register clicked, onRegister:', onRegister);
         if (onRegister) {
-            onRegister(); // ✅ CHUYỂN SANG REGISTER FORM
+            onRegister(); //  CHUYỂN SANG REGISTER FORM
         } else if (onLogin) {
-            onLogin(); // ✅ FALLBACK: CHUYỂN SANG LOGIN FORM
+            onLogin(); // FALLBACK: CHUYỂN SANG LOGIN FORM
         } else {
             console.warn('⚠️ No onRegister/onLogin handler provided');
             alert('Chức năng đăng ký đang được phát triển.');
@@ -72,7 +72,7 @@ export default function Header({
         setCartLoading(true);
         try {
             const userId = user?.id || null;
-            const count = await CartAPI.getCartItemCount(userId);
+            const count = await CartService.getCartItemCount(userId);
             setCartItemCount(count);
             console.log(
                 `📊 Cart count loaded: ${count} (${userId ? 'user' : 'guest'})`
@@ -108,7 +108,7 @@ export default function Header({
     return (
         <header className='homepage-header'>
             <div className='header-container'>
-                {/* ✅ LOGO SECTION */}
+               
                 <div className='logo-section'>
                     <div className='logo-container'>
                         <img
@@ -128,7 +128,6 @@ export default function Header({
                     </div>
                 </div>
 
-                {/* ✅ NAVIGATION */}
                 <nav className='main-nav'>
                     <a
                         href='#home'
@@ -180,9 +179,9 @@ export default function Header({
                     </a>
                 </nav>
 
-                {/* ✅ RIGHT SECTION */}
+               
                 <div className='header-actions'>
-                    {/* ✅ CART BUTTON - HIỂN THỊ CHO CẢ USER VÀ GUEST */}
+                  
                     <CartButton
                         cartItemCount={cartItemCount}
                         currentPage={currentPage}
@@ -193,9 +192,9 @@ export default function Header({
                         isGuest={isGuest}
                     />
 
-                    {/* ✅ USER SECTION HOẶC AUTH BUTTONS */}
+                
                     {user && !isGuest ? (
-                        // ✅ USER MENU (KHI ĐÃ ĐĂNG NHẬP)
+                        
                         <div className='user-section'>
                             <div
                                 className='user-dropdown'
@@ -210,7 +209,7 @@ export default function Header({
                                 </div>
                                 <div className='user-info'>
                                     <span className='user-name'>
-                                        {user?.username || 'User'}
+                                        {user?.name || 'User'}
                                     </span>
                                     <span className='user-role'>
                                         Khách hàng
@@ -233,7 +232,10 @@ export default function Header({
                                     >
                                         <span>Đăng xuất</span>
                                     </button>
-                                    <button className='menu-item logout'>
+                                    <button className='menu-item logout' onClick={() => {
+                                        window.location.hash = 'orders';
+                                                setShowUserMenu(false);
+                                    }} >
                                         <span>Danh sách đơn hàng</span>
                                     </button>
                                 </div>

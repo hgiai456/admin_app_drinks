@@ -1,10 +1,10 @@
-import CartAPI from '@api/cartapi.js';
+import CartService from '@services/cart.service.js';
 
 export const triggerCartRefresh = () => {
     const event = new CustomEvent('refreshCartCount');
     window.dispatchEvent(event);
 };
-// ✅ HELPER FUNCTION ĐỂ THÊM VÀO GIỎ HÀNG VÀ REFRESH
+//  HELPER FUNCTION ĐỂ THÊM VÀO GIỎ HÀNG VÀ REFRESH
 export const addToCartAndRefresh = async (
     cartId,
     productDetailId,
@@ -12,20 +12,20 @@ export const addToCartAndRefresh = async (
     productName = ''
 ) => {
     try {
-        await CartAPI.addToCart(cartId, productDetailId, quantity);
+        await CartService.addToCart(cartId, productDetailId, quantity);
 
         // Trigger refresh cart count
         triggerCartRefresh();
 
         return {
             success: true,
-            message: `✅ Đã thêm "${productName}" vào giỏ hàng!`
+            message: ` Đã thêm "${productName}" vào giỏ hàng!`
         };
     } catch (error) {
-        console.error('❌ Error adding to cart:', error);
+        console.error(' Error adding to cart:', error);
         return {
             success: false,
-            message: `❌ Lỗi khi thêm "${productName}" vào giỏ hàng!`
+            message: ` Lỗi khi thêm "${productName}" vào giỏ hàng!`
         };
     }
 };

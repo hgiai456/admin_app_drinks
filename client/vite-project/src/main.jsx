@@ -2,27 +2,30 @@ import { StrictMode, useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 
 // Import các component gốc của bạn
-import StoreComponent from '@components/admin/StoreComponent.jsx';
-import BrandComponent from '@components/admin/BrandComponent.jsx';
-import '@styles/pages/_admin.scss';
-import CategoryComponent from '@components/admin/CategoryComponent.jsx';
-import ProdetailComponent from '@components/admin/ProdetailComponent.jsx';
-import BannerComponent from '@components/admin/BannerComponent.jsx';
-import UserComponent from '@components/admin/UserComponent.jsx';
-import ProductComponent from '@components/admin/ProductComponent.jsx';
-import SizeComponent from '@components/admin/SizeComponent.jsx';
-import OrderComponent from '@components/admin/OrderComponent.jsx';
-import ImageComponent from '@components/admin/ImageComponent.jsx';
-import LoginAdmin from '@components/admin/LoginAdmin.jsx';
-import RegisterComponent from './components/customer/RegisterComponent';
-import HomePage from '@components/customer/HomePage.jsx';
-import ProductPage from '@components/customer/ProductPage.jsx';
-import ProductDetailPage from './components/customer/ProductDetailPage';
-import CartPage from '@components/customer/CartPage.jsx';
-import CheckoutPage from '@components/customer/CheckoutPage';
-import PaymentResult from './components/customer/PaymentResult';
+import StoreManagement from '@pages/admin/StoreManagement.jsx';
+import BrandManagement from '@pages/admin/BrandManagement.jsx';
+import CategoryManagement from '@pages/admin/CategoryManagement.jsx';
+import ProdetailManagement from '@pages/admin/ProdetailManagement.jsx';
+import BannerManagement from '@pages/admin/BannerManagement.jsx';
+import UserManagement from '@pages/admin/UserManagement.jsx';
+import ProductManagement from '@pages/admin/ProductManagement.jsx';
+import SizeManagement from '@pages/admin/SizeManagement.jsx';
+import OrderManagement from '@pages/admin/OrderManagement.jsx';
+import ImageManagement from '@pages/admin/ImageManagement.jsx';
+import LoginAdmin from '@pages/admin/LoginAdmin.jsx';
 
-// ✅ THÊM STYLED COMPONENT WRAPPER
+import '@styles/pages/_admin.scss';
+import ProductPage from '@pages/customer/ProductPage.jsx';
+import ProductDetailPage from '@pages/customer/ProductDetailPage.jsx';
+import CartPage from '@pages/customer/CartPage.jsx';
+import CheckoutPage from '@pages/customer/CheckoutPage.jsx';
+import PaymentResult from '@pages/customer/PaymentResult.jsx';
+import OrderHistory from '@pages/customer/OrderHistory.jsx';
+import Layout from '@components/common/Layout.jsx';
+import HomePage from '@pages/customer/HomePage.jsx';
+import RegisterPage from '@pages/customer/RegisterPage.jsx';
+
+// THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
     return (
         <div className='component-wrapper'>
@@ -236,7 +239,7 @@ export default function AuthContainer({ onLogin, onGuestMode }) {
     };
 
     if (currentView === 'register') {
-        return <RegisterComponent onRegisterSuccess={handleRegisterSuccess} />;
+        return <RegisterPage onRegisterSuccess={handleRegisterSuccess} />;
     }
 
     return (
@@ -335,55 +338,55 @@ function App() {
                 case 'Quản lý đơn hàng':
                     return (
                         <StyledComponentWrapper>
-                            <OrderComponent />
+                            <OrderManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý cửa hàng':
                     return (
                         <StyledComponentWrapper>
-                            <StoreComponent />
+                            <StoreManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý thương hiệu':
                     return (
                         <StyledComponentWrapper>
-                            <BrandComponent />
+                            <BrandManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý danh mục':
                     return (
                         <StyledComponentWrapper>
-                            <CategoryComponent />
+                            <CategoryManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý sản phẩm':
                     return (
                         <StyledComponentWrapper>
-                            <ProductComponent />
+                            <ProductManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý người dùng':
                     return (
                         <StyledComponentWrapper>
-                            <UserComponent />
+                            <UserManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý kích thước':
                     return (
                         <StyledComponentWrapper>
-                            <SizeComponent />
+                            <SizeManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý banner':
                     return (
                         <StyledComponentWrapper>
-                            <BannerComponent />
+                            <BannerManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý chi tiết sản phẩm':
                     return (
                         <StyledComponentWrapper>
-                            <ProdetailComponent />
+                            <ProdetailManagement />
                         </StyledComponentWrapper>
                     );
                 case 'Quản lý hình ảnh':
@@ -392,13 +395,13 @@ function App() {
                             title='Quản lý hình ảnh'
                             description='Upload và quản lý ảnh'
                         >
-                            <ImageComponent />
+                            <ImageManagement />
                         </StyledComponentWrapper>
                     );
                 default:
                     return (
                         <StyledComponentWrapper>
-                            <OrderComponent />
+                            <OrderManagement />
                         </StyledComponentWrapper>
                     );
             }
@@ -427,7 +430,10 @@ function App() {
 }
 
 function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
-    const [currentPage, setCurrentPage] = useState('home');
+    const [currentPage, setCurrentPage] = useState(() => {
+        const hash = window.location.hash.replace('#', '');
+        return hash.split('?')[0] || 'home';
+    });
 
     const getHashRoute = () => {
         const hash = window.location.hash.replace('#', '');
@@ -436,6 +442,14 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
         return route || 'home';
     }
 
+    useEffect(() => {
+    const onHashChange = () => {
+        const hash = window.location.hash.replace('#', '');
+        setCurrentPage(hash.split('?')[0] || 'home');
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+}, []);
     const [currentRoute, setCurrentRoute] = useState(getHashRoute());
     useEffect(() => {
         const handleHashChange = () => {
@@ -511,6 +525,11 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
                     onRegister={handleRegisterFromGuest}
                 />
             );
+        case 'orders': return (
+            <Layout user={user} onLogout={onLogout} isGuest={isGuest} onLogin={handleLoginFromGuest} >
+                <OrderHistory user={user} />
+            </Layout>
+        );
         case 'menu':
             return (
                 <ProductPage

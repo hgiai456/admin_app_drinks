@@ -1,0 +1,37 @@
+import express from "express";
+import authRoutes from "./auth.routes.js";
+import userRoutes from "./user.routes.js";
+import productRoutes from "./product.routes.js";
+import categoryRoutes from "./category.routes.js";
+import brandRoutes from "./brand.routes.js";
+import orderRoutes from "./order.routes.js";
+import cartRoutes from "./cart.routes.js";
+import storeRoutes from "./store.routes.js";
+import sizeRoutes from "./size.routes.js";
+import bannerRoutes from "./banner.routes.js";
+import prodetailRoutes from "./prodetail.routes.js";
+import paymentRoutes from "./payment.routes.js";
+import imageRoutes from "./image.routes.js";
+import cartItemRoutes from "./cart_items.routes.js";
+import newsRoutes from "./news.routes.js";
+import newsDetailRoutes from "./news_detail.routes.js";
+const route = express.Router();
+
+route.use("/auth", authRoutes);
+route.use("/users", userRoutes);
+route.use("/products", productRoutes);
+route.use("/categories", categoryRoutes);
+route.use("/brands", brandRoutes);
+route.use("/orders", orderRoutes);
+route.use("/carts", cartRoutes);
+route.use("/cart-items", cartItemRoutes);
+route.use("/stores", storeRoutes);
+route.use("/sizes", sizeRoutes);
+route.use("/banners", bannerRoutes);
+route.use("/prodetails", prodetailRoutes);
+route.use("/payments", paymentRoutes);
+route.use("/images", imageRoutes);
+route.use("/news", newsRoutes);
+route.use("/news-details", newsDetailRoutes);
+
+export default route;

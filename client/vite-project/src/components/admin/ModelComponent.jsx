@@ -9,7 +9,6 @@ const Modal = ({
     size = 'default',
     children,
     closeOnOverlay = true,
-    footer = null
 }) => {
     if (!show) return null;
 
