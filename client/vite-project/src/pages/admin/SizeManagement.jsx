@@ -3,7 +3,7 @@ import SizeService from '@services/size.service.js';
 import Modal from '@components/admin/ModelComponent.jsx';
 import '@styles/pages/_admin.scss';
 
-function SizeComponent() {
+function SizeManagement() {
     const [sizes, setSizes] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('create');
@@ -661,4 +661,4 @@ function SizeComponent() {
     );
 }
 
-export default SizeComponent;
+export default SizeManagement;

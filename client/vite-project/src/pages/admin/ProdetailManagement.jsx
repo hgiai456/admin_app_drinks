@@ -8,7 +8,7 @@ import Prodetail from '@models/prodetail';
 import '@styles/pages/_admin.scss';
 import Modal from '@components/admin/ModelComponent.jsx';
 
-function ProdetailComponent() {
+function ProdetailManagement() {
     // ✅ KHAI BÁO TẤT CẢ STATE CẦN THIẾT
 
     const [prodetails, setProdetails] = useState([]);
@@ -900,4 +900,4 @@ function ProdetailComponent() {
     );
 }
 
-export default ProdetailComponent;
+export default ProdetailManagement;

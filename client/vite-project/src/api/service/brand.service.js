@@ -1,239 +1,219 @@
-import Brand from '@models/brand.js';
+import Brand from "@models/brand.js";
+import BaseService from "./base.service";
+import api from "../index.js";
+import { ENDPOINTS } from "../endpoints.js";
 
-class BrandService {
-    static baseUrl = 'http://localhost:3003/api/brands';
+class BrandService extends BaseService {
+  constructor() {
+    super(ENDPOINTS.BRANDS.BASE);
+  }
 
-    static getAuthHeader() {
-        const token = localStorage.getItem('admin_token');
-        return token ? { Authorization: 'Bearer ' + token } : {};
+  async getAll() {
+    try {
+      console.log("🔗 Đang gọi API Brands getAll:", `${this.endpoint}/all`);
+
+      const response = await api.get(`${this.endpoint}`);
+
+      console.log("✅ Response status:", response.status);
+      console.log("✅ Response data:", response.data);
+
+      const data = response.data;
+      const brands = data.data || data.brands || data || [];
+
+      return Array.isArray(brands)
+        ? brands.map((item) =>
+            Brand?.fromApiResponse ? Brand.fromApiResponse(item) : item
+          )
+        : [];
+    } catch (error) {
+      console.error("❌ Lỗi Brands getAll:", error);
+      throw new Error("Lỗi khi tải danh sách thương hiệu: " + error.message);
     }
+  }
 
-    static async getAll() {
-        try {
-            console.log('🔗 Đang gọi API Brands getAll:', this.baseUrl);
+  async getPaging({ page = 1, search = "" } = {}) {
+    try {
+      console.log(
+        `🔗 Gọi API Brands getPaging - page: ${page}, search: "${search}"`
+      );
 
-            const res = await fetch(this.baseUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+      const params = { page, search };
+      const response = await api.get(this.endpoint, { params });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi Brands getAll:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+      console.log("📊 Response status:", response.status);
+      console.log("✅ Raw Brands Paging Data:", response.data);
 
-            const data = await res.json();
-            console.log('✅ Dữ liệu Brands getAll:', data);
+      const data = response.data;
 
-            // Xử lý response data
-            const brands = data.data || data.brands || data || [];
-
-            return Array.isArray(brands)
-                ? brands.map((item) =>
-                      Brand && Brand.fromApiResponse
-                          ? Brand.fromApiResponse(item)
-                          : {
-                                id: item.id,
-                                name: item.name,
-                                image: item.image,
-                                createdAt: item.createdAt,
-                                updatedAt: item.updatedAt,
-                                ...item
-                            }
-                  )
-                : [];
-        } catch (error) {
-            console.error('❌ Lỗi Brands getAll:', error);
-            throw new Error(
-                'Lỗi khi tải danh sách thương hiệu: ' + error.message
-            );
-        }
+      return {
+        data: data.data || [],
+        pagination: {
+          currentPage: data.currentPage || parseInt(page),
+          totalPage: data.totalPage || 1,
+          totalItems: data.totalBrands || data.totalItems || 0,
+        },
+      };
+    } catch (error) {
+      console.error("❌ Lỗi trong Brands getPaging:", error);
+      throw new Error("Lỗi khi tải thương hiệu phân trang: " + error.message);
     }
+  }
 
-    static async getPaging({ page = 1, search = '' } = {}) {
-        try {
-            const url = `${this.baseUrl}?search=${encodeURIComponent(
-                search
-            )}&page=${page}`;
-            console.log('🔗 Đang gọi API Brands Paging:', url);
+  // ✅ SỬA: Các methods còn lại cũng dùng axios
+  async getById(id) {
+    try {
+      console.log("🔗 Đang tải thương hiệu:", id);
 
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
-            console.log('📊 Brands Paging Status:', res.status, res.statusText);
+      const response = await api.get(`${this.endpoint}/${id}`);
+      const data = response.data;
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi từ server Brands:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+      console.log("✅ Brand getById data:", data);
 
-            const data = await res.json();
-            console.log('✅ Raw Brands Paging Data:', data);
-
-            const response = {
-                data: data.data || [],
-                pagination: {
-                    currentPage: data.currentPage || parseInt(page),
-                    totalPage: data.totalPage || 1,
-                    totalItems: data.totalBrands || data.totalItems || 0,
-                    limit: Math.ceil(
-                        (data.totalBrands || 0) / (data.totalPage || 1)
-                    )
-                }
-            };
-
-            return response;
-        } catch (error) {
-            console.error('❌ Lỗi trong Brands getPaging:', error);
-            throw error;
-        }
+      const brandResponse = data.data || data.brand || data;
+      return Brand?.fromApiResponse
+        ? Brand.fromApiResponse(brandResponse)
+        : brandResponse;
+    } catch (error) {
+      console.error("❌ Lỗi trong getById Brand:", error);
+      throw new Error("Lỗi khi tải thương hiệu: " + error.message);
     }
+  }
 
-    static async getById(id) {
-        try {
-            console.log('🔗 Đang tải thương hiệu:', id);
+  //   async getById(id) {
+  //     try {
+  //       console.log("🔗 Đang tải thương hiệu:", id);
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+  //       const res = await fetch(`${this.baseUrl}/${id}`, {
+  //         method: "GET",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           ...this.getAuthHeader(),
+  //         },
+  //       });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi getById Brand:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+  //       if (!res.ok) {
+  //         const errorText = await res.text();
+  //         console.error("❌ Lỗi getById Brand:", errorText);
+  //         throw new Error(`HTTP ${res.status}: ${errorText}`);
+  //       }
 
-            const data = await res.json();
-            console.log('✅ Brand getById data:', data);
+  //       const data = await res.json();
+  //       console.log("✅ Brand getById data:", data);
 
-            const brandResponse = data.data || data.brand || data;
-            return Brand.fromApiResponse(brandResponse);
-        } catch (error) {
-            console.error('❌ Lỗi trong getById Brand:', error);
-            throw new Error('Lỗi khi tải thương hiệu: ' + error.message);
-        }
-    }
+  //       const brandResponse = data.data || data.brand || data;
+  //       return Brand.fromApiResponse(brandResponse);
+  //     } catch (error) {
+  //       console.error("❌ Lỗi trong getById Brand:", error);
+  //       throw new Error("Lỗi khi tải thương hiệu: " + error.message);
+  //     }
+  //   }
 
-    static async create(brandData) {
-        try {
-            console.log('🔗 Đang tạo thương hiệu:', brandData);
+  //   async create(brandData) {
+  //     try {
+  //       console.log("🔗 Đang tạo thương hiệu:", brandData);
 
-            // ✅ Nếu là Brand instance, sử dụng toApiFormat
-            const payload =
-                brandData instanceof Brand
-                    ? brandData.toApiFormat()
-                    : brandData;
+  //       // ✅ Nếu là Brand instance, sử dụng toApiFormat
+  //       const payload =
+  //         brandData instanceof Brand ? brandData.toApiFormat() : brandData;
 
-            const res = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                },
-                body: JSON.stringify(payload)
-            });
+  //       const res = await fetch(this.baseUrl, {
+  //         method: "POST",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           ...this.getAuthHeader(),
+  //         },
+  //         body: JSON.stringify(payload),
+  //       });
 
-            console.log('📊 Create Brand Status:', res.status);
+  //       console.log("📊 Create Brand Status:", res.status);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi tạo thương hiệu:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+  //       if (!res.ok) {
+  //         const errorText = await res.text();
+  //         console.error("❌ Lỗi tạo thương hiệu:", errorText);
+  //         throw new Error(`HTTP ${res.status}: ${errorText}`);
+  //       }
 
-            const data = await res.json();
-            console.log('✅ Raw Create Response:', data);
+  //       const data = await res.json();
+  //       console.log("✅ Raw Create Response:", data);
 
-            // ✅ Convert response thành Brand instance
-            const brandResponse = data.data || data.brand || data;
-            return Brand.fromApiResponse(brandResponse);
-        } catch (error) {
-            console.error('❌ Lỗi trong create Brand:', error);
-            throw error;
-        }
-    }
+  //       // ✅ Convert response thành Brand instance
+  //       const brandResponse = data.data || data.brand || data;
+  //       return Brand.fromApiResponse(brandResponse);
+  //     } catch (error) {
+  //       console.error("❌ Lỗi trong create Brand:", error);
+  //       throw error;
+  //     }
+  //   }
 
-    static async update(id, brandData) {
-        try {
-            console.log('🔗 Đang cập nhật thương hiệu:', id, brandData);
+  //   static async update(id, brandData) {
+  //     try {
+  //       console.log("🔗 Đang cập nhật thương hiệu:", id, brandData);
 
-            // ✅ Nếu là Brand instance, sử dụng toApiFormat
-            const payload =
-                brandData instanceof Brand
-                    ? brandData.toApiFormat()
-                    : brandData;
+  //       // ✅ Nếu là Brand instance, sử dụng toApiFormat
+  //       const payload =
+  //         brandData instanceof Brand ? brandData.toApiFormat() : brandData;
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                },
-                body: JSON.stringify(payload)
-            });
+  //       const res = await fetch(`${this.baseUrl}/${id}`, {
+  //         method: "PUT",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           ...this.getAuthHeader(),
+  //         },
+  //         body: JSON.stringify(payload),
+  //       });
 
-            console.log('📊 Update Brand Status:', res.status);
+  //       console.log("📊 Update Brand Status:", res.status);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi cập nhật thương hiệu:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+  //       if (!res.ok) {
+  //         const errorText = await res.text();
+  //         console.error("❌ Lỗi cập nhật thương hiệu:", errorText);
+  //         throw new Error(`HTTP ${res.status}: ${errorText}`);
+  //       }
 
-            const data = await res.json();
-            console.log('✅ Raw Update Response:', data);
+  //       const data = await res.json();
+  //       console.log("✅ Raw Update Response:", data);
 
-            // ✅ Convert response thành Brand instance
-            const brandResponse = data.data || data.brand || data;
-            return Brand.fromApiResponse(brandResponse);
-        } catch (error) {
-            console.error('❌ Lỗi trong update Brand:', error);
-            throw error;
-        }
-    }
+  //       // ✅ Convert response thành Brand instance
+  //       const brandResponse = data.data || data.brand || data;
+  //       return Brand.fromApiResponse(brandResponse);
+  //     } catch (error) {
+  //       console.error("❌ Lỗi trong update Brand:", error);
+  //       throw error;
+  //     }
+  //   }
 
-    static async delete(id) {
-        try {
-            console.log('🔗 Đang xóa thương hiệu:', id);
+  //   static async delete(id) {
+  //     try {
+  //       console.log("🔗 Đang xóa thương hiệu:", id);
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+  //       const res = await fetch(`${this.baseUrl}/${id}`, {
+  //         method: "DELETE",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //           ...this.getAuthHeader(),
+  //         },
+  //       });
 
-            console.log('📊 Delete Brand Status:', res.status);
+  //       console.log("📊 Delete Brand Status:", res.status);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi xóa thương hiệu:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+  //       if (!res.ok) {
+  //         const errorText = await res.text();
+  //         console.error("❌ Lỗi xóa thương hiệu:", errorText);
+  //         throw new Error(`HTTP ${res.status}: ${errorText}`);
+  //       }
 
-            const data = await res.json();
-            console.log('✅ Thương hiệu đã xóa:', data);
+  //       const data = await res.json();
+  //       console.log("✅ Thương hiệu đã xóa:", data);
 
-            return data.data || data.brand || data;
-        } catch (error) {
-            console.error('❌ Lỗi trong delete Brand:', error);
-            throw error;
-        }
-    }
+  //       return data.data || data.brand || data;
+  //     } catch (error) {
+  //       console.error("❌ Lỗi trong delete Brand:", error);
+  //       throw error;
+  //     }
+  //   }
 }
 
-export default BrandService;
+export default new BrandService();
+//Export instance
+// export default BrandService;
+//Export class

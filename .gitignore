@@ -1,5 +1,5 @@
 # ========================
-# 📦 DEPENDENCIES
+# DEPENDENCIES
 # ========================
 node_modules/
 package-lock.json
@@ -7,7 +7,7 @@ yarn.lock
 pnpm-lock.yaml
 
 # ========================
-# 🔐 ENVIRONMENT & SECRETS
+# ENVIRONMENT & SECRETS
 # ========================
 .env
 .env.local

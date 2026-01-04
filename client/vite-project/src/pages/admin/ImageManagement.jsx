@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import ImageService from '@services/image.service.js';
 
-function ImageComponent() {
+function ImageManagement() {
     const [file, setFile] = useState(null);
     const [imageUrl, setImageUrl] = useState('');
     const [message, setMessage] = useState('');
@@ -125,4 +125,4 @@ function ImageComponent() {
     );
 }
 
-export default ImageComponent;
+export default ImageManagement;
