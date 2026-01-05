@@ -10,7 +10,6 @@ import InsertNewsRequest from "../dtos/requests/news/InsertNewsRequest.js";
 const route = express.Router();
 
 route.get("/", asyncHandle(NewsController.getNewsArticles));
-route.get("/all", asyncHandle(NewsController.getAllNewsArticles));
 route.get("/:id", asyncHandle(NewsController.getNewsArticleById));
 route.post(
   "/",

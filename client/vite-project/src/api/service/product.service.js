@@ -1,399 +1,260 @@
-import Product from '@models/product.js';
+import Product from "@models/product.js";
+import BaseService from "./base.service.js";
+import api from "../index.js";
+import { ENDPOINTS } from "../endpoints.js";
 
-class ProductService {
-    static baseUrl = 'http://localhost:3003/api/products';
+class ProductService extends BaseService {
+  constructor() {
+    super(ENDPOINTS.PRODUCTS.BASE);
+  }
 
-    static getAuthHeader() {
-        const token = localStorage.getItem('admin_token');
-        return token ? { Authorization: 'Bearer ' + token } : {};
+  async getAll() {
+    try {
+      console.log("🔗 Đang gọi API Products getAll:", this.endpoint);
+
+      const response = await api.get(this.endpoint);
+      const data = response.data;
+
+      console.log("✅ Dữ liệu Products getAll:", data);
+
+      const products = data.data || data.products || data || [];
+
+      return Array.isArray(products)
+        ? products.map((item) =>
+            Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+          )
+        : [];
+    } catch (error) {
+      console.error("❌ Lỗi Products getAll:", error);
+      throw new Error("Lỗi khi tải danh sách sản phẩm: " + error.message);
     }
+  }
 
-    static async getAll() {
-        try {
-            console.log('🔗 Đang gọi API Products getAll:', this.baseUrl);
+  async getAllProducts() {
+    try {
+      const response = await api.get(`${this.endpoint}/all`);
+      const data = response.data;
 
-            const res = await fetch(this.baseUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+      const products = data.data || data.products || data || [];
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi Products getAll:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Dữ liệu Products getAll:', data);
-
-            // Xử lý response data
-            const products = data.data || data.products || data || [];
-
-            return Array.isArray(products)
-                ? products.map((item) =>
-                      Product && Product.fromApiResponse
-                          ? Product.fromApiResponse(item)
-                          : {
-                                id: item.id,
-                                name: item.name,
-                                category_id: item.category_id,
-                                brand_id: item.brand_id,
-                                description: item.description,
-                                createdAt: item.createdAt,
-                                updatedAt: item.updatedAt
-                            }
-                  )
-                : [];
-        } catch (error) {
-            console.error('❌ Lỗi Products getAll:', error);
-            throw new Error('Lỗi khi tải danh sách sản phẩm: ' + error.message);
-        }
+      return Array.isArray(products)
+        ? products.map((item) =>
+            Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+          )
+        : [];
+    } catch (error) {
+      console.error("❌ Lỗi Products getAllProducts:", error);
+      throw new Error("Lỗi khi tải danh sách sản phẩm: " + error.message);
     }
+  }
 
-    static async getAllProducts() {
-        try {
-            console.log('🔗 Đang gọi API Products getAll:', this.baseUrl);
+  async getPaging({ page = 1, search = "" } = {}) {
+    try {
+      console.log(
+        `🔗 Gọi API Products getPaging - page: ${page}, search: "${search}"`
+      );
 
-            const res = await fetch(`${this.baseUrl}-all`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+      const params = { page, search };
+      const response = await api.get(this.endpoint, { params });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi Products getAll:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+      const data = response.data;
 
-            const data = await res.json();
-            console.log('✅ Dữ liệu Products getAll:', data);
-
-            // Xử lý response data
-            const products = data.data || data.products || data || [];
-
-            return Array.isArray(products)
-                ? products.map((item) =>
-                      Product && Product.fromApiResponse
-                          ? Product.fromApiResponse(item)
-                          : {
-                                id: item.id,
-                                name: item.name,
-                                category_id: item.category_id,
-                                brand_id: item.brand_id,
-                                description: item.description,
-                                createdAt: item.createdAt,
-                                updatedAt: item.updatedAt
-                            }
-                  )
-                : [];
-        } catch (error) {
-            console.error('❌ Lỗi Products getAll:', error);
-            throw new Error('Lỗi khi tải danh sách sản phẩm: ' + error.message);
-        }
+      return {
+        data: (data.data || []).map((item) =>
+          Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+        ),
+        pagination: {
+          currentPage: data.currentPage || parseInt(page),
+          totalPage: data.totalPage || 1,
+          totalItems: data.totalProducts || data.totalItems || 0,
+          limit: Math.ceil((data.totalProducts || 0) / (data.totalPage || 1)),
+        },
+      };
+    } catch (error) {
+      console.error("❌ Lỗi trong Products getPaging:", error);
+      throw new Error("Lỗi khi tải sản phẩm phân trang: " + error.message);
     }
-    static async getByCategory(categoryId, params = {}) {
-        try {
-            const { page = 1, limit = 12, search = '' } = params;
+  }
 
-            const queryParams = new URLSearchParams({
-                category_id: categoryId,
-                page: page.toString(),
-                limit: limit.toString(),
-                ...(search && { search })
-            });
+  async getByCategory(categoryId, params = {}) {
+    try {
+      const { page = 1, limit = 12, search = "" } = params;
 
-            console.log(
-                `🔄 Fetching products by category ${categoryId}:`,
-                queryParams.toString()
-            );
+      const queryParams = {
+        category_id: categoryId,
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(search && { search }),
+      };
 
-            const response = await fetch(
-                `http://localhost:3003/api/products-by-category?${queryParams}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...this.getAuthHeader()
-                    }
-                }
-            );
+      console.log(
+        `🔗 Fetching products by category ${categoryId}:`,
+        queryParams
+      );
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+      const response = await api.get(ENDPOINTS.PRODUCTS.BY_CATEGORY, {
+        params: queryParams,
+      });
 
-            const result = await response.json();
-            console.log('✅ Products by category response:', result);
+      const result = response.data;
+      console.log("✅ Products by category response:", result);
 
-            return {
-                data: result.data || [],
-                totalProducts: result.totalProducts || 0,
-                pagination: {
-                    currentPage: page,
-                    totalPage: Math.ceil((result.totalProducts || 0) / limit),
-                    totalItems: result.totalProducts || 0
-                }
-            };
-        } catch (error) {
-            console.error('❌ Error fetching products by category:', error);
-            throw error;
-        }
+      return {
+        data: (result.data || []).map((item) =>
+          Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+        ),
+        totalProducts: result.totalProducts || 0,
+        pagination: {
+          currentPage: page,
+          totalPage: Math.ceil((result.totalProducts || 0) / limit),
+          totalItems: result.totalProducts || 0,
+        },
+      };
+    } catch (error) {
+      console.error("❌ Error fetching products by category:", error);
+      throw error;
     }
-    static async getCustomizePage({
-        page = 1,
-        search = '',
-        pageSize = 4
-    } = {}) {
-        try {
-            const queryParams = new URLSearchParams({
-                page: page.toString(),
-                pageSize: pageSize.toString(),
-                ...(search && { search: search.toString() })
-            });
+  }
 
-            const url = `http://localhost:3003/api/products/customize-page?${queryParams}`;
-            console.log('🔗 Đang gọi API Products Customize Page:', url);
+  async getCustomizePage({ page = 1, search = "", pageSize = 4 } = {}) {
+    try {
+      const params = {
+        page: page.toString(),
+        pageSize: pageSize.toString(),
+        ...(search && { search: search.toString() }),
+      };
 
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+      console.log(
+        "🔗 Đang gọi API Products Customize Page:",
+        ENDPOINTS.PRODUCTS.CUSTOMIZE_PAGE
+      );
 
-            console.log(
-                '📊 Products Customize Page Status:',
-                res.status,
-                res.statusText
-            );
+      const response = await api.get(ENDPOINTS.PRODUCTS.CUSTOMIZE_PAGE, {
+        params,
+      });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error(
-                    '❌ Lỗi từ server Products Customize:',
-                    errorText
-                );
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+      console.log("📊 Products Customize Page Status:", response.status);
+      console.log("✅ Raw Products Customize Page Data:", response.data);
 
-            const data = await res.json();
-            console.log('✅ Raw Products Customize Page Data:', data);
+      const data = response.data;
 
-            // ✅ XỬ LÝ RESPONSE THEO CẤU TRÚC BACKEND
-            const response = {
-                data: data.data || [],
-                pagination: data.pagination || {
-                    currentPage: data.currentPage || parseInt(page),
-                    totalPage: data.totalPage || 1,
-                    totalItems: data.totalProducts || 0,
-                    pageSize: data.pageSize || parseInt(pageSize),
-                    hasNextPage: data.pagination?.hasNextPage || false,
-                    hasPrevPage: data.pagination?.hasPrevPage || false,
-                    nextPage: data.pagination?.nextPage || null,
-                    prevPage: data.pagination?.prevPage || null
-                }
-            };
-
-            console.log('✅ Processed Customize Page Response:', response);
-            return response;
-        } catch (error) {
-            console.error('❌ Lỗi trong Products getCustomizePage:', error);
-            throw error;
-        }
+      return {
+        data: (data.data || []).map((item) =>
+          Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+        ),
+        pagination: data.pagination || {
+          currentPage: data.currentPage || parseInt(page),
+          totalPage: data.totalPage || 1,
+          totalItems: data.totalProducts || 0,
+          pageSize: data.pageSize || parseInt(pageSize),
+          hasNextPage: data.pagination?.hasNextPage || false,
+          hasPrevPage: data.pagination?.hasPrevPage || false,
+          nextPage: data.pagination?.nextPage || null,
+          prevPage: data.pagination?.prevPage || null,
+        },
+      };
+    } catch (error) {
+      console.error("❌ Lỗi trong Products getCustomizePage:", error);
+      throw error;
     }
-    static async getPaging({ page = 1, search = '' } = {}) {
-        try {
-            const url = `${this.baseUrl}?search=${encodeURIComponent(
-                search
-            )}&page=${page}`;
-            console.log('🔗 Đang gọi API Products Paging:', url);
+  }
 
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
-            console.log(
-                '📊 Products Paging Status:',
-                res.status,
-                res.statusText
-            );
+  // ===== GET PRODUCT BY ID =====
+  async getById(id) {
+    try {
+      console.log("🔗 Getting product by ID:", id);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi từ server Products:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+      const response = await api.get(`${this.endpoint}/${id}`);
+      const data = response.data;
 
-            const data = await res.json();
-            console.log('✅ Raw Products Paging Data:', data);
-            const response = {
-                data: data.data || [],
-                pagination: {
-                    currentPage: data.currentPage || parseInt(page),
-                    totalPage: data.totalPage || 1,
-                    totalItems: data.totalProducts || data.totalItems || 0, // ✅ FIX: totalProducts
-                    limit: Math.ceil(
-                        (data.totalProducts || 0) / (data.totalPage || 1)
-                    )
-                }
-            };
-            //Trả về data nguyên bảng để component xử lý
+      console.log("✅ Product by ID response:", data);
 
-            return response;
-        } catch (error) {
-            console.error('❌ Lỗi trong Products getPaging:', error);
-            throw error;
-        }
+      const productResponse = data.data || data.product || data;
+
+      return Product?.fromApiResponse
+        ? Product.fromApiResponse(productResponse)
+        : {
+            id: productResponse.id,
+            name: productResponse.name,
+            description: productResponse.description,
+            image: productResponse.image,
+            sizes: productResponse.sizes || [],
+            category_id: productResponse.category_id,
+            brand_id: productResponse.brand_id,
+            createdAt: productResponse.createdAt,
+            updatedAt: productResponse.updatedAt,
+          };
+    } catch (error) {
+      console.error("❌ Error getting product by ID:", error);
+      throw new Error("Lỗi khi tải sản phẩm: " + error.message);
     }
-    static async getById(id) {
-        try {
-            console.log('🔗 Getting product by ID:', id);
+  }
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+  // ===== CREATE PRODUCT =====
+  async create(productData) {
+    try {
+      console.log("🔗 Đang tạo sản phẩm:", productData);
 
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
+      const payload =
+        productData instanceof Product
+          ? productData.toApiFormat()
+          : productData;
 
-            const data = await res.json();
-            console.log('✅ Product by ID response:', data);
+      const response = await api.post(this.endpoint, payload);
+      const data = response.data;
 
-            // ✅ XỬ LÝ RESPONSE THEO CẤU TRÚC THỰC TẾ
-            return {
-                id: data.id,
-                name: data.name,
-                description: data.description,
-                image: data.image,
-                // ✅ THÊM sizes để ProductDetailPage sử dụng
-                sizes: data.sizes || []
-            };
-        } catch (error) {
-            console.error('❌ Error getting product by ID:', error);
-            throw error;
-        }
+      const productResponse = data.data || data.product || data;
+
+      return Product?.fromApiResponse
+        ? Product.fromApiResponse(productResponse)
+        : productResponse;
+    } catch (error) {
+      console.error("❌ Lỗi trong create Product:", error);
+      throw error;
     }
+  }
 
-    static async create(productData) {
-        try {
-            console.log('🔗 Đang tạo sản phẩm:', productData);
+  // ===== UPDATE PRODUCT =====
+  async update(id, productData) {
+    try {
+      console.log("🔗 Đang cập nhật sản phẩm:", id, productData);
 
-            // ✅ Nếu là Product instance, sử dụng toApiFormat
-            const payload =
-                productData instanceof Product
-                    ? productData.toApiFormat() //
-                    : productData; //payload có nghĩa là format dữ liệu khi gửi về server
+      // ✅ Nếu là Product instance, sử dụng toApiFormat
+      const payload =
+        productData instanceof Product
+          ? productData.toApiFormat()
+          : productData;
 
-            const res = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                },
-                body: JSON.stringify(payload) // Gửi lên server với dữ liệu đã format đúng kiểu dữ liệu
-            });
+      const response = await api.put(`${this.endpoint}/${id}`, payload);
+      const data = response.data;
 
-            console.log('📊 Create Product Status:', res.status);
+      console.log("✅ Raw Update Response:", data);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi tạo sản phẩm:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Raw Create Response:', data);
-
-            // ✅ Convert response thành Product instance
-            const productResponse = data.data || data.product || data;
-            return Product.fromApiResponse(productResponse);
-        } catch (error) {
-            console.error('❌ Lỗi trong create Product:', error);
-            throw error;
-        }
+      const productResponse = data.data || data.product || data;
+      return Product?.fromApiResponse
+        ? Product.fromApiResponse(productResponse)
+        : productResponse;
+    } catch (error) {
+      console.error("❌ Lỗi trong update Product:", error);
+      throw error;
     }
-    static async update(id, productData) {
-        try {
-            console.log('🔗 Đang cập nhật sản phẩm:', id, productData);
+  }
 
-            // ✅ Nếu là Product instance, sử dụng toApiFormat
-            const payload =
-                productData instanceof Product
-                    ? productData.toApiFormat()
-                    : productData;
+  async delete(id) {
+    try {
+      console.log("🔗 Đang xóa sản phẩm:", id);
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                },
-                body: JSON.stringify(payload)
-            });
+      const response = await api.delete(`${this.endpoint}/${id}`);
+      const data = response.data;
 
-            console.log('📊 Update Product Status:', res.status);
+      console.log("✅ Sản phẩm đã xóa:", data);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi cập nhật sản phẩm:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Raw Update Response:', data);
-
-            // ✅ Convert response thành Product instance
-            const productResponse = data.data || data.product || data;
-            return Product.fromApiResponse(productResponse);
-        } catch (error) {
-            console.error('❌ Lỗi trong update Product:', error);
-            throw error;
-        }
+      return data.data || data.product || data;
+    } catch (error) {
+      console.error("❌ Lỗi trong delete Product:", error);
+      throw error;
     }
-    static async delete(id) {
-        try {
-            console.log('🔗 Đang xóa sản phẩm:', id);
-
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
-
-            console.log('📊 Delete Product Status:', res.status);
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi xóa sản phẩm:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Sản phẩm đã xóa:', data);
-
-            return data.data || data.product || data;
-        } catch (error) {
-            console.error('❌ Lỗi trong delete Product:', error);
-            throw error;
-        }
-    }
+  }
 }
 
-export default ProductService;
+export default new ProductService();

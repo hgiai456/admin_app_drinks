@@ -24,6 +24,7 @@ import OrderHistory from "@pages/customer/OrderHistory.jsx";
 import Layout from "@components/common/Layout.jsx";
 import HomePage from "@pages/customer/HomePage.jsx";
 import RegisterPage from "@pages/customer/RegisterPage.jsx";
+import NewsManagement from "./pages/admin/NewsManagement";
 
 // THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -54,13 +55,12 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
     { name: "Quản lý banner", icon: "🎨" },
     { name: "Quản lý chi tiết sản phẩm", icon: "🛍️" },
     { name: "Quản lý hình ảnh", icon: "🖼️" },
+    { name: "Quản lý tin tức", icon: "📰" },
   ];
   return (
     <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
-      {/* Sidebar Header */}
       <div className="sidebar-header">
         <div className="sidebar-brand">
-          {/* ✅ LOGO CONTAINER - CENTERED */}
           <div className="brand-logo">
             <img
               src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
@@ -74,7 +74,6 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
             <span className="brand-icon">🍹</span>
           </div>
 
-          {/* ✅ BRAND TEXT - BELOW LOGO */}
           {!isCollapsed && (
             <div className="brand-content">
               <span className="brand-text">Admin Panel</span>
@@ -83,7 +82,6 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
           )}
         </div>
 
-        {/* ✅ TOGGLE BUTTON */}
         <button
           className="sidebar-toggle"
           onClick={() => setIsCollapsed(!isCollapsed)}
@@ -92,7 +90,6 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
         </button>
       </div>
 
-      {/* Navigation Menu */}
       <nav className="sidebar-nav">
         {pages.map((page) => (
           <button
@@ -147,7 +144,6 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
 }
 
 function Header({ currentPage }) {
-  // ✅ DANH SÁCH CÁC COMPONENT MUỐN ẨN HEADER
   const hideHeaderPages = [
     "Quản lý đơn hàng",
     "Quản lý sản phẩm",
@@ -156,6 +152,7 @@ function Header({ currentPage }) {
     "Quản lý thương hiệu",
     "Quản lý danh mục",
     "Quản lý người dùng",
+    "Quản lý tin tức",
     // Thêm các trang khác nếu cần
   ];
 
@@ -163,7 +160,6 @@ function Header({ currentPage }) {
     return null; // Ẩn header cho các trang này
   }
 
-  // ✅ HIỂN THỊ HEADER CHO CÁC TRANG KHÁC (nếu có)
   const getCurrentPageInfo = () => {
     const pageMap = {
       // ... các trang khác không bị ẩn header
@@ -179,7 +175,6 @@ function Header({ currentPage }) {
   );
 }
 
-// ✅ MAIN LAYOUT COMPONENT
 function AdminLayout({
   children,
   currentPage,
@@ -272,7 +267,6 @@ function App() {
       }
     }
   }, []);
-  // ✅ HÀM XỬ LÝ KHI MUỐN ĐĂNG NHẬP TỪ GUEST MODE
   const handleGuestToLogin = () => {
     setIsGuestMode(false);
     setUser(null);
@@ -324,7 +318,6 @@ function App() {
 
   if (user.role === 2) {
     const renderPage = () => {
-      // ✅ CẬP NHẬT COMPONENT NAMES THEO TÊN MỚI
       switch (currentPage) {
         case "Quản lý đơn hàng":
           return (
@@ -389,6 +382,12 @@ function App() {
               <ImageManagement />
             </StyledComponentWrapper>
           );
+        case "Quản lý tin tức":
+          return (
+            <StyledComponentWrapper>
+              <NewsManagement />
+            </StyledComponentWrapper>
+          );
         default:
           return (
             <StyledComponentWrapper>
@@ -409,7 +408,6 @@ function App() {
     );
   }
 
-  // ✅ FALLBACK - KHÔNG BAO GIỜ XẢY RA NHƯNG AN TOÀN
   return (
     <CustomerRouter
       user={null}
@@ -477,13 +475,13 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
   const handleLoginFromGuest = () => {
     console.log("🔄 Switching from guest to login mode");
     if (onLogin) {
-      onLogin(); // ✅ CHUYỂN SANG LOGIN FORM
+      onLogin(); //  CHUYỂN SANG LOGIN FORM
     } else {
       console.warn("⚠️ No onLogin handler in CustomerRouter");
     }
   };
 
-  // ✅ HÀM XỬ LÝ ĐĂNG KÝ (TỪ GUEST MODE)
+  //  HÀM XỬ LÝ ĐĂNG KÝ (TỪ GUEST MODE)
   const handleRegisterFromGuest = () => {
     console.log("🔄 Switching from guest to register mode");
     if (onLogin) {
@@ -493,7 +491,7 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     }
   };
 
-  // ✅ HELPER FUNCTION ĐỂ LẤY PRODUCT ID TỪ HASH
+  //  HELPER FUNCTION ĐỂ LẤY PRODUCT ID TỪ HASH
   const getProductIdFromHash = () => {
     const hash = window.location.hash.replace("#", "");
     if (hash.startsWith("product/")) {
@@ -504,7 +502,7 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     return null;
   };
 
-  // ✅ RENDER PAGES BASED ON HASH
+  //  RENDER PAGES BASED ON HASH
   switch (currentPage) {
     case "home":
       return (

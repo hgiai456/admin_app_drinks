@@ -4,7 +4,7 @@ full-stack JavaScript development with enterprise practices.
 
 # TECH STACK    
 - React 
-- NodeJS (Expres)
+- NodeJS (Express)
 - MySQL
 - JWT Authenication
 - Docker Compose

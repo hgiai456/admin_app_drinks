@@ -29,12 +29,12 @@ class ProdetailService {
             }
 
             const data = await res.json();
-            console.log('✅ Raw API Data:', data);
+            console.log(' Raw API Data:', data);
 
             // ✅ Trả về data nguyên bản để component xử lý
             return data;
         } catch (error) {
-            console.error('❌ Lỗi trong getPaging:', error);
+            console.error(' Lỗi trong getPaging:', error);
             throw error;
         }
     }
