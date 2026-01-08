@@ -4,8 +4,11 @@ import NewsDetailService from "@services/newsdetail.service.js";
 import ProductService from "@services/product.service.js";
 import News from "@models/news.js";
 import Modal from "@components/admin/ModelComponent.jsx";
+import Button from "@components/common/Button.jsx";
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_news.scss";
+import { Image } from "lucide-react";
+import ImagePicker from "../../components/admin/ImagePicker";
 
 function NewsManagement() {
   const [newsList, setNewsList] = useState([]);
@@ -23,6 +26,7 @@ function NewsManagement() {
   const [selectedNews, setSelectedNews] = useState(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   const [form, setForm] = useState({
     title: "",
@@ -48,6 +52,11 @@ function NewsManagement() {
     if (!text) return "";
     if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
+  };
+
+  const handleImageSelect = (imagePath) => {
+    setForm((prev) => ({ ...prev, image: imagePath }));
+    setShowImagePicker(false);
   };
 
   const getProductNames = (productIds) => {
@@ -357,13 +366,13 @@ function NewsManagement() {
       {/* Header */}
       <div className="header">
         <h2>📰 Quản lý tin tức</h2>
-        <button
-          className="btn btn-success"
+        <Button
+          variant="success"
+          size="md"
           onClick={openCreateModal}
           disabled={loading}
-        >
-          ➕ Thêm tin tức
-        </button>
+          icon={<span>➕ Thêm tin tức</span>}
+        ></Button>
       </div>
 
       {/* Search Bar */}
@@ -378,9 +387,9 @@ function NewsManagement() {
             placeholder="Tìm kiếm tin tức..."
             defaultValue={search}
           />
-          <button type="submit" className="btn-search">
+          <Button type="submit" variant="primary" size="sm">
             🔍 Tìm kiếm
-          </button>
+          </Button>
         </form>
       </div>
 
@@ -452,27 +461,30 @@ function NewsManagement() {
                   <td className="date">{formatDate(news.createdAt)}</td>
                   <td className="actions">
                     <div className="action-buttons">
-                      <button
-                        className="btn-view"
+                      <Button
+                        variant="info"
+                        size="sm"
                         onClick={() => openDetailModal(news)}
                         disabled={loading}
                       >
                         👁️ Xem
-                      </button>
-                      <button
-                        className="btn-edit"
+                      </Button>
+                      <Button
+                        variant="primary"
+                        size="sm"
                         onClick={() => openEditModal(news)}
                         disabled={loading}
                       >
                         ✏️ Sửa
-                      </button>
-                      <button
-                        className="btn-delete"
+                      </Button>
+                      <Button
+                        variant="danger"
+                        size="sm"
                         onClick={() => handleDelete(news.id)}
                         disabled={loading}
                       >
                         🗑️ Xóa
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -489,50 +501,55 @@ function NewsManagement() {
             Trang {page} / {totalPage} - Tổng {totalItems} tin tức
           </div>
           <div className="pagination-controls">
-            <button
-              className="btn-nav"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => handlePageChange(1)}
               disabled={page === 1 || loading}
             >
               ⏪ Đầu
-            </button>
-            <button
-              className="btn-nav"
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => handlePageChange(page - 1)}
               disabled={page === 1 || loading}
             >
               ⬅️ Trước
-            </button>
+            </Button>
 
             {Array.from({ length: Math.min(5, totalPage) }, (_, i) => {
               const pageNum = page - 2 + i;
               if (pageNum < 1 || pageNum > totalPage) return null;
               return (
-                <button
+                <Button
                   key={pageNum}
-                  className={`btn-page ${page === pageNum ? "active" : ""}`}
+                  variant={page === pageNum ? "primary" : "secondary"}
+                  size="sm"
                   onClick={() => handlePageChange(pageNum)}
                   disabled={loading}
+                  className={page === pageNum ? "active" : ""}
                 >
                   {pageNum}
-                </button>
+                </Button>
               );
             })}
-
-            <button
-              className="btn-nav"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => handlePageChange(page + 1)}
               disabled={page === totalPage || loading}
             >
               Tiếp ➡️
-            </button>
-            <button
-              className="btn-nav"
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => handlePageChange(totalPage)}
               disabled={page === totalPage || loading}
             >
               Cuối ⏩
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -563,24 +580,44 @@ function NewsManagement() {
           </div>
 
           <div className="form-group">
-            <label className="form-label">🖼️ Hình ảnh (URL)</label>
-            <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              className={`form-input ${errors.image ? "error" : ""}`}
-              placeholder="https://example.com/image.jpg"
-              type="url"
-            />
+            <label className="form-label">🖼️ Hình ảnh</label>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                className={`form-input ${errors.image ? "error" : ""}`}
+                placeholder="URL hình ảnh..."
+                type="url"
+                style={{ flex: 1 }}
+              />
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                icon={<Image size={18} />}
+                onClick={() => setShowImagePicker(true)}
+              >
+                Chọn từ thư viện
+              </Button>
+            </div>
             {errors.image && <span className="form-error">{errors.image}</span>}
             {form.image && (
-              <div className="image-preview">
+              <div className="image-preview" style={{ marginTop: "12px" }}>
                 <img
                   src={form.image}
                   alt="Preview"
+                  style={{
+                    width: "200px",
+                    height: "120px",
+                    objectFit: "cover",
+                    borderRadius: "8px",
+                    border: "2px solid #ddd",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                  }}
                   onError={(e) => {
                     e.target.src =
-                      "https://via.placeholder.com/400x200?text=Invalid+Image";
+                      "https://via.placeholder.com/200x120?text=Invalid+Image";
                   }}
                 />
               </div>
@@ -634,25 +671,24 @@ function NewsManagement() {
           </div>
 
           <div className="form-buttons">
-            <button
+            <Button
               type="button"
-              className="btn btn-secondary"
+              variant="secondary"
+              size="md"
               onClick={closeModal}
               disabled={loading}
             >
               ❌ Hủy
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="btn btn-success"
+              variant="success"
+              size="md"
+              loading={loading}
               disabled={loading}
             >
-              {loading
-                ? "⏳ Đang xử lý..."
-                : modalMode === "edit"
-                ? "💾 Cập nhật"
-                : "➕ Thêm mới"}
-            </button>
+              {modalMode === "edit" ? "💾 Cập nhật" : "➕ Thêm mới"}
+            </Button>
           </div>
         </form>
       </Modal>
@@ -666,6 +702,13 @@ function NewsManagement() {
       >
         {renderDetailModal()}
       </Modal>
+
+      <ImagePicker
+        show={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImageSelect}
+        currentImage={form.image}
+      />
     </div>
   );
 }

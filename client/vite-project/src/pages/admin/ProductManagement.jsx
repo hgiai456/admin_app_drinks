@@ -5,6 +5,8 @@ import BrandService from "@services/brand.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
 import ImagePicker from "../../components/admin/ImagePicker";
+import { Image } from "lucide-react";
+import Button from "@components/common/Button.jsx";
 
 function ProductManagement() {
   const [products, setProducts] = useState([]);
@@ -589,13 +591,15 @@ function ProductManagement() {
                 type="url"
                 style={{ flex: 1 }}
               />
-              <button
+              <Button
                 type="button"
-                className="btn btn-primary"
+                variant="primary"
+                size="md"
+                icon={<Image size={18} />}
                 onClick={() => setShowImagePicker(true)}
               >
-                📚 Chọn từ thư viện
-              </button>
+                Chọn từ thư viện
+              </Button>
             </div>
             {form.image && (
               <div style={{ marginTop: "8px" }}>
