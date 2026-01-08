@@ -15,6 +15,7 @@ import imageRoutes from "./image.routes.js";
 import cartItemRoutes from "./cart_items.routes.js";
 import newsRoutes from "./news.routes.js";
 import newsDetailRoutes from "./news_detail.routes.js";
+import mediaLibraryRoutes from "./media_library.routes.js";
 const route = express.Router();
 
 route.use("/auth", authRoutes);
@@ -33,5 +34,7 @@ route.use("/payments", paymentRoutes);
 route.use("/images", imageRoutes);
 route.use("/news", newsRoutes);
 route.use("/news-details", newsDetailRoutes);
+route.use("/media-library", mediaLibraryRoutes);
+
 
 export default route;

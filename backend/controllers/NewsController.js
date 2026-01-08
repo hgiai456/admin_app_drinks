@@ -7,7 +7,7 @@ const { Op } = Sequelize;
  */
 export async function getNewsArticles(req, res) {
   const { search = "", page = 1 } = req.query;
-  const pageSize = 8;
+  const pageSize = 4;
   const offset = (page - 1) * pageSize;
 
   let whereClause = {};
@@ -164,7 +164,7 @@ export async function updateNews(req, res) {
 
     if (existingTitle) {
       return res.status(400).json({
-        message: "Tiêu đề tin tức đã tồn tại",
+        message: "Tiêu đề tin tức đã tồn tại ở tin tức khác",
       });
     }
   }

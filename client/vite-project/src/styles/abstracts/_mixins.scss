@@ -13,6 +13,127 @@
     font-size: v.$font-size-md;
 }
 
+@mixin news-table-cell {
+  padding: v.$spacing-md v.$spacing-lg;
+  font-size: v.$font-size-sm;
+  color: v.$admin-text;
+}
+
+
+
+// Mixin cho news image wrapper
+@mixin news-image-wrapper($width: v.$news-image-width, $height: v.$news-image-height) {
+  width: $width;
+  height: $height;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: v.$border-radius-sm;
+    border: 1px solid v.$border-color-light;
+  }
+}
+
+// Mixin cho news image placeholder
+@mixin news-image-placeholder($width: v.$news-image-width, $height: v.$news-image-height) {
+  width: $width;
+  height: $height;
+  background-color: v.$news-placeholder-bg;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: v.$border-radius-sm;
+  font-size: v.$news-icon-size;
+}
+
+
+// Mixin cho news text truncate
+@mixin news-text-truncate($max-width, $font-size, $color) {
+  max-width: $max-width;
+  font-size: $font-size;
+  color: $color;
+  line-height: 1.5;
+}
+
+// Mixin cho custom scrollbar
+@mixin custom-scrollbar(
+  $width: v.$news-scrollbar-width,
+  $track-color: v.$scrollbar-track,
+  $thumb-color: v.$scrollbar-thumb,
+  $thumb-hover-color: v.$scrollbar-thumb-hover
+) {
+  &::-webkit-scrollbar {
+    width: $width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $track-color;
+    border-radius: calc($width / 2);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $thumb-color;
+    border-radius: calc($width / 2);
+
+    &:hover {
+      background: $thumb-hover-color;
+    }
+  }
+}
+
+// Mixin cho select multiple
+@mixin select-multiple {
+  padding: v.$spacing-sm;
+  min-height: v.$news-select-min-height;
+
+  option {
+    padding: v.$spacing-xs v.$spacing-sm;
+    cursor: pointer;
+
+    &:hover {
+      background: v.$admin-primary;
+      color: white;
+    }
+
+    &:checked {
+      background: v.$admin-primary;
+      color: white;
+    }
+  }
+}
+
+// Mixin cho loading/empty state
+@mixin table-state-cell {
+  text-align: center;
+  padding: v.$spacing-xxxl !important;
+}
+
+// Mixin cho news meta badge
+@mixin news-meta-badge {
+  display: flex;
+  align-items: center;
+  gap: v.$spacing-xs;
+  font-size: v.$font-size-sm;
+  color: v.$admin-text-light;
+  padding: v.$spacing-xs v.$spacing-sm;
+  background: v.$admin-light;
+  border-radius: v.$border-radius-md;
+}
+
+// Mixin cho image preview container
+@mixin image-preview-container {
+  margin-top: v.$spacing-sm;
+
+  img {
+    width: 100%;
+    max-height: v.$news-image-preview-max-height;
+    object-fit: cover;
+    border-radius: v.$border-radius-md;
+    border: 1px solid v.$border-color-light;
+  }
+}
+
 @mixin form-input($border-color: v.$border-color) {
     width: 100%;
     padding: 10px v.$spacing-md;

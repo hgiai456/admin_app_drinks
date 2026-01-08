@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3003/api";
+const API_BASE_URL = "http://localhost:3003/api";
 
 export const ENDPOINTS = {
   // ===== AUTH =====
@@ -28,7 +27,6 @@ export const ENDPOINTS = {
     BY_ID: (id) => `${API_BASE_URL}/news-details/${id}`,
   },
 
-  // ===== PRODUCTS =====
   PRODUCTS: {
     BASE: `${API_BASE_URL}/products`,
     ALL: `${API_BASE_URL}/products/all`,
@@ -37,7 +35,6 @@ export const ENDPOINTS = {
     CUSTOMIZE_PAGE: `${API_BASE_URL}/products/customize-page`,
   },
 
-  // ===== CATEGORIES =====
   CATEGORIES: {
     BASE: `${API_BASE_URL}/categories`,
     ALL: `${API_BASE_URL}/categories/all`,
@@ -51,7 +48,14 @@ export const ENDPOINTS = {
     BY_ID: (id) => `${API_BASE_URL}/brands/${id}`,
   },
 
-  // ===== ORDERS =====
+  MEDIA_LIBRARY: {
+    BASE: `${API_BASE_URL}/media-library`,
+    BY_ID: (id) => `${API_BASE_URL}/media-library/${id}`,
+    UPLOAD: `${API_BASE_URL}/media-library/upload`,
+    INCREMENT_USAGE: `${API_BASE_URL}/media-library/increment-usage`,
+    UPLOAD_MULTIPLE: `${API_BASE_URL}/media-library/upload-multiple`,
+  },
+
   ORDERS: {
     BASE: `${API_BASE_URL}/orders`,
     BY_ID: (id) => `${API_BASE_URL}/orders/${id}`,
@@ -78,19 +82,16 @@ export const ENDPOINTS = {
     },
   },
 
-  // ===== STORES =====
   STORES: {
     BASE: `${API_BASE_URL}/stores`,
     BY_ID: (id) => `${API_BASE_URL}/stores/${id}`,
   },
 
-  // ===== SIZES =====
   SIZES: {
     BASE: `${API_BASE_URL}/sizes`,
     BY_ID: (id) => `${API_BASE_URL}/sizes/${id}`,
   },
 
-  // ===== BANNERS =====
   BANNERS: {
     BASE: `${API_BASE_URL}/banners`,
     BY_ID: (id) => `${API_BASE_URL}/banners/${id}`,

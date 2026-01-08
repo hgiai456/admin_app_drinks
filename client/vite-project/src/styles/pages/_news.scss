@@ -3,11 +3,11 @@
 @use 'sass:color';
 
 // =============================================
-//  NEWS MANAGEMENT STYLES
+// NEWS MANAGEMENT STYLES
 // =============================================
 
 .news-container {
-  //  Header
+  // Header
   .header {
     @include m.flex-between;
     margin-bottom: $spacing-xl;
@@ -44,7 +44,7 @@
     }
   }
 
-  //  Message Alert
+  // Message Alert
   .message {
     padding: $spacing-md $spacing-lg;
     margin-bottom: $spacing-xl;
@@ -81,7 +81,7 @@
     }
   }
 
-  //  Search Bar
+  // Search Bar
   .search-bar {
     @include m.flex-between;
     margin-bottom: $spacing-xl;
@@ -132,7 +132,7 @@
     }
   }
 
-  //  Table Container
+  // Table Container
   .table-container {
     background: white;
     border-radius: $border-radius-lg;
@@ -183,7 +183,7 @@
             color: $admin-primary;
           }
 
-          //  News Title Column
+          // News Title Column
           &.news-title {
             .title-wrapper {
               max-width: 300px;
@@ -196,7 +196,7 @@
             }
           }
 
-          //  News Image Column
+          // News Image Column
           &.news-image {
             .image-wrapper {
               width: 80px;
@@ -233,7 +233,7 @@
             }
           }
 
-          //  Products Column
+          // Products Column
           &.news-products {
             .products-text {
               max-width: 200px;
@@ -242,13 +242,13 @@
             }
           }
 
-          //  Date Column
+          // Date Column
           &.date {
             color: $admin-text-light;
             font-size: $font-size-xs;
           }
 
-          //  Actions Column
+          // Actions Column
           &.actions {
             .action-buttons {
               display: flex;
@@ -285,7 +285,7 @@
           }
         }
 
-        //  Loading & Empty State
+        // Loading & Empty State
         .loading-cell,
         .empty-cell {
           text-align: center;
@@ -299,7 +299,7 @@
     }
   }
 
-  //  Pagination
+  // Pagination
   .pagination {
     @include m.flex-between;
     padding: $spacing-lg;
@@ -352,6 +352,10 @@
     }
   }
 }
+
+// =============================================
+// NEWS DETAIL MODAL
+// =============================================
 
 .news-detail-modal {
   max-height: 70vh;
@@ -433,7 +437,7 @@
 }
 
 // =============================================
-//  FORM STYLES (Create/Edit Modal)
+// FORM STYLES (Create/Edit Modal)
 // =============================================
 
 .form-group {
@@ -492,14 +496,14 @@
     }
   }
 
-  //  Character Count
+  // Character Count
   .char-count {
     font-size: $font-size-xs;
     color: $admin-text-light;
     margin-top: $spacing-xs;
   }
 
-  //  Multi-select Products
+  // Multi-select Products
   select[multiple] {
     padding: $spacing-sm;
     min-height: 150px;
@@ -576,7 +580,7 @@
   }
 }
 
-
+// Loading State
 .loading-state {
   @include m.flex-center;
   flex-direction: column;
@@ -590,6 +594,7 @@
   }
 }
 
+// Animations
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -601,6 +606,9 @@
   }
 }
 
+// =============================================
+// RESPONSIVE
+// =============================================
 
 @media (max-width: 992px) {
   .news-container {

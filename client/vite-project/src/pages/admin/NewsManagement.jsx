@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import NewsService from "@services/news.service.js";
-import ProductService from "@services/product.service.js"; // ✅ THÊM
+import NewsDetailService from "@services/newsdetail.service.js";
+import ProductService from "@services/product.service.js";
 import News from "@models/news.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_news.scss";
-import NewsDetailService from "@services/newsdetail.service";
 
 function NewsManagement() {
   const [newsList, setNewsList] = useState([]);
@@ -31,7 +31,7 @@ function NewsManagement() {
     product_ids: [],
   });
 
-  // ===== HELPER FUNCTIONS =====
+  // Helper Functions
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     const date = new Date(dateString);
@@ -50,7 +50,6 @@ function NewsManagement() {
     return text.substring(0, maxLength) + "...";
   };
 
-  // ✅ THÊM: Get product names from IDs
   const getProductNames = (productIds) => {
     if (!productIds || !Array.isArray(productIds) || productIds.length === 0) {
       return "Không có sản phẩm";
@@ -64,7 +63,7 @@ function NewsManagement() {
       .join(", ");
   };
 
-  // ===== FETCH DATA =====
+  // Fetch Data
   const fetchNews = async (pageNum = 1, searchTerm = "") => {
     setLoading(true);
     try {
@@ -72,6 +71,7 @@ function NewsManagement() {
         page: pageNum,
         search: searchTerm,
       });
+
       const newsWithProducts = await Promise.all(
         result.data.map(async (news) => {
           try {
@@ -82,21 +82,20 @@ function NewsManagement() {
             };
           } catch (error) {
             console.error(
-              `❌ Error loading news-details for news ${news.id}:`,
+              `Error loading news-details for news ${news.id}:`,
               error
             );
             return { ...news, product_ids: [] };
           }
         })
       );
-      console.log(" News data:", result);
 
       setNewsList(newsWithProducts);
       setTotalPage(result.pagination.totalPage);
       setTotalItems(result.pagination.totalItems);
       setPage(result.pagination.currentPage);
     } catch (error) {
-      console.error("❌ Error fetching news:", error);
+      console.error("Error fetching news:", error);
       setMessage("❌ " + error.message);
     } finally {
       setLoading(false);
@@ -109,12 +108,12 @@ function NewsManagement() {
       const allProducts = await ProductService.getAllProducts();
       setProducts(allProducts || []);
     } catch (error) {
-      console.error("❌ Error loading products:", error);
+      console.error("Error loading products:", error);
       setMessage("⚠️ Không thể tải danh sách sản phẩm");
     }
   };
 
-  // ===== USEEFFECT =====
+  // UseEffect
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -123,7 +122,7 @@ function NewsManagement() {
     fetchNews(page, search);
   }, [page, search]);
 
-  // ===== MODAL HANDLERS =====
+  // Modal Handlers
   const openCreateModal = () => {
     setModalMode("create");
     setEditingId(null);
@@ -132,20 +131,22 @@ function NewsManagement() {
     setShowModal(true);
   };
 
-  const openEditModal = (news) => {
+  const openEditModal = async (news) => {
     setModalMode("edit");
     setEditingId(news.id);
+
     try {
-      const newsDetails = NewsDetailService.getByNewsId(news.id);
-      const relateProductIds = newsDetails.map((detail) => detail.product_id);
+      const newsDetails = await NewsDetailService.getByNewsId(news.id);
+      const relatedProductIds = newsDetails.map((detail) => detail.product_id);
+
       setForm({
         title: news.title || "",
         content: news.content || "",
         image: news.image || "",
-        product_ids: relateProductIds,
+        product_ids: relatedProductIds,
       });
     } catch (error) {
-      console.error("❌ Error loading news details:", error);
+      console.error("Error loading news details:", error);
       setForm({
         title: news.title || "",
         content: news.content || "",
@@ -200,16 +201,17 @@ function NewsManagement() {
         return;
       }
 
-      let newsId;
-
       if (modalMode === "create") {
-        const createNews = await NewsService.create({
+        const payload = {
           title: form.title,
           content: form.content,
           image: form.image,
-          product_ids: form.product_ids,
-        });
-        newsId = createNews.id;
+          product_ids: form.product_ids, // GIỮ NGUYÊN product_ids
+        };
+
+        console.log("📤 Payload gửi đi:", JSON.stringify(payload, null, 2));
+
+        await NewsService.create(payload);
         setMessage("✅ Thêm tin tức thành công!");
       } else {
         await NewsService.update(editingId, {
@@ -218,16 +220,14 @@ function NewsManagement() {
           image: form.image,
         });
 
-        newsId = editingId;
-
-        const oldDetails = await NewsDetailService.getByNewsId(newsId);
+        const oldDetails = await NewsDetailService.getByNewsId(editingId);
         for (const detail of oldDetails) {
           await NewsDetailService.delete(detail.id);
         }
 
         for (const productId of form.product_ids) {
           await NewsDetailService.create({
-            news_id: newsId,
+            news_id: editingId,
             product_id: productId,
           });
         }
@@ -238,8 +238,24 @@ function NewsManagement() {
       closeModal();
       fetchNews(page, search);
     } catch (error) {
-      console.error("❌ Submit error:", error);
-      setMessage("❌ " + error.message);
+      if (error.response) {
+        console.error("📍 Response status:", error.response.status);
+        console.error("📍 Response data:", error.response.data);
+        console.error("📍 Response headers:", error.response.headers);
+
+        // Display backend error message
+        const errorMsg =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          error.message;
+        setMessage(`❌ ${errorMsg}`);
+      } else if (error.request) {
+        console.error("📍 No response received:", error.request);
+        setMessage("❌ Không nhận được phản hồi từ server");
+      } else {
+        console.error("📍 Error message:", error.message);
+        setMessage("❌ " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -250,18 +266,23 @@ function NewsManagement() {
 
     setLoading(true);
     try {
+      const newsDetails = await NewsDetailService.getByNewsId(id);
+      for (const detail of newsDetails) {
+        await NewsDetailService.delete(detail.id);
+      }
+
       await NewsService.delete(id);
       setMessage("✅ Xóa tin tức thành công!");
       fetchNews(page, search);
     } catch (error) {
-      console.error(" Delete error:", error);
+      console.error("Delete error:", error);
       setMessage("❌ " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  // ===== PAGINATION =====
+  // Pagination
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPage && newPage !== page && !loading) {
       setPage(newPage);
@@ -276,7 +297,7 @@ function NewsManagement() {
     setPage(1);
   };
 
-  // ===== LOADING STATE =====
+  // Loading State
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -285,7 +306,7 @@ function NewsManagement() {
     );
   }
 
-  // ===== RENDER DETAIL MODAL =====
+  // Render Detail Modal
   const renderDetailModal = () => (
     <div className="news-detail-modal">
       <div className="news-detail-header">
@@ -307,22 +328,20 @@ function NewsManagement() {
             alt={selectedNews.title}
             className="news-detail-image"
             onError={(e) => {
-              e.target.style.display = "none";
-              e.target.nextElementSibling.style.display = "flex";
+              e.target.src =
+                "https://via.placeholder.com/800x400?text=No+Image";
             }}
           />
         </div>
       )}
 
       <div className="news-content">
-        <p style={{ whiteSpace: "pre-wrap", lineHeight: 1.8 }}>
-          {selectedNews?.content}
-        </p>
+        <p>{selectedNews?.content}</p>
       </div>
     </div>
   );
 
-  // ===== MAIN RENDER =====
+  // Main Render
   return (
     <div className="news-container">
       {/* Message Alert */}
@@ -382,23 +401,13 @@ function NewsManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan="7"
-                  style={{ textAlign: "center", padding: "40px" }}
-                >
+                <td colSpan="7" className="loading-cell">
                   🔄 Đang tải...
                 </td>
               </tr>
             ) : newsList.length === 0 ? (
               <tr>
-                <td
-                  colSpan="7"
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                    color: "#999",
-                  }}
-                >
+                <td colSpan="7" className="empty-cell">
                   📦 Không có tin tức nào
                 </td>
               </tr>
@@ -407,72 +416,36 @@ function NewsManagement() {
                 <tr key={news.id}>
                   <td className="table-id">#{news.id}</td>
                   <td className="news-title">
-                    <div style={{ maxWidth: "300px" }}>
-                      <div
-                        style={{
-                          fontWeight: "bold",
-                          fontSize: "14px",
-                          color: "#333",
-                        }}
-                      >
-                        {news.title || "-"}
-                      </div>
+                    <div className="title-wrapper">
+                      <div className="title-text">{news.title || "-"}</div>
                     </div>
                   </td>
                   <td className="news-image">
-                    {news.image ? (
-                      <img
-                        src={news.image}
-                        alt={news.title}
-                        style={{
-                          width: "80px",
-                          height: "50px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                          border: "1px solid #ddd",
-                        }}
-                        onError={(e) => {
-                          e.target.src =
-                            "https://via.placeholder.com/80x50?text=No+Image";
-                        }}
-                      />
-                    ) : (
-                      <div
-                        style={{
-                          width: "80px",
-                          height: "50px",
-                          backgroundColor: "#f0f0f0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          borderRadius: "4px",
-                          fontSize: "20px",
-                        }}
-                      >
-                        📷
-                      </div>
-                    )}
+                    <div className="image-wrapper">
+                      {news.image ? (
+                        <img
+                          src={news.image}
+                          alt={news.title}
+                          onError={(e) => {
+                            e.target.src =
+                              "https://via.placeholder.com/80x50?text=No+Image";
+                          }}
+                        />
+                      ) : (
+                        <img
+                          src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
+                          alt="No Image"
+                        />
+                      )}
+                    </div>
                   </td>
                   <td className="news-excerpt">
-                    <div
-                      style={{
-                        maxWidth: "250px",
-                        fontSize: "13px",
-                        color: "#666",
-                        lineHeight: 1.5,
-                      }}
-                    >
+                    <div className="excerpt-text">
                       {getExcerpt(news.content, 80)}
                     </div>
                   </td>
                   <td className="news-products">
-                    <div
-                      style={{
-                        maxWidth: "200px",
-                        fontSize: "12px",
-                        color: "#555",
-                      }}
-                    >
+                    <div className="products-text">
                       {getProductNames(news.product_ids)}
                     </div>
                   </td>
@@ -483,10 +456,6 @@ function NewsManagement() {
                         className="btn-view"
                         onClick={() => openDetailModal(news)}
                         disabled={loading}
-                        style={{
-                          background: "#17a2b8",
-                          borderColor: "#17a2b8",
-                        }}
                       >
                         👁️ Xem
                       </button>
@@ -605,11 +574,10 @@ function NewsManagement() {
             />
             {errors.image && <span className="form-error">{errors.image}</span>}
             {form.image && (
-              <div>
+              <div className="image-preview">
                 <img
                   src={form.image}
                   alt="Preview"
-                  className="news-image-preview"
                   onError={(e) => {
                     e.target.src =
                       "https://via.placeholder.com/400x200?text=Invalid+Image";
@@ -633,9 +601,7 @@ function NewsManagement() {
             {errors.content && (
               <span className="form-error">{errors.content}</span>
             )}
-            <div style={{ fontSize: "12px", color: "#666", marginTop: "4px" }}>
-              {form.content.length} / 5000 ký tự
-            </div>
+            <div className="char-count">{form.content.length} / 5000 ký tự</div>
           </div>
 
           <div className="form-group">
@@ -645,7 +611,6 @@ function NewsManagement() {
               value={form.product_ids}
               onChange={handleProductsChange}
               className="form-input"
-              style={{ minHeight: "150px" }}
             >
               {products.length === 0 ? (
                 <option disabled>Đang tải sản phẩm...</option>

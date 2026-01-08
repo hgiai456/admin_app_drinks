@@ -2,7 +2,6 @@
 @use '../abstracts/mixins' as m;
 @use 'sass:color';
 
-// ✅ RESET VÀ BASE STYLES
 * {
     margin: 0;
     padding: 0;
@@ -18,7 +17,6 @@ body {
     overflow-x: hidden;
 }
 
-// ✅ ADMIN LAYOUT
 .admin-layout {
     display: flex;
     min-height: 100vh;
@@ -321,7 +319,6 @@ body {
         }
     }
 
-    // ✅ SIDEBAR FOOTER
     &-footer {
         padding: $spacing-lg $spacing-xl;
         border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -461,9 +458,72 @@ body {
             }
         }
     }
+
+    @media (max-width: 1024px) {
+    position: fixed;
+    left: -280px; // Ẩn sidebar ra ngoài màn hình
+    width: 280px;
+    height: 100vh;
+    z-index: 1001;
+    transition: left 0.3s ease;
+    box-shadow: 4px 0 12px rgba(0, 0, 0, 0.3);
+
+    &.mobile-open {
+      left: 0; // Hiển thị sidebar
+    }
+
+    &.collapsed {
+      width: 280px; // Giữ nguyên width
+      left: -280px; // Vẫn ẩn khi chưa mở
+
+      &.mobile-open {
+        left: 0;
+      }
+
+      .sidebar-header {
+        min-height: 120px;
+
+        .sidebar-brand {
+          .brand-logo {
+            .sidebar-logo {
+              width: 105px;
+              height: 105px;
+              border-radius: 16px;
+            }
+
+            .brand-icon {
+              display: none; // Ẩn icon, hiện logo
+            }
+          }
+
+          .brand-content {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+          }
+        }
+      }
+
+      .nav-item {
+        .nav-text {
+          display: block; // Hiển thị text
+        }
+      }
+
+      .sidebar-footer {
+        .admin-info,
+        .logout-btn-sidebar {
+          display: flex; // Hiển thị đầy đủ
+        }
+
+        .logout-btn-collapsed {
+          display: none; // Ẩn nút collapsed
+        }
+      }
+    }
+  }
 }
 
-// ✅ MAIN CONTENT AREA
 .main-content {
     flex: 1;
     margin-left: 280px;
@@ -477,7 +537,6 @@ body {
     }
 }
 
-// ✅ HEADER STYLES
 .main-header {
     background: white;
     border-bottom: 1px solid $admin-border;
@@ -526,9 +585,39 @@ body {
             }
         }
     }
+
+    @media (max-width: 1024px) {
+    padding: $spacing-lg;
+    margin-top: 60px; // Tránh toggle button
+
+    .header-content {
+      flex-direction: column;
+      gap: $spacing-md;
+      align-items: flex-start;
+
+      .page-info {
+        .page-title {
+          font-size: 1.5rem;
+        }
+
+        .page-subtitle {
+          font-size: $font-size-sm;
+        }
+      }
+
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+
+        .current-time {
+          font-size: 0.75rem;
+          padding: $spacing-xs $spacing-sm;
+        }
+      }
+    }
+  }
 }
 
-// ✅ CONTENT AREA
 .content-area {
     flex: 1;
     padding: $spacing-xxl;
@@ -566,6 +655,22 @@ body {
             z-index: 2;
         }
     }
+    
+   @media (max-width: 1024px) {
+    padding: $spacing-lg;
+
+    .content-wrapper {
+      padding: $spacing-lg;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: $spacing-md;
+
+    .content-wrapper {
+      padding: $spacing-md;
+    }
+  }
 }
 
 // ✅ LOGOUT BUTTON
@@ -940,6 +1045,67 @@ body {
     }
 }
 
+.mobile-menu-toggle {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1002;
+  background: linear-gradient(135deg, $admin-primary, $admin-accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+
+  // ✅ HIỂN THỊ TRÊN MOBILE
+  @media (max-width: 1024px) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
+
+  &.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
+
 // ✅ RESPONSIVE
 @media (max-width: 1024px) {
     .sidebar {
@@ -956,101 +1122,84 @@ body {
 }
 
 @media (max-width: 768px) {
-    .main-header {
-        padding: $spacing-lg;
+  .main-header {
+    padding: $spacing-md;
+    margin-top: 55px;
 
-        .header-content {
-            flex-direction: column;
-            gap: $spacing-md;
-            align-items: flex-start;
+    .header-content {
+      .page-info {
+        .page-title {
+          font-size: 1.25rem;
         }
+      }
     }
+  }
 
-    .content-area {
-        padding: $spacing-lg;
+  .search-bar {
+    flex-direction: column;
+    gap: $spacing-md;
+
+    .search-form {
+      width: 100%;
+
+      .search-input {
+        width: 100%;
+      }
     }
+  }
 
-    .search-bar {
-        flex-direction: column;
-        gap: $spacing-md;
+  .pagination {
+    flex-direction: column;
+    gap: $spacing-md;
 
-        .search-form {
+    .pagination-controls {
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+
+    .form-group {
+      margin-bottom: $spacing-lg;
+    }
+  }
+
+  // ✅ TABLE RESPONSIVE
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+
+    .data-table {
+      min-width: 600px; // Đảm bảo table có min-width
+      font-size: 0.85rem;
+
+      th,
+      td {
+        padding: $spacing-sm !important;
+        font-size: 0.8rem;
+      }
+
+      .actions {
+        .action-buttons {
+          flex-direction: column;
+          gap: 4px;
+
+          .btn-edit,
+          .btn-delete {
             width: 100%;
-
-            .search-input {
-                width: 100%;
-            }
+            font-size: 0.75rem;
+            padding: 6px 8px;
+          }
         }
+      }
     }
+  }
 
-    .pagination {
-        flex-direction: column;
-        gap: $spacing-md;
-    }
-
-    .form-row {
-        flex-direction: column;
-        gap: 0;
-
-        .form-group {
-            margin-bottom: $spacing-lg;
-        }
-    }
-}
-/* ✅ DROPDOWN SCROLL STYLES */
-.form-group select {
-    max-height: 200px; /* Giới hạn chiều cao */
-    overflow-y: auto; /* Cho phép scroll dọc */
-
-    &[name='category_id'],
-    &[name='brand_id'] {
-        /* Styling đặc biệt cho category và brand dropdown */
-        max-height: 180px;
-        overflow-y: auto;
-        scrollbar-width: thin;
-        scrollbar-color: #888 #f1f1f1;
-
-        /* Webkit browsers (Chrome, Safari) */
-        &::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        &::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        &::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
-
-            &:hover {
-                background: #555;
-            }
-        }
-
-        /* Styling cho options */
-        option {
-            padding: 8px 12px;
-            border-bottom: 1px solid #f0f0f0;
-
-            &:hover {
-                background-color: #f8f9fa;
-            }
-
-            &:last-child {
-                border-bottom: none;
-            }
-        }
-    }
-}
-
-/* ✅ RESPONSIVE ADJUSTMENTS */
-@media (max-width: 768px) {
-    .form-group select {
-        &[name='category_id'],
-        &[name='brand_id'] {
-            max-height: 150px; /* Giảm chiều cao trên mobile */
-        }
-    }
+  .btn {
+    font-size: 0.85rem;
+    padding: $spacing-sm $spacing-md;
+  }
 }

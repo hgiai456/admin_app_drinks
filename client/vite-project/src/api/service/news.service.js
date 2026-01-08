@@ -7,6 +7,7 @@ class NewsService extends BaseService {
   constructor() {
     super(ENDPOINTS.NEWS.BASE);
   }
+  
   async getAll() {
     try {
       const response = await api.get(`${this.endpoint}`);
@@ -57,8 +58,8 @@ class NewsService extends BaseService {
       const payload = {
         title: newsData.title,
         content: newsData.content,
-        image: newsData.image,
-        products_ids: newsData.products_ids || [],
+        image: newsData.image || null,
+        product_ids: newsData.product_ids || [],
       };
 
       console.log(" Payload gửi lên server:", payload);
@@ -100,7 +101,7 @@ class NewsService extends BaseService {
     try {
       console.log("🔗 Đang xóa tin tức:", id);
 
-      const response = await api.delete(`${this.endpoint}/${id}`);
+      const response = await api.delete(ENDPOINTS.NEWS.BY_ID(id));
       const data = response.data;
 
       return data.data || data.news || data;

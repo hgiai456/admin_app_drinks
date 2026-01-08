@@ -43,8 +43,8 @@ function StyledComponentWrapper({ children, title, description }) {
 
 function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const pages = [
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const menuItems = [
     { name: "Quản lý đơn hàng", icon: "📋" },
     { name: "Quản lý cửa hàng", icon: "🏪" },
     { name: "Quản lý thương hiệu", icon: "🏷️" },
@@ -57,89 +57,110 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
     { name: "Quản lý hình ảnh", icon: "🖼️" },
     { name: "Quản lý tin tức", icon: "📰" },
   ];
+
+  const handleMenuClick = (itemName) => {
+    setCurrentPage(itemName);
+    setIsMobileOpen(false);
+  };
+
   return (
-    <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
-      <div className="sidebar-header">
-        <div className="sidebar-brand">
-          <div className="brand-logo">
-            <img
-              src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
-              alt="Logo"
-              className="sidebar-logo"
-              onError={(e) => {
-                e.target.style.display = "none";
-                e.target.nextElementSibling.style.display = "block";
-              }}
-            />
-            <span className="brand-icon">🍹</span>
+    <div>
+      <button
+        className="mobile-menu-toggle"
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+      >
+        {isMobileOpen ? "✖️" : "☰"}
+      </button>
+
+      <div
+        className={`sidebar-overlay ${isMobileOpen ? "active" : ""}`}
+        onClick={() => setIsMobileOpen(false)}
+      />
+
+      <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
+            <div className="brand-logo">
+              <img
+                src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
+                alt="Logo"
+                className="sidebar-logo"
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  e.target.nextElementSibling.style.display = "block";
+                }}
+              />
+              <span className="brand-icon">🍹</span>
+            </div>
+
+            {!isCollapsed && (
+              <div className="brand-content">
+                <span className="brand-text">Admin Panel</span>
+                <span className="brand-subtitle">Management System</span>
+              </div>
+            )}
           </div>
 
-          {!isCollapsed && (
-            <div className="brand-content">
-              <span className="brand-text">Admin Panel</span>
-              <span className="brand-subtitle">Management System</span>
-            </div>
-          )}
+          <button
+            className="sidebar-toggle"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+          >
+            {isCollapsed ? "➡️" : "⬅️"}
+          </button>
         </div>
 
-        <button
-          className="sidebar-toggle"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-        >
-          {isCollapsed ? "➡️" : "⬅️"}
-        </button>
-      </div>
-
-      <nav className="sidebar-nav">
-        {pages.map((page) => (
-          <button
-            key={page.name}
-            onClick={() => setCurrentPage(page.name)}
-            className={`nav-item ${currentPage === page.name ? "active" : ""}`}
-            data-page={page.name}
-            style={{ "--accent-color": page.color }}
-            title={isCollapsed ? page.name : ""}
-          >
-            <span className="nav-icon">{page.icon}</span>
-            {!isCollapsed && <span className="nav-text">{page.name}</span>}
-            {currentPage === page.name && <div className="nav-indicator" />}
-          </button>
-        ))}
-      </nav>
-
-      {/* Sidebar Footer */}
-      <div className="sidebar-footer">
-        {!isCollapsed && (
-          <>
-            <div className="admin-info">
-              <div className="admin-avatar">👨‍💼</div>
-              <div className="admin-details">
-                <span className="admin-name">Admin</span>
-                <span className="admin-role">Super User</span>
-              </div>
-            </div>
-
+        <nav className="sidebar-nav">
+          {menuItems.map((page) => (
             <button
-              className="logout-btn-sidebar"
-              onClick={onLogout}
-              title="Đăng xuất khỏi hệ thống"
+              key={page.name}
+              onClick={() => setCurrentPage(page.name)}
+              className={`nav-item ${
+                currentPage === page.name ? "active" : ""
+              }`}
+              data-page={page.name}
+              style={{ "--accent-color": page.color }}
+              title={isCollapsed ? page.name : ""}
             >
-              <span className="logout-text">Đăng xuất</span>
-              <div className="logout-arrow">→</div>
+              <span className="nav-icon">{page.icon}</span>
+              {!isCollapsed && <span className="nav-text">{page.name}</span>}
+              {currentPage === page.name && <div className="nav-indicator" />}
             </button>
-          </>
-        )}
-        {isCollapsed && (
-          <button
-            className="logout-btn-collapsed"
-            onClick={onLogout}
-            title="Đăng xuất"
-          >
-            <span className="logout-icon">🚪</span>
-          </button>
-        )}
-      </div>
-    </aside>
+          ))}
+        </nav>
+
+        <div className="sidebar-footer">
+          {!isCollapsed && (
+            <>
+              <div className="admin-info">
+                <div className="admin-avatar">👨‍💼</div>
+                <div className="admin-details">
+                  <span className="admin-name">Admin</span>
+                  <span className="admin-role">Super User</span>
+                </div>
+              </div>
+
+              <button
+                className="logout-btn-sidebar"
+                onClick={onLogout}
+                title="Đăng xuất khỏi hệ thống"
+              >
+                <span className="logout-text">Đăng xuất</span>
+                <div className="logout-arrow">→</div>
+              </button>
+            </>
+          )}
+          {isCollapsed && (
+            <button
+              className="logout-btn-collapsed"
+              onClick={onLogout}
+              title="Đăng xuất"
+            >
+              <span className="logout-icon">🚪</span>
+            </button>
+          )}
+        </div>
+      </aside>
+    </div>
   );
 }
 

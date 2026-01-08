@@ -5,13 +5,11 @@ import BaseService from "./base.service.js";
 
 class NewsDetailService extends BaseService {
   constructor() {
-    super(ENDPOINTS.NEWSDETAILS.BASE); // "/news-details"
+    super(ENDPOINTS.NEWSDETAILS.BASE);
   }
 
   async getAll() {
     try {
-      console.log(" Fetching all news-details");
-
       const response = await api.get(this.endpoint);
       const data = response.data;
 
@@ -56,9 +54,12 @@ class NewsDetailService extends BaseService {
 
   async update(id, newsDetailData) {
     try {
-      console.log("🔗 Updating news-detail:", id, newsDetailData);
+      console.log(" Updating news-detail:", id, newsDetailData);
 
-      const response = await api.put(`${this.endpoint}/${id}`, newsDetailData);
+      const response = await api.put(
+        ENDPOINTS.NEWSDETAILS.BY_ID(id),
+        newsDetailData
+      );
       const data = response.data;
 
       console.log(" News-detail updated:", data);

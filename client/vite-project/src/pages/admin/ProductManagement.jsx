@@ -4,6 +4,7 @@ import CategoryService from "@services/category.service.js";
 import BrandService from "@services/brand.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
+import ImagePicker from "../../components/admin/ImagePicker";
 
 function ProductManagement() {
   const [products, setProducts] = useState([]);
@@ -20,6 +21,7 @@ function ProductManagement() {
   const [totalPage, setTotalPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [search, setSearch] = useState("");
+  const [showImagePicker, setShowImagePicker] = useState(false); // ✅ ADD THIS
 
   const [form, setForm] = useState({
     name: "",
@@ -47,14 +49,11 @@ function ProductManagement() {
     }
   };
 
-  // USEEFFECTS (giống Prodetail)
   useEffect(() => {
-    //Tải dữ liệu khi gọi lần 1
     loadingInitialData();
   }, []);
 
   useEffect(() => {
-    //Tải dữ liệu khi gọi lần 2 khi page và search thay đổi
     if (!loadingData) {
       fetchProducts(page, search);
     }
@@ -63,13 +62,11 @@ function ProductManagement() {
   const fetchProducts = async (pageNum = 1, searchTerm = "") => {
     setLoading(true);
     try {
-      // ✅ CALL API VỚI PARAMS RÕ RÀNG
       const response = await ProductService.getPaging({
         page: pageNum || 1,
         search: searchTerm || "",
       });
 
-      // ✅ XỬ LÝ RESPONSE MỚI
       if (!response || !response.data) {
         setProducts([]);
         setTotalPage(1);
@@ -89,12 +86,10 @@ function ProductManagement() {
       console.log("📊 Processed Products:", processedProducts);
       console.log("📊 Pagination:", pagination);
 
-      // ✅ SET STATE
       const currentPage = pagination.currentPage || pageNum || 1;
       const totalPageCount = pagination.totalPage || 1;
       const totalItemsCount = pagination.totalItems || 0;
 
-      // ✅ SET STATE AN TOÀN
       setProducts(processedProducts);
       setPage(currentPage);
       setTotalPage(totalPageCount);
@@ -105,7 +100,6 @@ function ProductManagement() {
       console.error("❌ Error in fetchProducts:", error);
       setMessage(`❌ ${error.message}`);
 
-      // ✅ RESET STATE KHI LỖI
       setProducts([]);
       setTotalPage(1);
       setTotalItems(0);
@@ -113,7 +107,6 @@ function ProductManagement() {
       setLoading(false);
     }
   };
-  // ✅ MODAL FUNCTIONS (giống Prodetail)
   const openCreateModal = () => {
     setForm({
       name: "",
@@ -292,6 +285,10 @@ function ProductManagement() {
     return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
+  const handleImageSelect = (imagePath) => {
+    setForm((prev) => ({ ...prev, image: imagePath }));
+    setShowImagePicker(false);
+  };
   // ✅ LOADING STATE (giống Prodetail)
   if (loadingData) {
     return (
@@ -582,14 +579,24 @@ function ProductManagement() {
 
           <div className="form-group">
             <label className="form-label">🖼️ Hình ảnh</label>
-            <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              className="form-input"
-              placeholder="URL hình ảnh..."
-              type="url"
-            />
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="URL hình ảnh..."
+                type="url"
+                style={{ flex: 1 }}
+              />
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => setShowImagePicker(true)}
+              >
+                📚 Chọn từ thư viện
+              </button>
+            </div>
             {form.image && (
               <div style={{ marginTop: "8px" }}>
                 <img
@@ -678,6 +685,13 @@ function ProductManagement() {
           </div>
         </form>
       </Modal>
+
+      <ImagePicker
+        show={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImageSelect}
+        currentImage={form.image}
+      />
     </div>
   );
 }
