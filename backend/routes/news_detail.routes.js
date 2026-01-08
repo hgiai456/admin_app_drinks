@@ -8,7 +8,6 @@ import validate from "../middlewares/validate.js";
 
 const route = express.Router();
 
-// ===== PUBLIC ROUTES =====
 // GET /api/news-details - Lấy danh sách liên kết tin tức - sản phẩm (có phân trang)
 route.get("/", asyncHandle(NewsDetailController.getNewsDetails));
 

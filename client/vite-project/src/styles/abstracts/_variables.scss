@@ -41,6 +41,9 @@ $font-size-sm: 13px;
 $font-size-md: 14px;
 $font-size-lg: 16px;
 $font-size-xl: 18px;
+$font-size-xxl: 1.2rem; //  Cho loading text
+$font-size-xxxl: 1.5rem; //  Cho modal title
+$font-size-huge: 1.8rem; // Cho page title
 
 $font-weight-normal: 400;
 $font-weight-medium: 500;
@@ -56,19 +59,47 @@ $border-radius-xl: 12px;
 $border-color: #ced4da;
 $border-color-focus: #007bff;
 $border-color-error: #dc3545;
+$border-color-light: #ddd;
 
 $box-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
 $box-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
 $box-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.15);
 
-// ✅ Biến transition
+//Biến transition
 $transition-fast: 0.15s ease-in-out;
 $transition-normal: 0.3s ease-out;
+$transition-slow: 0.3s ease;
 
 //reponsive size
-// ✅ IMPROVED RESPONSIVE BREAKPOINTS
+//IMPROVED RESPONSIVE BREAKPOINTS
 $mobile-small: 320px;
 $mobile: 480px;
 $tablet: 768px;
 $tablet-large: 1024px;
 $desktop: 1200px;
+
+$news-title-color: #333;
+$news-excerpt-color: #666;
+$news-products-color: #555;
+$news-empty-color: #999;
+$news-placeholder-bg: #f0f0f0;
+$news-selected-bg: #f0f0f0;
+$news-view-btn: #17a2b8;
+$news-view-btn-hover: #138496;
+
+$news-image-width: 80px;
+$news-image-height: 50px;
+$news-image-width-mobile: 60px;
+$news-image-height-mobile: 40px;
+$news-title-max-width: 300px;
+$news-excerpt-max-width: 250px;
+$news-products-max-width: 200px;
+$news-select-min-height: 150px;
+$news-image-preview-max-height: 200px;
+$news-detail-modal-max-height: 70vh;
+$news-scrollbar-width: 6px;
+$news-icon-size: 1.25rem;
+
+$scrollbar-track: #f1f1f1;
+$scrollbar-thumb: #c1c1c1;
+$scrollbar-thumb-hover: #a8a8a8;

@@ -1,35 +1,43 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3003/api";
+const API_BASE_URL = "http://localhost:3003/api";
 
 export const ENDPOINTS = {
   // ===== AUTH =====
   AUTH: {
-    LOGIN: "/auth/login",
-    REGISTER: "/auth/register",
-    REFRESH: "/auth/refresh",
-    LOGOUT: "/auth/logout",
+    LOGIN: `${API_BASE_URL}/auth/login`,
+    REGISTER: `${API_BASE_URL}/auth/register`,
+    REFRESH: `${API_BASE_URL}/auth/refresh`,
+    LOGOUT: `${API_BASE_URL}/auth/logout`,
   },
 
   // ===== USERS =====
   USERS: {
-    BASE: "/users",
-    BY_ID: (id) => `/users/${id}`,
-    PROFILE: "/users/profile",
+    BASE: `${API_BASE_URL}/users`,
+    BY_ID: (id) => `${API_BASE_URL}/users/${id}`,
+    PROFILE: `${API_BASE_URL}/users/profile`,
   },
 
-  // ===== PRODUCTS =====
+  // ===== NEWS =====
+  NEWS: {
+    BASE: `${API_BASE_URL}/news`,
+    BY_ID: (id) => `${API_BASE_URL}/news/${id}`,
+  },
+
+  NEWSDETAILS: {
+    BASE: `${API_BASE_URL}/news-details`,
+    BY_ID: (id) => `${API_BASE_URL}/news-details/${id}`,
+  },
+
   PRODUCTS: {
-    BASE: "/products",
-    ALL: "/products/all",
-    BY_ID: (id) => `/products/${id}`,
-    BY_CATEGORY: "/products/by-category",
-    CUSTOMIZE_PAGE: "/products/customize-page",
+    BASE: `${API_BASE_URL}/products`,
+    ALL: `${API_BASE_URL}/products/all`,
+    BY_ID: (id) => `${API_BASE_URL}/products/${id}`,
+    BY_CATEGORY: `${API_BASE_URL}/products/by-category`,
+    CUSTOMIZE_PAGE: `${API_BASE_URL}/products/customize-page`,
   },
 
-  // ===== CATEGORIES =====
   CATEGORIES: {
     BASE: `${API_BASE_URL}/categories`,
-    ALL: `${API_BASE_URL}/categories/all`, // ✅ PHẢI CÓ DÒNG NÀY
+    ALL: `${API_BASE_URL}/categories/all`,
     BY_ID: (id) => `${API_BASE_URL}/categories/${id}`,
   },
 
@@ -40,86 +48,90 @@ export const ENDPOINTS = {
     BY_ID: (id) => `${API_BASE_URL}/brands/${id}`,
   },
 
-  // ===== ORDERS =====
+  MEDIA_LIBRARY: {
+    BASE: `${API_BASE_URL}/media-library`,
+    BY_ID: (id) => `${API_BASE_URL}/media-library/${id}`,
+    UPLOAD: `${API_BASE_URL}/media-library/upload`,
+    INCREMENT_USAGE: `${API_BASE_URL}/media-library/increment-usage`,
+    UPLOAD_MULTIPLE: `${API_BASE_URL}/media-library/upload-multiple`,
+  },
+
   ORDERS: {
-    BASE: "/orders",
-    BY_ID: (id) => `/orders/${id}`,
-    BY_USER: (userId) => `/orders/user/${userId}`,
+    BASE: `${API_BASE_URL}/orders`,
+    BY_ID: (id) => `${API_BASE_URL}/orders/${id}`,
+    BY_USER: (userId) => `${API_BASE_URL}/orders/user/${userId}`,
     DETAILS: {
-      BASE: "/orders/details/all",
-      BY_ID: (id) => `/orders/details/${id}`,
+      BASE: `${API_BASE_URL}/orders/details/all`,
+      BY_ID: (id) => `${API_BASE_URL}/orders/details/${id}`,
     },
   },
 
   // ===== CARTS =====
   CARTS: {
-    BASE: "/carts",
-    BY_ID: (id) => `/carts/${id}`,
-    BY_SESSION: "/carts/by-session",
-    BY_USER: (userId) => `/carts/user/${userId}`,
-    CHECKOUT: "/carts/checkout",
-    CLEAR: (id) => `/carts/${id}/clear`,
+    BASE: `${API_BASE_URL}/carts`,
+    BY_ID: (id) => `${API_BASE_URL}/carts/${id}`,
+    BY_SESSION: `${API_BASE_URL}/carts/by-session`,
+    BY_USER: (userId) => `${API_BASE_URL}/carts/user/${userId}`,
+    CHECKOUT: `${API_BASE_URL}/carts/checkout`,
+    CLEAR: (id) => `${API_BASE_URL}/carts/${id}/clear`,
     ITEMS: {
-      BASE: "/carts/items",
-      ALL: "/carts/items/all",
-      BY_ID: (id) => `/carts/items/${id}`,
-      BY_CART: (cartId) => `/carts/items/cart/${cartId}`,
+      BASE: `${API_BASE_URL}/carts/items`,
+      ALL: `${API_BASE_URL}/carts/items/all`,
+      BY_ID: (id) => `${API_BASE_URL}/carts/items/${id}`,
+      BY_CART: (cartId) => `${API_BASE_URL}/carts/items/cart/${cartId}`,
     },
   },
 
-  // ===== STORES =====
   STORES: {
-    BASE: "/stores",
-    BY_ID: (id) => `/stores/${id}`,
+    BASE: `${API_BASE_URL}/stores`,
+    BY_ID: (id) => `${API_BASE_URL}/stores/${id}`,
   },
 
-  // ===== SIZES =====
   SIZES: {
-    BASE: "/sizes",
-    BY_ID: (id) => `/sizes/${id}`,
+    BASE: `${API_BASE_URL}/sizes`,
+    BY_ID: (id) => `${API_BASE_URL}/sizes/${id}`,
   },
 
-  // ===== BANNERS =====
   BANNERS: {
-    BASE: "/banners",
-    BY_ID: (id) => `/banners/${id}`,
+    BASE: `${API_BASE_URL}/banners`,
+    BY_ID: (id) => `${API_BASE_URL}/banners/${id}`,
     DETAILS: {
-      BASE: "/banners/details/all",
-      BY_ID: (id) => `/banners/details/${id}`,
+      BASE: `${API_BASE_URL}/banners/details/all`,
+      BY_ID: (id) => `${API_BASE_URL}/banners/details/${id}`,
     },
   },
 
   // ===== PRODETAILS =====
   PRODETAILS: {
-    BASE: "/prodetails",
-    BY_ID: (id) => `/prodetails/${id}`,
-    BY_PRODUCT: "/prodetails/by-product",
-    FIND: "/prodetails/find",
+    BASE: `${API_BASE_URL}/prodetails`,
+    BY_ID: (id) => `${API_BASE_URL}/prodetails/${id}`,
+    BY_PRODUCT: `${API_BASE_URL}/prodetails/by-product`,
+    FIND: `${API_BASE_URL}/prodetails/find`,
   },
 
   // ===== PAYMENTS =====
   PAYMENTS: {
-    CREATE: "/payments/create",
-    VERIFY: "/payments/verify",
-    STATUS: (orderId) => `/payments/status/${orderId}`,
+    CREATE: `${API_BASE_URL}/payments/create`,
+    VERIFY: `${API_BASE_URL}/payments/verify`,
+    STATUS: (orderId) => `${API_BASE_URL}/payments/status/${orderId}`,
     VNPAY: {
-      RETURN: "/payments/vnpay/return",
-      IPN: "/payments/vnpay/ipn",
+      RETURN: `${API_BASE_URL}/payments/vnpay/return`,
+      IPN: `${API_BASE_URL}/payments/vnpay/ipn`,
     },
     PAYOS: {
-      WEBHOOK: "/payments/payos/webhook",
+      WEBHOOK: `${API_BASE_URL}/payments/payos/webhook`,
     },
   },
 
   // ===== IMAGES =====
   IMAGES: {
-    UPLOAD: "/images/upload",
-    UPLOAD_GOOGLE: "/images/google/upload",
-    DELETE: "/images/delete",
-    VIEW: (fileName) => `/images/${fileName}`,
+    UPLOAD: `${API_BASE_URL}/images/upload`,
+    UPLOAD_GOOGLE: `${API_BASE_URL}/images/google/upload`,
+    DELETE: `${API_BASE_URL}/images/delete`,
+    VIEW: (fileName) => `${API_BASE_URL}/images/${fileName}`,
     PRODUCTS: {
-      BASE: "/images/products/all",
-      BY_ID: (id) => `/images/products/${id}`,
+      BASE: `${API_BASE_URL}/images/products/all`,
+      BY_ID: (id) => `${API_BASE_URL}/images/products/${id}`,
     },
   },
 };
