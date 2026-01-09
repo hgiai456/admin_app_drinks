@@ -11,7 +11,6 @@ import UserManagement from "@pages/admin/UserManagement.jsx";
 import ProductManagement from "@pages/admin/ProductManagement.jsx";
 import SizeManagement from "@pages/admin/SizeManagement.jsx";
 import OrderManagement from "@pages/admin/OrderManagement.jsx";
-import ImageManagement from "@pages/admin/ImageManagement.jsx";
 import LoginAdmin from "@pages/admin/LoginAdmin.jsx";
 
 import "@styles/pages/_admin.scss";
@@ -54,7 +53,6 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
     { name: "Quản lý kích thước", icon: "📏" },
     { name: "Quản lý banner", icon: "🎨" },
     { name: "Quản lý chi tiết sản phẩm", icon: "🛍️" },
-    { name: "Quản lý hình ảnh", icon: "🖼️" },
     { name: "Quản lý tin tức", icon: "📰" },
   ];
 
@@ -392,15 +390,6 @@ function App() {
           return (
             <StyledComponentWrapper>
               <ProdetailManagement />
-            </StyledComponentWrapper>
-          );
-        case "Quản lý hình ảnh":
-          return (
-            <StyledComponentWrapper
-              title="Quản lý hình ảnh"
-              description="Upload và quản lý ảnh"
-            >
-              <ImageManagement />
             </StyledComponentWrapper>
           );
         case "Quản lý tin tức":

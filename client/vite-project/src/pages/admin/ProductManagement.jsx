@@ -5,6 +5,7 @@ import BrandService from "@services/brand.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
 import ImagePicker from "../../components/admin/ImagePicker";
+import ImageComponent from "../../components/common/Image.jsx";
 import { Image } from "lucide-react";
 import Button from "@components/common/Button.jsx";
 
@@ -150,7 +151,6 @@ function ProductManagement() {
     setErrors({});
   };
 
-  // ✅ FORM HANDLERS (giống Prodetail)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -225,7 +225,6 @@ function ProductManagement() {
     }
   };
 
-  // ✅ ACTION HANDLERS (giống Prodetail)
   const handleDelete = async (id) => {
     if (!confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
       return;
@@ -291,7 +290,6 @@ function ProductManagement() {
     setForm((prev) => ({ ...prev, image: imagePath }));
     setShowImagePicker(false);
   };
-  // ✅ LOADING STATE (giống Prodetail)
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -300,7 +298,6 @@ function ProductManagement() {
     );
   }
 
-  // ✅ MAIN RENDER (sử dụng SCSS classes)
   return (
     <div className="prodetail-container">
       {/* Message Alert */}
@@ -416,36 +413,30 @@ function ProductManagement() {
                   </td>
                   <td className="product-image">
                     {item.image ? (
-                      <img
+                      <ImageComponent
                         src={item.image}
                         alt={item.name}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                          border: "1px solid #ddd",
-                        }}
+                        width={55}
+                        height={55}
+                        borderRadius={4}
                         onError={(e) => {
                           e.target.style.display = "none";
                           e.target.nextElementSibling.style.display = "flex";
                         }}
                       />
-                    ) : null}
-                    <div
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#f0f0f0",
-                        display: item.image ? "none" : "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "4px",
-                        fontSize: "20px",
-                      }}
-                    >
-                      📷
-                    </div>
+                    ) : (
+                      <ImageComponent
+                        src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
+                        alt={"Default Image"}
+                        width={55}
+                        height={55}
+                        borderRadius={4}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextElementSibling.style.display = "flex";
+                        }}
+                      />
+                    )}
                   </td>
                   <td className="category-name">
                     <span className="category-badge">
@@ -581,7 +572,7 @@ function ProductManagement() {
 
           <div className="form-group">
             <label className="form-label">🖼️ Hình ảnh</label>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="image-row">
               <input
                 name="image"
                 value={form.image}
@@ -602,17 +593,12 @@ function ProductManagement() {
               </Button>
             </div>
             {form.image && (
-              <div style={{ marginTop: "8px" }}>
-                <img
+              <div>
+                <ImageComponent
                   src={form.image}
-                  alt="Preview"
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    objectFit: "cover",
-                    borderRadius: "4px",
-                    border: "1px solid #ddd",
-                  }}
+                  alt={form.name}
+                  width={150}
+                  height={150}
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}

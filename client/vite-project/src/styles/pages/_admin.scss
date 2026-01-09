@@ -74,7 +74,6 @@ body {
     }
 }
 
-// ✅ SIDEBAR STYLES
 .sidebar {
     position: fixed;
     left: 0;
@@ -93,13 +92,11 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
 
-    // ✅ NGĂN USER SELECT VÀ DRAG
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
 
-    // ✅ NGĂN TOUCH SCROLL NGANG
     touch-action: pan-y;
     -webkit-overflow-scrolling: touch;
 
@@ -961,6 +958,11 @@ body {
 .form-group {
     margin-bottom: $spacing-lg;
 
+    .image-row{
+        display: flex;
+        gap: $spacing-md;
+        margin-bottom: $spacing-md;
+    }
     .form-label {
         @include m.form-label;
         font-weight: $font-weight-semibold;
@@ -990,6 +992,8 @@ body {
         font-weight: $font-weight-medium;
     }
 }
+
+
 
 .form-row {
     display: flex;
@@ -1028,6 +1032,8 @@ body {
             transform: translateY(-2px);
         }
     }
+
+
 }
 
 // ✅ LOADING STATES

@@ -1,0 +1,201 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as m;
+@use 'sass:color';
+
+// =============================================
+// IMAGE COMPONENT
+// =============================================
+
+.image-wrapper {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  background: $admin-light;
+  min-width: 50px;
+  min-height: 50px;
+  
+  // ENSURE wrapper doesn't collapse
+  &:empty {
+    min-width: 50px;
+    min-height: 50px;
+  }
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transition: all $transition-normal;
+
+  // OBJECT FIT VARIANTS
+  &--cover {
+    object-fit: cover;
+  }
+
+  &--contain {
+    object-fit: contain;
+  }
+
+  &--fill {
+    object-fit: fill;
+  }
+
+  &--none {
+    object-fit: none;
+  }
+
+  &--scale-down {
+    object-fit: scale-down;
+  }
+
+  // SHAPE VARIANTS
+  &--rounded {
+    border-radius: $border-radius-md;
+  }
+
+  &--circle {
+    border-radius: 50%;
+  }
+
+  // BORDER VARIANT
+  &--bordered {
+    border: 2px solid $admin-border;
+  }
+
+  // SHADOW VARIANT
+  &--shadow {
+    box-shadow: $box-shadow-md;
+  }
+
+  // CLICKABLE VARIANT
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: $box-shadow-lg;
+    }
+  }
+
+  // LOADING STATE
+  &--loading {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  // ERROR STATE
+  &--error {
+    opacity: 0.5;
+    filter: grayscale(100%);
+  }
+}
+
+// SKELETON LOADING
+.image-skeleton {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    $admin-light 0%,
+    color.adjust($admin-light, $lightness: -5%) 50%,
+    $admin-light 100%
+  );
+  border-radius: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: $spacing-sm;
+  z-index: 2;
+}
+
+.skeleton-shimmer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+.skeleton-text {
+  position: relative;
+  z-index: 1;
+  font-size: $font-size-xs;
+  color: $admin-text-light;
+  font-weight: $font-weight-medium;
+  background: rgba(white, 0.9);
+  padding: 4px 8px;
+  border-radius: $border-radius-sm;
+}
+
+// ERROR OVERLAY
+.image-error-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba($danger-color, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  border-radius: inherit;
+  z-index: 3;
+}
+
+.image-error-badge {
+  background: rgba($danger-color, 0.9);
+  color: white;
+  padding: 6px 12px;
+  border-radius: $border-radius-sm;
+  font-size: $font-size-lg;
+  box-shadow: $box-shadow-sm;
+}
+
+.image-error-text {
+  font-size: $font-size-xs;
+  color: $danger-color;
+  font-weight: $font-weight-medium;
+  text-align: center;
+  padding: 0 $spacing-sm;
+  background: rgba(white, 0.9);
+  border-radius: $border-radius-sm;
+}
+
+// KEYFRAMES
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// RESPONSIVE
+@media (max-width: $tablet) {
+  .image {
+    &--clickable {
+      &:hover {
+        transform: scale(1.02);
+      }
+    }
+  }
+
+  .skeleton-text,
+  .image-error-text {
+    font-size: $font-size-xs;
+  }
+}

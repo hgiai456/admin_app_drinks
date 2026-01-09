@@ -3,6 +3,11 @@ import StoreService from "@services/store.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
 
+import ImagePicker from "@components/admin/ImagePicker";
+import ImageComponent from "@components/common/Image.jsx";
+import Button from "@components/common/Button.jsx";
+import { Image } from "lucide-react";
+
 function StoreManagement() {
   const [stores, setStores] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -16,6 +21,8 @@ function StoreManagement() {
   const [totalPage, setTotalPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [search, setSearch] = useState("");
+
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   const [form, setForm] = useState({
     storeName: "",
@@ -133,7 +140,6 @@ function StoreManagement() {
     }
   };
 
-  // ✅ MODAL FUNCTIONS
   const openCreateModal = () => {
     setForm({
       storeName: "",
@@ -178,7 +184,6 @@ function StoreManagement() {
     setErrors({});
   };
 
-  // ✅ FORM HANDLERS
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -277,7 +282,6 @@ function StoreManagement() {
     }
   };
 
-  // ✅ ACTION HANDLERS
   const handleDelete = async (id) => {
     if (!confirm("Bạn có chắc chắn muốn xóa cửa hàng này không?")) {
       return;
@@ -315,7 +319,6 @@ function StoreManagement() {
     }
   };
 
-  // ✅ HELPER FUNCTIONS
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("vi-VN");
@@ -337,7 +340,11 @@ function StoreManagement() {
     return `${openTime.slice(0, 5)} - ${closeTime.slice(0, 5)}`;
   };
 
-  // ✅ LOADING STATE
+  const handleImageSelect = (imagePath) => {
+    setForm((prev) => ({ ...prev, image: imagePath }));
+    setShowImagePicker(false);
+  };
+
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -346,7 +353,6 @@ function StoreManagement() {
     );
   }
 
-  // ✅ MAIN RENDER
   return (
     <div className="prodetail-container">
       {/* Message Alert */}
@@ -436,22 +442,30 @@ function StoreManagement() {
                   <td className="table-id">{item.id}</td>
                   <td className="store-image">
                     {item.image ? (
-                      <img
+                      <ImageComponent
                         src={item.image}
-                        alt={item.storeName}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                          border: "1px solid #ddd",
-                        }}
+                        alt={item.name}
+                        width={55}
+                        height={55}
+                        borderRadius={4}
                         onError={(e) => {
                           e.target.style.display = "none";
                           e.target.nextElementSibling.style.display = "flex";
                         }}
                       />
-                    ) : null}
+                    ) : (
+                      <ImageComponent
+                        src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
+                        alt={"Default Image"}
+                        width={55}
+                        height={55}
+                        borderRadius={4}
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          e.target.nextElementSibling.style.display = "flex";
+                        }}
+                      />
+                    )}
                     <div
                       style={{
                         width: "50px",
@@ -678,14 +692,26 @@ function StoreManagement() {
 
           <div className="form-group">
             <label className="form-label">🖼️ Hình ảnh</label>
-            <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              className={`form-input ${errors.image ? "error" : ""}`}
-              placeholder="URL hình ảnh..."
-              type="url"
-            />
+            <div className="image-row">
+              <input
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="URL hình ảnh..."
+                type="url"
+              />
+
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                icon={<Image size={18} />}
+                onClick={() => setShowImagePicker(true)}
+              >
+                Chọn từ thư viện
+              </Button>
+            </div>
             {errors.image && <span className="form-error">{errors.image}</span>}
             {form.image && (
               <div style={{ marginTop: "8px" }}>
@@ -731,6 +757,13 @@ function StoreManagement() {
           </div>
         </form>
       </Modal>
+
+      <ImagePicker
+        show={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImageSelect}
+        currentImage={form.image}
+      />
     </div>
   );
 }

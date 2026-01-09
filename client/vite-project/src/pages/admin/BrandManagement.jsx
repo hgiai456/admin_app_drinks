@@ -2,6 +2,10 @@ import { useEffect, useState } from "react";
 import BrandService from "@services/brand.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
+import ImagePicker from "@components/admin/ImagePicker";
+import ImageComponent from "@components/common/Image.jsx";
+import Button from "@components/common/Button.jsx";
+import { Image } from "lucide-react";
 
 function BrandManagement() {
   const [brands, setBrands] = useState([]);
@@ -16,6 +20,7 @@ function BrandManagement() {
   const [totalPage, setTotalPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [search, setSearch] = useState("");
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -35,7 +40,6 @@ function BrandManagement() {
     }
   };
 
-  // ✅ USEEFFECTS
   useEffect(() => {
     loadingInitialData();
   }, []);
@@ -125,7 +129,6 @@ function BrandManagement() {
     }
   };
 
-  // ✅ MODAL FUNCTIONS
   const openCreateModal = () => {
     setForm({
       name: "",
@@ -235,7 +238,6 @@ function BrandManagement() {
     }
   };
 
-  // ✅ ACTION HANDLERS
   const handleDelete = async (id) => {
     if (!confirm("Bạn có chắc chắn muốn xóa thương hiệu này không?")) {
       return;
@@ -273,13 +275,16 @@ function BrandManagement() {
     }
   };
 
-  // ✅ HELPER FUNCTIONS
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
-  // ✅ LOADING STATE
+  const handleImageSelect = (imagePath) => {
+    setForm((prev) => ({ ...prev, image: imagePath }));
+    setShowImagePicker(false);
+  };
+
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -288,7 +293,6 @@ function BrandManagement() {
     );
   }
 
-  // ✅ MAIN RENDER
   return (
     <div className="prodetail-container">
       {/* Message Alert */}
@@ -527,27 +531,34 @@ function BrandManagement() {
 
           <div className="form-group">
             <label className="form-label">🖼️ Hình ảnh</label>
-            <input
-              name="image"
-              value={form.image}
-              onChange={handleChange}
-              className={`form-input ${errors.image ? "error" : ""}`}
-              placeholder="URL hình ảnh..."
-              type="url"
-            />
-            {errors.image && <span className="form-error">{errors.image}</span>}
+            <div className="image-row">
+              <input
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="URL hình ảnh..."
+                type="url"
+              />
+
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                icon={<Image size={18} />}
+                onClick={() => setShowImagePicker(true)}
+              >
+                Chọn từ thư viện
+              </Button>
+            </div>
+
             {form.image && (
-              <div style={{ marginTop: "8px" }}>
-                <img
+              <div>
+                <ImageComponent
                   src={form.image}
-                  alt="Preview"
-                  style={{
-                    width: "100px",
-                    height: "100px",
-                    objectFit: "cover",
-                    borderRadius: "4px",
-                    border: "1px solid #ddd",
-                  }}
+                  alt={form.name}
+                  width={150}
+                  height={150}
                   onError={(e) => {
                     e.target.style.display = "none";
                   }}
@@ -580,6 +591,13 @@ function BrandManagement() {
           </div>
         </form>
       </Modal>
+
+      <ImagePicker
+        show={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImageSelect}
+        currentImage={form.image}
+      />
     </div>
   );
 }
