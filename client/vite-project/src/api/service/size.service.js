@@ -1,162 +1,185 @@
-import Size from '@models/size';
+import Size from "@models/size.js";
+import BaseService from "./base.service";
+import api from "../index.js";
+import { ENDPOINTS } from "../endpoints.js";
 
-class SizeService {
-    static baseUrl = 'http://localhost:3003/api/sizes';
+class SizeService extends BaseService {
+  constructor() {
+    super(ENDPOINTS.SIZES.BASE);
+  }
 
-    static getAuthHeader() {
-        const token = localStorage.getItem('admin_token');
-        return token ? { Authorization: 'Bearer ' + token } : {};
+  async getAll() {
+    try {
+      console.log("🔗 SizeService.getAll() - Endpoint:", this.endpoint);
+
+      const response = await api.get(this.endpoint);
+
+      console.log("✅ Raw response:", response);
+      console.log("✅ Response data:", response.data);
+
+      const data = response.data;
+
+      // ✅ EXTRACT ARRAY từ response
+      let sizes = [];
+
+      if (Array.isArray(data)) {
+        // Case 1: API trả về array trực tiếp
+        sizes = data;
+      } else if (data.data && Array.isArray(data.data)) {
+        // Case 2: API trả về { data: [...] }
+        sizes = data.data;
+      } else if (data.sizes && Array.isArray(data.sizes)) {
+        // Case 3: API trả về { sizes: [...] }
+        sizes = data.sizes;
+      } else {
+        console.warn("⚠️ Unexpected response format:", data);
+        sizes = [];
+      }
+
+      console.log(`✅ Extracted ${sizes.length} sizes:`, sizes);
+
+      // ✅ Transform với Size.fromApiResponse
+      return sizes.map((item) =>
+        Size?.fromApiResponse ? Size.fromApiResponse(item) : item
+      );
+    } catch (error) {
+      console.error("❌ Error in SizeService.getAll():", error);
+      console.error("Error details:", {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
+      throw new Error("Lỗi khi tải danh sách kích thước: " + error.message);
     }
+  }
 
-    static async getAll() {
-        try {
-            const res = await fetch(this.baseUrl);
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            const data = await res.json();
-            console.log('Raw response from getAll:', data);
+  async getPaging({ page = 1, search = "" } = {}) {
+    try {
+      console.log(
+        `🔗 SizeService.getPaging() - page: ${page}, search: "${search}"`
+      );
 
-            // Kiểm tra cấu trúc response
-            const sizes = data.data || data.sizes || data;
-            if (!Array.isArray(sizes)) {
-                console.error('Expected array but got:', sizes);
-                return [];
-            }
+      const params = { page, search };
+      const response = await api.get(this.endpoint, { params });
 
-            // Chuyển thành instance Size
-            return sizes.map(
-                (s) => new Size(s.id, s.name, s.createdAt, s.updatedAt)
-            );
-        } catch (error) {
-            console.error('Error fetching sizes:', error);
-            throw error;
-        }
+      console.log("✅ Paging response:", response.data);
+
+      const data = response.data;
+
+      // ✅ Extract data và pagination info
+      const sizes = data.data || [];
+      const pagination = {
+        currentPage: data.currentPage || parseInt(page),
+        totalPage: data.totalPage || 1,
+        totalItems: data.totalSizes || data.totalItems || 0,
+      };
+
+      console.log(
+        `✅ Extracted ${sizes.length} sizes with pagination:`,
+        pagination
+      );
+
+      return {
+        data: sizes.map((item) =>
+          Size?.fromApiResponse ? Size.fromApiResponse(item) : item
+        ),
+        pagination: pagination,
+      };
+    } catch (error) {
+      console.error("❌ Error in SizeService.getPaging():", error);
+      throw new Error("Lỗi khi tải kích thước phân trang: " + error.message);
     }
+  }
 
-    static async getById(id) {
-        try {
-            const res = await fetch(`${this.baseUrl}/${id}`);
-            if (!res.ok) {
-                throw new Error(`HTTP error! status: ${res.status}`);
-            }
-            const data = await res.json();
-            console.log('Raw response from getById:', data);
+  async getById(id) {
+    try {
+      console.log("🔗 Đang tải kích thước:", id);
 
-            const s = data.data || data.size || data;
-            return new Size(s.id, s.name, s.createdAt, s.updatedAt);
-        } catch (error) {
-            console.error('Error fetching size:', error);
-            throw error;
-        }
+      const response = await api.get(`${this.endpoint}/${id}`);
+      const data = response.data;
+
+      const sizeResponse = data.data || data.size || data;
+      return Size?.fromApiResponse
+        ? Size.fromApiResponse(sizeResponse)
+        : sizeResponse;
+    } catch (error) {
+      console.error("❌ Lỗi trong getById Size:", error);
+      throw new Error("Lỗi khi tải kích thước: " + error.message);
     }
+  }
 
-    static async create(sizeData) {
-        try {
-            console.log('Creating size with data:', sizeData);
-            const res = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                },
-                body: JSON.stringify(sizeData)
-            });
+  async create(sizeData) {
+    try {
+      console.log("🔗 Đang tạo kích thước:", sizeData);
 
-            console.log('Create response status:', res.status);
+      const payload =
+        sizeData instanceof Size ? sizeData.toApiFormat() : sizeData;
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('Create error response:', errorText);
-                throw new Error(
-                    `HTTP error! status: ${res.status}, message: ${errorText}`
-                );
-            }
+      const response = await api.post(this.endpoint, payload);
 
-            const data = await res.json();
-            console.log('Raw response from create:', data);
+      console.log("📊 Create Size Status:", response.status);
+      console.log("✅ Raw Create Response:", response.data);
 
-            const s = data.data || data.size || data;
-            return new Size(s.id, s.name, s.createdAt, s.updatedAt);
-        } catch (error) {
-            console.error('Error creating size:', error);
-            throw error;
-        }
+      const data = response.data;
+      const sizeResponse = data.data || data.size || data;
+
+      return Size?.fromApiResponse
+        ? Size.fromApiResponse(sizeResponse)
+        : sizeResponse;
+    } catch (error) {
+      console.error("❌ Lỗi trong create Size:", error);
+      throw new Error("Lỗi khi tạo kích thước: " + error.message);
     }
+  }
 
-    static async update(id, sizeData) {
-        try {
-            console.log('Updating size ID:', id, 'with data:', sizeData);
+  async update(id, sizeData) {
+    try {
+      console.log("🔗 Đang cập nhật kích thước:", id, sizeData);
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                },
-                body: JSON.stringify(sizeData)
-            });
+      const payload =
+        sizeData instanceof Size ? sizeData.toApiFormat() : sizeData;
 
-            console.log('Update response status:', res.status);
+      const response = await api.put(`${this.endpoint}/${id}`, payload);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('Update error response:', errorText);
-                throw new Error(
-                    `HTTP error! status: ${res.status}, message: ${errorText}`
-                );
-            }
+      const data = response.data;
 
-            const data = await res.json();
-            console.log('Raw response from update:', data);
+      if (data.success || data.message) {
+        console.log("⚠️ API chỉ trả success, fetch lại size...");
+        return await this.getById(id);
+      }
 
-            // Một số API chỉ trả về success message, không trả về size object
-            if (data.success || data.message) {
-                // Nếu chỉ trả về success, fetch lại size
-                return await this.getById(id);
-            }
+      const sizeResponse = data.data || data.size || data;
 
-            const s = data.data || data.size || data;
-            if (!s.id) {
-                // Nếu không có ID trong response, fetch lại size
-                return await this.getById(id);
-            }
+      if (!sizeResponse.id) {
+        console.log("⚠️ Response không có ID, fetch lại size...");
+        return await this.getById(id);
+      }
 
-            return new Size(s.id, s.name, s.createdAt, s.updatedAt);
-        } catch (error) {
-            console.error('Error updating size:', error);
-            throw error;
-        }
+      return Size?.fromApiResponse
+        ? Size.fromApiResponse(sizeResponse)
+        : sizeResponse;
+    } catch (error) {
+      console.error("❌ Lỗi trong update Size:", error);
+      throw new Error("Lỗi khi cập nhật kích thước: " + error.message);
     }
+  }
 
-    static async delete(id) {
-        try {
-            console.log('Deleting size ID:', id);
+  async delete(id) {
+    try {
+      console.log("🔗 Đang xóa kích thước:", id);
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'DELETE',
-                headers: this.getAuthHeader()
-            });
+      const response = await api.delete(`${this.endpoint}/${id}`);
 
-            console.log('Delete response status:', res.status);
+      console.log("📊 Delete Size Status:", response.status);
+      console.log("✅ Raw Delete Response:", response.data);
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('Delete error response:', errorText);
-                throw new Error(
-                    `HTTP error! status: ${res.status}, message: ${errorText}`
-                );
-            }
-
-            const data = await res.json();
-            console.log('Raw response from delete:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('Error deleting size:', error);
-            throw error;
-        }
+      const data = response.data;
+      return data.data || data.size || data;
+    } catch (error) {
+      console.error("❌ Lỗi trong delete Size:", error);
+      throw new Error("Lỗi khi xóa kích thước: " + error.message);
     }
+  }
 }
 
-export default SizeService;
+export default new SizeService();

@@ -21,7 +21,7 @@ export async function getMedia(req, res) {
       sortBy = "createdAt",
       order = "DESC",
     } = req.query;
-    const pageSize = 20;
+    const pageSize = 10;
     const offset = (page - 1) * pageSize;
 
     const whereClause = search

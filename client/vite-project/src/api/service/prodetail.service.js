@@ -1,240 +1,141 @@
-import Prodetail from '@models/prodetail';
-
+import ProDetail from "@models/Prodetail.js";
+import BaseService from "./base.service";
+import api from "../index.js";
+import { ENDPOINTS } from "../endpoints.js";
 // ProdetailAPI.js
+class ProDetailService extends BaseService {
+  constructor() {
+    super(ENDPOINTS.PRODETAILS.BASE);
+  }
 
-class ProdetailService {
-    static baseUrl = 'http://localhost:3003/api/prodetails';
+  async getAll() {
+    try {
+      const response = await api.get(this.endpoint);
 
-    static async getPaging({ page = 1, search = '', limit = 10 } = {}) {
-        try {
-            const url = `${this.baseUrl}?search=${encodeURIComponent(
-                search
-            )}&page=${page}&limit=${limit}`;
-            console.log('🔗 Đang gọi API:', url);
+      const data = response.data;
+      const prodetails = data.data || data.prodetails || data || [];
 
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
-
-            console.log('📊 Status:', res.status, res.statusText);
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi từ server:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-
-            const data = await res.json();
-            console.log(' Raw API Data:', data);
-
-            // ✅ Trả về data nguyên bản để component xử lý
-            return data;
-        } catch (error) {
-            console.error(' Lỗi trong getPaging:', error);
-            throw error;
-        }
+      return Array.isArray(prodetails)
+        ? prodetails.map((item) =>
+            ProDetail?.fromApiResponse ? ProDetail.fromApiResponse(item) : item
+          )
+        : [];
+    } catch (error) {
+      console.error("❌ Lỗi ProDetails getAll:", error);
+      throw new Error(
+        "Lỗi khi tải danh sách chi tiết sản phẩm: " + error.message
+      );
     }
+  }
 
-    static getAuthHeader() {
-        const token = localStorage.getItem('admin_token');
-        return token ? { Authorization: 'Bearer ' + token } : {};
+  async getPaging({ page = 1, search = "", limit = 10 } = {}) {
+    try {
+      console.log(
+        `🔗 ProDetails getPaging - page: ${page}, search: "${search}"`
+      );
+
+      const params = { page, search, limit };
+      const response = await api.get(this.endpoint, { params });
+
+      console.log("📊 ProDetails getPaging response:", response.data);
+
+      const data = response.data;
+
+      return {
+        data: data.data || [],
+        totalPage: data.totalPage || 1,
+        currentPage: data.currentPage || page,
+        totalProDetails: data.totalProDetails || 0,
+      };
+    } catch (error) {
+      console.error("❌ Lỗi ProDetails getPaging:", error);
+      throw new Error(
+        "Lỗi khi tải chi tiết sản phẩm phân trang: " + error.message
+      );
     }
-    static async getAll() {
-        try {
-            console.log('🔗 Đang gọi API getAll:', this.baseUrl);
+  }
 
-            const res = await fetch(this.baseUrl, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+  // ===== GET PRODUCT DETAIL BY SIZE AND PRODUCT =====
+  async getProductDetailBySizeAndProduct(productId, sizeId) {
+    try {
+      console.log("🔗 ProDetails getProductDetailBySizeAndProduct:", {
+        productId,
+        sizeId,
+      });
 
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error('❌ Lỗi getAll:', errorText);
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
+      const response = await api.get(
+        `${ENDPOINTS.PRODETAILS.FIND}?product_id=${productId}&size_id=${sizeId}`
+      );
+      const data = response.data;
 
-            const data = await res.json();
-            console.log('✅ Dữ liệu getAll:', data);
+      console.log("✅ ProDetails by Size & Product response:", data);
 
-            // Xử lý response data
-            const products = data.data || data.prodetails || data || [];
+      const prodetailResponse = data.data || data.prodetail || data;
 
-            return Array.isArray(products)
-                ? products.map((item) =>
-                      Prodetail.fromApiResponse
-                          ? Prodetail.fromApiResponse(item)
-                          : new Prodetail(
-                                item.id,
-                                item.name,
-                                item.product_id,
-                                item.size_id,
-                                item.store_id,
-                                item.buyturn,
-                                item.specification,
-                                item.price,
-                                item.oldprice,
-                                item.quantity,
-                                item.img1,
-                                item.img2,
-                                item.img3,
-                                item.createdAt,
-                                item.updatedAt
-                            )
-                  )
-                : [];
-        } catch (error) {
-            console.error('❌ Lỗi getAll:', error);
-            throw new Error('Lỗi khi tải danh sách sản phẩm: ' + error.message);
-        }
+      return ProDetail?.fromApiResponse
+        ? ProDetail.fromApiResponse(prodetailResponse)
+        : prodetailResponse;
+    } catch (error) {
+      console.error(
+        "❌ Lỗi ProDetails getProductDetailBySizeAndProduct:",
+        error
+      );
+      throw new Error(
+        "Lỗi khi tải chi tiết sản phẩm theo size và product: " + error.message
+      );
     }
+  }
 
-    static async getById(id) {
-        try {
-            console.log('🔗 Getting product by ID:', id);
+  async getProductDetailsByProductId(productId) {
+    try {
+      console.log("🔗 ProDetails getProductDetailsByProductId:", productId);
 
-            const res = await fetch(`${this.baseUrl}/${id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
+      const response = await api.get(
+        `${this.endpoint}/by-product?product_id=${productId}`
+      );
+      const data = response.data;
 
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
+      console.log("✅ ProDetails by ProductId response:", data);
 
-            const data = await res.json();
-            console.log('✅ Product by ID response:', data);
+      const prodetails = data.data || data.prodetails || data || [];
 
-            return data.data || data; // ✅ HANDLE CẢ 2 TRƯỜNG HỢP
-        } catch (error) {
-            console.error('❌ Error getting product by ID:', error);
-            throw error;
-        }
+      return Array.isArray(prodetails)
+        ? prodetails.map((item) =>
+            ProDetail?.fromApiResponse ? ProDetail.fromApiResponse(item) : item
+          )
+        : [];
+    } catch (error) {
+      console.error("❌ Lỗi ProDetails getProductDetailsByProductId:", error);
+      throw new Error(
+        "Lỗi khi tải chi tiết sản phẩm theo product_id: " + error.message
+      );
     }
+  }
+  async getAllProductDetails(productId) {
+    try {
+      const res = await api.get(
+        `${ENDPOINTS.PRODETAILS.BASE}?product_id=${productId}`
+      );
 
-    static async create(prodetail) {
-        const res = await fetch(this.baseUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...this.getAuthHeader()
-            },
-            body: JSON.stringify(prodetail)
-        });
-        const data = await res.json();
-        return data.data;
+      const data = res.data;
+      return ProDetail.fromApiResponse(data);
+    } catch (error) {
+      console.error("❌ Lỗi ProDetails getAllProductDetails:", error);
+      throw new Error("Lỗi khi tải tất cả chi tiết sản phẩm: " + error.message);
     }
-
-    static async update(id, prodetail) {
-        const res = await fetch(`${this.baseUrl}/${id}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                ...this.getAuthHeader()
-            },
-            body: JSON.stringify(prodetail)
-        });
-        const data = await res.json();
-        return data.data;
-    }
-
-    static async delete(id) {
-        const res = await fetch(`${this.baseUrl}/${id}`, {
-            method: 'DELETE',
-            headers: this.getAuthHeader()
-        });
-        const data = await res.json();
-        return data.data;
-    }
-    //METHOD lấy product_details bằng size_id và product_id
-    static async getProductDetailBySizeAndProduct(productId, sizeId) {
-        try {
-            const url = `http://localhost:3003/api/prodetail?product_id=${productId}&size_id=${sizeId}`;
-            const res = await fetch(url, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Product detail:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error getting product detail:', error);
-            throw error;
-        }
-    }
-    // ✅ THÊM METHOD getProductDetailsByProductId
-    static async getProductDetailsByProductId(productId) {
-        try {
-            console.log('🔗 Getting product details by product ID:', productId);
-
-            const res = await fetch(`${this.baseUrl}?product_id=${productId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...this.getAuthHeader()
-                }
-            });
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Product details by product ID:', data);
-
-            // Lọc theo product_id nếu API trả về tất cả
-            const allDetails = data.data || data.prodetails || data || [];
-            const filteredDetails = Array.isArray(allDetails)
-                ? allDetails.filter((detail) => detail.product_id == productId)
-                : [];
-
-            return filteredDetails;
-        } catch (error) {
-            console.error(
-                '❌ Error getting product details by product ID:',
-                error
-            );
-            // Fallback: lấy tất cả rồi filter
-            try {
-                const allDetails = await this.getAll();
-                return allDetails.filter(
-                    (detail) => detail.product_id == productId
-                );
-            } catch (fallbackError) {
-                console.error('❌ Fallback error:', fallbackError);
-                return [];
-            }
-        }
-    }
-    static async getAllProductDetails(productId) {
-        try {
-            const allDetails = await ProdetailService.getAll();
-            return allDetails.filter(
-                (detail) => detail.product_id == productId
-            );
-        } catch (error) {
-            console.error('❌ Error getting all product details:', error);
-            return [];
-        }
-    }
+  }
 }
 
-export default ProdetailService;
+export default new ProDetailService();
+
+// import ProDetail from "@models/Prodetail.js";
+// import BaseService from "./base.service";
+// import api from "../index.js";
+// import { ENDPOINTS } from "../endpoints.js";
+// // ProdetailAPI.js
+// class ProDetailService extends BaseService {
+//   constructor() {
+//     super(ENDPOINTS.PRODETAILS.BASE);
+//   }
+
+// }

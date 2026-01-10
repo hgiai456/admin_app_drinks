@@ -10,12 +10,8 @@ class ProductService extends BaseService {
 
   async getAll() {
     try {
-      console.log("🔗 Đang gọi API Products getAll:", this.endpoint);
-
       const response = await api.get(this.endpoint);
       const data = response.data;
-
-      console.log("✅ Dữ liệu Products getAll:", data);
 
       const products = data.data || data.products || data || [];
 
@@ -118,44 +114,38 @@ class ProductService extends BaseService {
 
   async getCustomizePage({ page = 1, search = "", pageSize = 4 } = {}) {
     try {
-      const params = {
-        page: page.toString(),
-        pageSize: pageSize.toString(),
-        ...(search && { search: search.toString() }),
-      };
-
-      console.log(
-        "🔗 Đang gọi API Products Customize Page:",
-        ENDPOINTS.PRODUCTS.CUSTOMIZE_PAGE
-      );
-
-      const response = await api.get(ENDPOINTS.PRODUCTS.CUSTOMIZE_PAGE, {
-        params,
+      console.log(`🔗 getCustomizePage called with:`, {
+        page,
+        search,
+        pageSize,
       });
 
-      console.log("📊 Products Customize Page Status:", response.status);
-      console.log("✅ Raw Products Customize Page Data:", response.data);
+      const params = { page, search, limit: pageSize };
+      const response = await api.get(this.endpoint, { params });
 
       const data = response.data;
+      console.log("✅ getCustomizePage raw response:", data);
+
+      // ✅ CHECK: product_details có trong data không?
+      if (data.data && data.data[0]) {
+        console.log("🔍 First product structure:", data.data[0]);
+        console.log("🔍 First product_details:", data.data[0].product_details);
+      }
 
       return {
         data: (data.data || []).map((item) =>
           Product?.fromApiResponse ? Product.fromApiResponse(item) : item
         ),
-        pagination: data.pagination || {
+        pagination: {
           currentPage: data.currentPage || parseInt(page),
           totalPage: data.totalPage || 1,
-          totalItems: data.totalProducts || 0,
-          pageSize: data.pageSize || parseInt(pageSize),
-          hasNextPage: data.pagination?.hasNextPage || false,
-          hasPrevPage: data.pagination?.hasPrevPage || false,
-          nextPage: data.pagination?.nextPage || null,
-          prevPage: data.pagination?.prevPage || null,
+          totalItems: data.totalProducts || data.totalItems || 0,
+          limit: pageSize,
         },
       };
     } catch (error) {
-      console.error("❌ Lỗi trong Products getCustomizePage:", error);
-      throw error;
+      console.error("❌ Error in getCustomizePage:", error);
+      throw new Error("Lỗi khi tải sản phẩm: " + error.message);
     }
   }
 

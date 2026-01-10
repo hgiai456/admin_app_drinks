@@ -17,6 +17,7 @@ class Product {
     this.category_id = category_id;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.product_details = [];
   }
 
   static fromApiResponse(data) {
@@ -24,8 +25,15 @@ class Product {
       console.error("❌ Data trống trong Product fromApiResponse");
       return null;
     }
+    console.log("🔍 Product.fromApiResponse input:", {
+      id: data.id,
+      name: data.name,
+      hasProductDetails: !!data.product_details,
+      productDetailsLength: data.product_details?.length || 0,
+      firstDetailPrice: data.product_details?.[0]?.price,
+    });
 
-    return new Product(
+    const product = new Product(
       data.id,
       data.name || "",
       data.description || "",
@@ -35,9 +43,28 @@ class Product {
       data.createdAt,
       data.updatedAt
     );
+
+    if (data.product_details && Array.isArray(data.product_details)) {
+      product.product_details = data.product_details;
+      console.log(
+        `✅ Preserved product_details for product ${data.id}:`,
+        product.product_details
+      );
+    } else {
+      console.warn(`⚠️ No product_details for product ${data.id}`);
+      product.product_details = [];
+    }
+
+    console.log(`✅ Final product instance ${product.id}:`, {
+      name: product.name,
+      hasProductDetails: !!product.product_details,
+      detailsLength: product.product_details?.length || 0,
+      firstPrice: product.product_details?.[0]?.price,
+    });
+
+    return product;
   }
 
-  // ✅ INSTANCE METHOD - toApiFormat (theo cấu trúc Prodetail)
   toApiFormat() {
     return {
       id: this.id,
@@ -99,6 +126,13 @@ class Product {
     if (this.image.startsWith("http")) return this.image;
     if (this.image.startsWith("/")) return this.image;
     return `/images/products/${this.image}`;
+  }
+
+  getPrice() {
+    if (this.product_details && this.product_details.length > 0) {
+      return this.product_details[0].price || 0;
+    }
+    return 0;
   }
 
   // ✅ SETTERS - Theo cấu trúc Prodetail

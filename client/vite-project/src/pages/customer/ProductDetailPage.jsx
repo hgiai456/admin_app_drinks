@@ -1,474 +1,518 @@
-import { useState, useEffect } from 'react';
-import Layout from '@components/common/Layout.jsx';
-import ProductService from '@services/product.service.js';
-import SizeService from '@services/size.service.js';
-import CartService from '@services/cart.service.js';
-import ProdetailService from '@services/prodetail.service.js';
-import '@styles/pages/_productdetail.scss';
-import { triggerCartRefresh } from '../../components/common/UtilityFunction';
+import { useState, useEffect } from "react";
+import Layout from "@components/common/Layout.jsx";
+import ProductService from "@services/product.service.js";
+import SizeService from "@services/size.service.js";
+import CartService from "@services/cart.service.js";
+import ProdetailService from "@services/prodetail.service.js";
+import "@styles/pages/_productdetail.scss";
+import { triggerCartRefresh } from "@components/common/UtilityFunction";
 //Đang bị lỗi cart không tải được khách vãng lai
 export default function ProductDetailPage({
-    user,
-    onLogout,
-    productId,
-    isGuest = false, // ✅ THÊM PROP
-    onLogin, // ✅ THÊM PROP
-    onRegister
+  user,
+  onLogout,
+  productId,
+  isGuest = false,
+  onLogin,
+  onRegister,
 }) {
-    const navigateToHash = (hash) => {
-        window.location.hash = hash;
-    };
+  const navigateToHash = (hash) => {
+    window.location.hash = hash;
+  };
 
-    //State
-    const [product, setProduct] = useState(null);
-    const [sizes, setSizes] = useState([]);
-    const [productDetails, setProductDetails] = useState([]);
-    const [selectedSize, setSelectedSize] = useState('');
-    const [selectedProductDetail, setSelectedProductDetail] = useState(null);
-    const [quantity, setQuantity] = useState(1);
-    const [loading, setLoading] = useState(true);
-    const [addingToCart, setAddingToCart] = useState(false);
-    const [error, setError] = useState('');
-    const [message, setMessage] = useState('');
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  //State
+  const [product, setProduct] = useState(null);
+  const [sizes, setSizes] = useState([]);
+  const [productDetails, setProductDetails] = useState([]);
+  const [selectedSize, setSelectedSize] = useState("");
+  const [selectedProductDetail, setSelectedProductDetail] = useState(null);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-    useEffect(() => {
-        const loadProductData = async () => {
-            try {
-                setLoading(true);
-                const [productData, sizesData, productDetailsData] =
-                    await Promise.all([
-                        ProductService.getById(productId),
-                        SizeService.getAll(),
-                        ProdetailService.getProductDetailsByProductId(productId)
-                    ]);
-                console.log('✅ Product data loaded:', {
-                    productData,
-                    sizesData,
-                    productDetailsData
-                });
+  useEffect(() => {
+    const loadProductData = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-                setProduct(productData);
-                // ✅ XỬ LÝ sizes TỪ API RESPONSE
-                const sizesFromApi = productData.sizes || [];
+        console.log("🔍 Loading product:", productId);
 
-                // ✅ TRANSFORM sizes THÀNH productDetails FORMAT
-                const transformedProductDetails = sizesFromApi.map(
-                    (sizeInfo) => ({
-                        id: sizeInfo.product_detail, // product_detail là ID của chi tiết sản phẩm
-                        size_id: sizeInfo.size_id,
-                        size_name: sizeInfo.size_name,
-                        price: sizeInfo.price,
-                        oldprice: sizeInfo.oldprice,
-                        quantity: sizeInfo.quantity,
-                        product_id: productData.id
-                    })
-                );
+        // ===== LOAD DATA =====
+        const [productData, allSizesData, productDetailsData] =
+          await Promise.all([
+            ProductService.getById(productId),
+            SizeService.getAll(),
+            ProdetailService.getProductDetailsByProductId(productId),
+          ]);
 
-                // ✅ TRANSFORM sizes THÀNH sizes FORMAT
-                const transformedSizes = sizesFromApi.map((sizeInfo) => ({
-                    id: sizeInfo.size_id,
-                    name: sizeInfo.size_name
-                }));
-                setSizes(transformedSizes || []);
-                setProductDetails(transformedProductDetails || []);
-                // Tự động chọn size đầu tiên nếu có
-                if (transformedProductDetails.length > 0) {
-                    const firstDetail = transformedProductDetails[0];
-                    setSelectedSize(firstDetail.size_id?.toString());
-                    setSelectedProductDetail(firstDetail);
-                }
-            } catch (error) {
-                console.error('❌ Error loading product data:', error);
-                setError('Không thể tải thông tin sản phẩm');
-            } finally {
-                setLoading(false);
-            }
-        };
-        if (productId) {
-            loadProductData();
+        console.log("✅ RAW API Response:", {
+          productData,
+          allSizesData,
+          productDetailsData,
+        });
+
+        setProduct(productData);
+
+        // ✅ RESET STATE TRƯỚC
+        setSizes([]);
+        setProductDetails([]);
+        setSelectedSize("");
+        setSelectedProductDetail(null);
+
+        // ===== VALIDATE DATA =====
+        if (!Array.isArray(allSizesData) || allSizesData.length === 0) {
+          console.error("❌ No sizes data from system");
+          setError("Lỗi: Không tải được danh sách sizes");
+          return;
         }
-    }, [productId]);
 
-    useEffect(() => {
-        if (selectedSize && productDetails.length > 0) {
-            const detail = productDetails.find(
-                (d) => d.size_id?.toString() === selectedSize
-            );
-            setSelectedProductDetail(detail || null);
-        }
-    }, [selectedSize, productDetails]);
-
-    const handleSizeChange = (sizeId) => {
-        setSelectedSize(sizeId);
-        // alert('bạn đã chọn size ' + sizeId);
-        setQuantity(1); //Reset quantity
-    };
-
-    const handleQuantityChange = (newQuantity) => {
-        if (newQuantity < 1) return;
         if (
-            selectedProductDetail &&
-            newQuantity > selectedProductDetail.quantity
+          !Array.isArray(productDetailsData) ||
+          productDetailsData.length === 0
         ) {
-            setMessage(`⚠️ Chỉ còn ${selectedProductDetail.quantity} sản phẩm`);
-            return;
+          console.error("❌ No product details found");
+          setError("Sản phẩm này chưa có thông tin chi tiết");
+          return;
         }
-        setQuantity(newQuantity);
-        setMessage('');
-    };
-    // ✅ SỬA handleAddToCart
-    const handleAddToCart = async () => {
-        try {
-            if (!selectedProductDetail) {
-                setMessage('❌ Vui lòng chọn size');
-                return; // ✅ THÊM return
-            }
 
-            if (quantity > selectedProductDetail.quantity) {
-                setMessage(
-                    `❌ Không đủ hàng. Chỉ còn ${selectedProductDetail.quantity} sản phẩm`
-                );
-                return;
-            }
+        // ===== CHỈ HIỂN THỊ SIZES CÓ TRONG PRODUCT_DETAILS =====
+        console.log("✅ Filtering sizes from product_details");
+        console.log("📊 All System Sizes:", allSizesData);
+        console.log("📦 Product Details:", productDetailsData);
 
-            setAddingToCart(true);
-            setMessage('');
-            const userId = user?.id || null;
+        // Step 1: Lấy danh sách size_id từ product_details
+        const availableSizeIds = new Set(
+          productDetailsData.map((detail) => detail.size_id)
+        );
 
-            // getOrCreatCart -> getOrCreateCart
-            const cart = await CartService.getOrCreateCart(userId);
+        console.log("🎯 Available Size IDs:", Array.from(availableSizeIds));
 
-            await CartService.addToCart(
-                cart.id,
-                selectedProductDetail.id,
-                quantity
-            );
-            // ✅ THÔNG BÁO KHÁC NHAU CHO USER VÀ GUEST
-            const guestText = isGuest ? ' (khách vãng lai)' : '';
-            setMessage(
-                `✅ Đã thêm ${quantity} ${product.name} (${getSizeName(
-                    selectedSize
-                )}) vào giỏ hàng${guestText}`
-            );
-            triggerCartRefresh();
-            // Reset quantity
-            setQuantity(1);
-        } catch (error) {
-            console.error('❌ Error adding to cart:', error);
-            setMessage('❌ Lỗi khi thêm vào giỏ hàng: ' + error.message);
-        } finally {
-            setAddingToCart(false);
+        // Step 2: CHỈ GIỮ LẠI sizes có trong product_details
+        const filteredSizes = allSizesData.filter((size) =>
+          availableSizeIds.has(size.id)
+        );
+
+        console.log(
+          "📏 Filtered Sizes (SHOULD ONLY HAVE AVAILABLE):",
+          filteredSizes
+        );
+
+        // Step 3: Tạo productDetails với size_name
+        const enrichedProductDetails = productDetailsData.map((detail) => {
+          const sizeInfo = allSizesData.find((s) => s.id === detail.size_id);
+
+          return {
+            id: detail.id,
+            size_id: detail.size_id,
+            size_name: sizeInfo?.name || `Size ${detail.size_id}`,
+            price: detail.price,
+            oldprice: detail.oldprice,
+            quantity: detail.quantity,
+            product_id: detail.product_id,
+            specification: detail.specification,
+          };
+        });
+
+        console.log("📦 Enriched Product Details:", enrichedProductDetails);
+
+        // ✅ QUAN TRỌNG: SET STATE VỚI FILTERED SIZES
+        console.log("🔄 Setting sizes state with:", filteredSizes);
+        setSizes(filteredSizes);
+        setProductDetails(enrichedProductDetails);
+
+        // Step 5: Auto-select first available size
+        if (enrichedProductDetails.length > 0) {
+          const firstAvailable = enrichedProductDetails.find(
+            (detail) => detail.quantity > 0
+          );
+          const firstDetail = firstAvailable || enrichedProductDetails[0];
+
+          setSelectedSize(firstDetail.size_id?.toString());
+          setSelectedProductDetail(firstDetail);
+          console.log("✅ Auto-selected size:", firstDetail);
         }
-    };
-    // ✅ UTILITY FUNCTIONS
-    const formatPrice = (price) => {
-        if (!price) return 'Liên hệ';
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(price);
+      } catch (error) {
+        console.error("❌ Error loading product data:", error);
+        setError("Không thể tải thông tin sản phẩm: " + error.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    const getSizeName = (sizeId) => {
-        const size = sizes.find((s) => s.id?.toString() === sizeId?.toString());
-        return size?.name || `Size ${sizeId}`;
-    };
-
-    const getAvailableImages = () => {
-        // ✅ VÌ API CHỈ TRẢ VỀ 1 HÌNH ẢNH CHÍNH
-        return [product?.image].filter(Boolean);
-    };
-
-    const calculateDiscount = () => {
-        if (!selectedProductDetail?.oldprice || !selectedProductDetail?.price)
-            return 0;
-        return Math.round(
-            ((selectedProductDetail.oldprice - selectedProductDetail.price) /
-                selectedProductDetail.oldprice) *
-                100
-        );
-    };
-
-    const handleGoBack = () => {
-        window.history.back();
-    };
-
-    const handleGoHome = () => {
-        window.location.hash = 'home';
-    };
-
-    const handleGoMenu = () => {
-        window.location.hash = 'menu';
-    };
-
-    const handleGoToCart = () => {
-        window.location.hash = 'cart';
-    };
-
-    // ✅ LOADING STATE
-    if (loading) {
-        return (
-            <Layout
-                user={user}
-                onLogout={onLogout}
-                currentPage='product-detail'
-            >
-                <div className='product-detail-loading'>
-                    <div className='loading-spinner'>☕</div>
-                    <p>Đang tải sản phẩm...</p>
-                </div>
-            </Layout>
-        );
+    if (productId) {
+      loadProductData();
     }
+  }, [productId]);
 
-    if (error || !product) {
-        return (
-            <Layout
-                user={user}
-                onLogout={onLogout}
-                currentPage='product-detail'
-            >
-                <div className='product-detail-error'>
-                    <h2>❌ Lỗi</h2>
-                    <p>{error || 'Không tìm thấy sản phẩm'}</p>
-                    <button onClick={handleGoBack} className='btn-back'>
-                        ← Quay lại
-                    </button>
-                </div>
-            </Layout>
-        );
+  useEffect(() => {
+    if (selectedSize && productDetails.length > 0) {
+      const detail = productDetails.find(
+        (d) => d.size_id?.toString() === selectedSize
+      );
+      setSelectedProductDetail(detail || null);
     }
+  }, [selectedSize, productDetails]);
 
-    const availableImages = getAvailableImages();
-    const discount = calculateDiscount();
-    return (
-        <Layout
-            user={user}
-            onLogout={onLogout}
-            currentPage='product-detail'
-            isGuest={isGuest} // ✅ PASS PROP
-            onLogin={onLogin} // ✅ PASS PROP
-            onRegister={onRegister}
-        >
-            <div className='product-detail-container'>
-                {/* ✅ BREADCRUMB */}
-                <div className='breadcrumb'>
-                    <span onClick={handleGoHome} className='breadcrumb-link'>
-                        🏠 Trang chủ
-                    </span>
-                    <span className='breadcrumb-separator'>›</span>
-                    <span onClick={handleGoMenu} className='breadcrumb-link'>
-                        📱 Menu
-                    </span>
-                    <span className='breadcrumb-separator'>›</span>
-                    <span className='breadcrumb-current'>{product.name}</span>
-                </div>
+  const handleSizeChange = (sizeId) => {
+    setSelectedSize(sizeId);
+    setQuantity(1); // Reset quantity
+    setMessage(""); // Clear messages
+  };
 
-                {/* ✅ MESSAGE */}
-                {message && (
-                    <div
-                        className={`message ${
-                            message.includes('✅')
-                                ? 'success'
-                                : message.includes('❌')
-                                ? 'error'
-                                : 'warning'
-                        }`}
-                    >
-                        {message}
-                        <button
-                            onClick={() => setMessage('')}
-                            className='close-message'
-                        >
-                            ×
-                        </button>
-                    </div>
-                )}
+  const handleQuantityChange = (newQuantity) => {
+    if (newQuantity < 1) return;
+    if (selectedProductDetail && newQuantity > selectedProductDetail.quantity) {
+      setMessage(`⚠️ Chỉ còn ${selectedProductDetail.quantity} sản phẩm`);
+      return;
+    }
+    setQuantity(newQuantity);
+    setMessage("");
+  };
+  const handleAddToCart = async () => {
+    try {
+      if (!selectedProductDetail) {
+        setMessage("❌ Vui lòng chọn size");
+        return;
+      }
 
-                {/* ✅ PRODUCT DETAIL CONTENT */}
-                <div className='product-detail-content'>
-                    {/* ✅ PRODUCT IMAGES */}
-                    <div className='product-images'>
-                        <div className='main-image'>
-                            <img
-                                src={availableImages[currentImageIndex]}
-                                alt={product.name}
-                                onError={(e) => {
-                                    e.target.src =
-                                        'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&q=80&fit=crop';
-                                }}
-                            />
-                            {discount > 0 && (
-                                <div className='discount-badge'>
-                                    -{discount}%
-                                </div>
-                            )}
-                        </div>
-                    </div>
+      if (quantity > selectedProductDetail.quantity) {
+        setMessage(
+          `❌ Không đủ hàng. Chỉ còn ${selectedProductDetail.quantity} sản phẩm`
+        );
+        return;
+      }
 
-                    {/* ✅ PRODUCT INFO */}
-                    <div className='product-info'>
-                        <h1 className='product-title'>{product.name}</h1>
+      setAddingToCart(true);
+      setMessage("");
+      const userId = user?.id || null;
 
-                        <div className='product-description'>
-                            <p>{product.description}</p>
-                        </div>
+      // getOrCreatCart -> getOrCreateCart
+      const cart = await CartService.getOrCreateCart(userId);
 
-                        {/* ✅ PRICE */}
-                        <div className='product-pricing'>
-                            {selectedProductDetail ? (
-                                <>
-                                    <div className='current-price'>
-                                        {formatPrice(
-                                            selectedProductDetail.price
-                                        )}
-                                    </div>
-                                    {selectedProductDetail.oldprice &&
-                                        selectedProductDetail.oldprice >
-                                            selectedProductDetail.price && (
-                                            <div className='old-price'>
-                                                {formatPrice(
-                                                    selectedProductDetail.oldprice
-                                                )}
-                                            </div>
-                                        )}
-                                </>
-                            ) : (
-                                <div className='price-placeholder'>
-                                    Chọn size để xem giá
-                                </div>
-                            )}
-                        </div>
+      await CartService.addToCart(cart.id, selectedProductDetail.id, quantity);
 
-                        {/* ✅ SIZE SELECTOR */}
-                        <div className='size-selector'>
-                            <h3>📏 Chọn size:</h3>
-                            <div className='size-options'>
-                                {productDetails.map((detail) => {
-                                    const isSelected =
-                                        selectedSize ===
-                                        detail.size_id?.toString();
-                                    const isOutOfStock = detail.quantity === 0;
+      const guestText = isGuest ? " (khách vãng lai)" : "";
+      setMessage(
+        `✅ Đã thêm ${quantity} ${product.name} (${getSizeName(
+          selectedSize
+        )}) vào giỏ hàng${guestText}`
+      );
+      triggerCartRefresh();
+      // Reset quantity
+      setQuantity(1);
+    } catch (error) {
+      console.error("❌ Error adding to cart:", error);
+      setMessage("❌ Lỗi khi thêm vào giỏ hàng: " + error.message);
+    } finally {
+      setAddingToCart(false);
+    }
+  };
 
-                                    return (
-                                        <button
-                                            key={detail.id}
-                                            className={`size-option ${
-                                                isSelected ? 'selected' : ''
-                                            } ${
-                                                isOutOfStock
-                                                    ? 'out-of-stock'
-                                                    : ''
-                                            }`}
-                                            onClick={() =>
-                                                !isOutOfStock &&
-                                                handleSizeChange(
-                                                    detail.size_id?.toString()
-                                                )
-                                            }
-                                            disabled={isOutOfStock}
-                                        >
-                                            <span className='size-name'>
-                                                {detail.size_name}
-                                            </span>
-                                            <span className='size-price'>
-                                                {formatPrice(detail.price)}
-                                            </span>
-                                            {isOutOfStock && (
-                                                <span className='stock-status'>
-                                                    Hết hàng
-                                                </span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
+  const formatPrice = (price) => {
+    if (!price) return "Liên hệ";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
 
-                        {/* ✅ QUANTITY SELECTOR */}
-                        {selectedProductDetail &&
-                            selectedProductDetail.quantity > 0 && (
-                                <div className='quantity-selector'>
-                                    <h3>📦 Số lượng:</h3>
-                                    <div className='quantity-controls'>
-                                        <button
-                                            className='quantity-btn'
-                                            onClick={() =>
-                                                handleQuantityChange(
-                                                    quantity - 1
-                                                )
-                                            }
-                                            disabled={quantity <= 1}
-                                        >
-                                            −
-                                        </button>
-                                        <input
-                                            type='number'
-                                            value={quantity}
-                                            onChange={(e) =>
-                                                handleQuantityChange(
-                                                    parseInt(e.target.value) ||
-                                                        1
-                                                )
-                                            }
-                                            min='1'
-                                            max={selectedProductDetail.quantity}
-                                            className='quantity-input'
-                                        />
-                                        <button
-                                            className='quantity-btn'
-                                            onClick={() =>
-                                                handleQuantityChange(
-                                                    quantity + 1
-                                                )
-                                            }
-                                            disabled={
-                                                quantity >=
-                                                selectedProductDetail.quantity
-                                            }
-                                        >
-                                            +
-                                        </button>
-                                    </div>
-                                    <div className='stock-info'>
-                                        Còn lại:{' '}
-                                        <strong>
-                                            {selectedProductDetail.quantity}
-                                        </strong>{' '}
-                                        sản phẩm
-                                    </div>
-                                </div>
-                            )}
+  const getSizeName = (sizeId) => {
+    const size = sizes.find((s) => s.id?.toString() === sizeId?.toString());
+    return size?.name || `Size ${sizeId}`;
+  };
 
-                        {/* ✅ ACTION BUTTONS */}
-                        <div className='product-actions'>
-                            <button
-                                className='btn-add-to-cart'
-                                onClick={handleAddToCart}
-                                disabled={
-                                    !selectedProductDetail ||
-                                    selectedProductDetail.quantity === 0 ||
-                                    addingToCart
-                                }
-                            >
-                                {addingToCart ? (
-                                    <>🔄 Đang thêm...</>
-                                ) : (
-                                    <>🛒 Thêm vào giỏ hàng</>
-                                )}
-                            </button>
+  const getAvailableImages = () => {
+    return [product?.image].filter(Boolean);
+  };
 
-                            <button
-                                className='btn-view-cart'
-                                onClick={handleGoToCart}
-                            >
-                                👁️ Xem giỏ hàng
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </Layout>
+  const calculateDiscount = () => {
+    if (!selectedProductDetail?.oldprice || !selectedProductDetail?.price)
+      return 0;
+    return Math.round(
+      ((selectedProductDetail.oldprice - selectedProductDetail.price) /
+        selectedProductDetail.oldprice) *
+        100
     );
+  };
+
+  const handleGoBack = () => {
+    window.history.back();
+  };
+
+  const handleGoHome = () => {
+    window.location.hash = "home";
+  };
+
+  const handleGoMenu = () => {
+    window.location.hash = "menu";
+  };
+
+  const handleGoToCart = () => {
+    window.location.hash = "cart";
+  };
+
+  // ✅ LOADING STATE
+  if (loading) {
+    return (
+      <Layout user={user} onLogout={onLogout} currentPage="product-detail">
+        <div className="product-detail-loading">
+          <div className="loading-spinner">☕</div>
+          <p>Đang tải sản phẩm...</p>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <Layout user={user} onLogout={onLogout} currentPage="product-detail">
+        <div className="product-detail-error">
+          <h2>❌ Lỗi</h2>
+          <p>{error || "Không tìm thấy sản phẩm"}</p>
+          <button onClick={handleGoBack} className="btn-back">
+            ← Quay lại
+          </button>
+        </div>
+      </Layout>
+    );
+  }
+
+  const availableImages = getAvailableImages();
+  const discount = calculateDiscount();
+  return (
+    <Layout
+      user={user}
+      onLogout={onLogout}
+      currentPage="product-detail"
+      isGuest={isGuest} // ✅ PASS PROP
+      onLogin={onLogin} // ✅ PASS PROP
+      onRegister={onRegister}
+    >
+      <div className="product-detail-container">
+        {/* ✅ BREADCRUMB */}
+        <div className="breadcrumb">
+          <span onClick={handleGoHome} className="breadcrumb-link">
+            🏠 Trang chủ
+          </span>
+          <span className="breadcrumb-separator">›</span>
+          <span onClick={handleGoMenu} className="breadcrumb-link">
+            📱 Menu
+          </span>
+          <span className="breadcrumb-separator">›</span>
+          <span className="breadcrumb-current">{product.name}</span>
+        </div>
+
+        {/* ✅ MESSAGE */}
+        {message && (
+          <div
+            className={`message ${
+              message.includes("✅")
+                ? "success"
+                : message.includes("❌")
+                ? "error"
+                : "warning"
+            }`}
+          >
+            {message}
+            <button onClick={() => setMessage("")} className="close-message">
+              ×
+            </button>
+          </div>
+        )}
+
+        {/* ✅ PRODUCT DETAIL CONTENT */}
+        <div className="product-detail-content">
+          {/* ✅ PRODUCT IMAGES */}
+          <div className="product-images">
+            <div className="main-image">
+              <img
+                src={availableImages[currentImageIndex]}
+                alt={product.name}
+                onError={(e) => {
+                  e.target.src =
+                    "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=600&q=80&fit=crop";
+                }}
+              />
+              {discount > 0 && (
+                <div className="discount-badge">-{discount}%</div>
+              )}
+            </div>
+          </div>
+
+          {/* ✅ PRODUCT INFO */}
+          <div className="product-info">
+            <h1 className="product-title">{product.name}</h1>
+
+            <div className="product-description">
+              <p>{product.description}</p>
+            </div>
+
+            {/* ✅ PRICE */}
+            <div className="product-pricing">
+              {selectedProductDetail ? (
+                <>
+                  <div className="current-price">
+                    {formatPrice(selectedProductDetail.price)}
+                  </div>
+                  {selectedProductDetail.oldprice &&
+                    selectedProductDetail.oldprice >
+                      selectedProductDetail.price && (
+                      <>
+                        <div className="old-price">
+                          {formatPrice(selectedProductDetail.oldprice)}
+                        </div>
+                        <div className="discount-badge">
+                          -{calculateDiscount()}%
+                        </div>
+                      </>
+                    )}
+                </>
+              ) : (
+                <div className="price-placeholder">👆 Chọn size để xem giá</div>
+              )}
+            </div>
+
+            <div className="size-selector">
+              <h3>📏 Chọn kích thước:</h3>
+
+              {sizes.length === 0 ? (
+                <div className="no-sizes-warning">
+                  <p>⚠️ Đang tải sizes...</p>
+                </div>
+              ) : (
+                <div className="size-options">
+                  {sizes.map((size) => {
+                    // Tìm detail tương ứng với size
+                    const detail = productDetails.find(
+                      (d) => d.size_id === size.id
+                    );
+
+                    if (!detail) {
+                      console.warn(`⚠️ No detail found for size ${size.id}`);
+                      return null; // Skip size này
+                    }
+
+                    const isSelected = selectedSize === size.id?.toString();
+                    const isOutOfStock = detail.quantity === 0;
+
+                    return (
+                      <button
+                        key={size.id}
+                        className={`size-option ${
+                          isSelected ? "selected" : ""
+                        } ${isOutOfStock ? "unavailable" : ""}`}
+                        onClick={() => {
+                          if (!isOutOfStock) {
+                            handleSizeChange(size.id?.toString());
+                          }
+                        }}
+                        disabled={isOutOfStock}
+                        title={
+                          isOutOfStock
+                            ? "Hết hàng"
+                            : `${size.name} - ${formatPrice(detail.price)}`
+                        }
+                      >
+                        {/* Size Name */}
+                        <span className="size-name">{size.name}</span>
+
+                        {/* Price */}
+                        <span className="size-price">
+                          {formatPrice(detail.price)}
+                        </span>
+
+                        {/* Stock Status */}
+                        {isOutOfStock && (
+                          <span className="stock-status">Hết hàng</span>
+                        )}
+
+                        {/* Selected Indicator */}
+                        {isSelected && (
+                          <span className="selected-indicator">✓</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* ✅ QUANTITY SELECTOR */}
+            {selectedProductDetail && selectedProductDetail.quantity > 0 && (
+              <div className="quantity-selector">
+                <h3>📦 Số lượng:</h3>
+                <div className="quantity-controls">
+                  <button
+                    className="quantity-btn"
+                    onClick={() => handleQuantityChange(quantity - 1)}
+                    disabled={quantity <= 1}
+                    aria-label="Giảm số lượng"
+                  >
+                    −
+                  </button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) =>
+                      handleQuantityChange(parseInt(e.target.value) || 1)
+                    }
+                    min="1"
+                    max={selectedProductDetail.quantity}
+                    className="quantity-input"
+                    aria-label="Số lượng"
+                  />
+                  <button
+                    className="quantity-btn"
+                    onClick={() => handleQuantityChange(quantity + 1)}
+                    disabled={quantity >= selectedProductDetail.quantity}
+                    aria-label="Tăng số lượng"
+                  >
+                    +
+                  </button>
+                </div>
+                <div className="stock-info">
+                  Còn lại: <strong>{selectedProductDetail.quantity}</strong> sản
+                  phẩm
+                </div>
+              </div>
+            )}
+
+            {selectedProductDetail && selectedProductDetail.quantity === 0 && (
+              <div className="out-of-stock-warning">
+                <span className="warning-icon">⚠️</span>
+                <span className="warning-text">
+                  Size này hiện đã hết hàng. Vui lòng chọn size khác.
+                </span>
+              </div>
+            )}
+
+            <div className="product-actions">
+              <button
+                className="btn-add-to-cart"
+                onClick={handleAddToCart}
+                disabled={
+                  !selectedProductDetail ||
+                  selectedProductDetail.quantity === 0 ||
+                  addingToCart
+                }
+              >
+                {addingToCart ? (
+                  <>🔄 Đang thêm...</>
+                ) : (
+                  <>🛒 Thêm vào giỏ hàng</>
+                )}
+              </button>
+
+              <button className="btn-view-cart" onClick={handleGoToCart}>
+                👁️ Xem giỏ hàng
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
 }

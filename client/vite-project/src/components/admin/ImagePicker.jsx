@@ -276,12 +276,14 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                   uploadMode === "single" ? "primary" : "outline-primary"
                 }
                 size="md"
-                icon={<Image size={20} />}
+                icon={<Images size={20} />}
                 onClick={() => {
-                  setUploadMode("single");
-                  setUploadFiles([]);
-                  previewUrls.forEach((url) => URL.revokeObjectURL(url));
-                  setPreviewUrls([]);
+                  setUploadMode("multiple");
+                  setUploadFile(null);
+                  if (previewUrl) {
+                    URL.revokeObjectURL(previewUrl);
+                    setPreviewUrl("");
+                  }
                   setUploadError("");
                 }}
                 fullWidth

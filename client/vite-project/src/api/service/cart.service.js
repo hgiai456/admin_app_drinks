@@ -1,326 +1,298 @@
-class CartService {
-    static baseUrl = 'http://localhost:3003/api';
-    static getAuthHeader() {
-        const token =
-            localStorage.getItem('token') ||
-            localStorage.getItem('admin_token');
-        return token ? { Authorization: 'Bearer ' + token } : {};
-    }
+import BaseService from "./base.service";
+import api from "../index.js";
+import { ENDPOINTS } from "../endpoints.js";
 
-    static getSessionId() {
-        let sessionId = localStorage.getItem('guest_session_id');
-        if (!sessionId) {
-            // ✅ TẠO SESSION ID NGẪU NHIÊN DỰA TRÊN TIMESTAMP + RANDOM
-            sessionId =
-                Date.now().toString() + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('guest_session_id', sessionId);
-            console.log('🆔 Created new session ID:', sessionId);
+class CartService extends BaseService {
+  constructor() {
+    super(ENDPOINTS.CARTS.BASE);
+  }
+
+  static getSessionId() {
+    let sessionId = localStorage.getItem("guest_session_id");
+    if (!sessionId) {
+      sessionId =
+        Date.now().toString() + Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("guest_session_id", sessionId);
+      console.log("🆔 Created new session ID:", sessionId);
+    }
+    return sessionId;
+  }
+
+  // ===== CART ITEM COUNT =====
+  async getCartItemCount(userId = null) {
+    try {
+      const cart = await this.getOrCreateCart(userId);
+      const cartItems = await this.getCartItems(cart.id);
+
+      const totalItems = Array.isArray(cartItems)
+        ? cartItems.reduce((total, item) => total + (item.quantity || 0), 0)
+        : 0;
+
+      console.log("✅ Cart item count:", totalItems);
+      return totalItems;
+    } catch (error) {
+      console.error("❌ Error getting cart item count:", error);
+      return 0;
+    }
+  }
+
+  // ===== GET OR CREATE CART =====
+  async getOrCreateCart(userId = null) {
+    const sessionId = CartService.getSessionId();
+
+    try {
+      console.log("🛒 Getting or creating cart...");
+      console.log("📊 Input params:", { userId, sessionId });
+
+      const payload = userId ? { user_id: userId } : { session_id: sessionId };
+
+      console.log("📦 Request payload:", payload);
+
+      const response = await api.post(ENDPOINTS.CARTS.BASE, payload);
+      const data = response.data;
+
+      console.log("✅ Cart created/retrieved:", data);
+      return data.data || data;
+    } catch (error) {
+      if (error.response?.status === 409) {
+        console.log("⚠️ Cart already exists (409), fetching existing cart...");
+        console.log(
+          "🔄 Using:",
+          userId ? `user_id: ${userId}` : `session_id: ${sessionId}`
+        );
+
+        if (userId) {
+          console.log("👤 Fetching cart by user_id:", userId);
+          return await this.getCartByUserId(userId);
+        } else {
+          console.log("🆔 Fetching cart by session_id:", sessionId);
+          return await this.getCartBySessionId(sessionId); // ← GIỜ sessionId ĐÃ DEFINED!
         }
-        return sessionId;
+      }
+
+      console.error("❌ Error in getOrCreateCart:", error);
+      console.error("Error details:", {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
+      throw new Error("Lỗi khi tải giỏ hàng: " + error.message);
     }
+  }
 
-    static async getCartItemCount(userId = null) {
-        try {
-            const cart = await this.getOrCreateCart(userId);
-            const cartItems = await this.getCartItems(cart.id);
+  // ===== GET CART BY USER ID =====
+  async getCartByUserId(userId) {
+    try {
+      console.log("🔍 Finding cart by user_id:", userId);
 
-            const totalItems = Array.isArray(cartItems)
-                ? cartItems.reduce(
-                      (total, item) => total + (item.quantity || 0),
-                      0
-                  )
-                : 0;
-            console.log('✅ Cart item count:', totalItems);
-            return totalItems;
-        } catch (error) {
-            console.error('❌ Error getting cart item count:', error);
-            return 0; // ✅ THÊM RETURN
+      const response = await api.get(ENDPOINTS.CARTS.BY_USER(userId));
+      const data = response.data;
+
+      console.log("✅ Found cart by user_id:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error finding cart by user_id:", error);
+      throw new Error("Không tìm thấy giỏ hàng người dùng: " + error.message);
+    }
+  }
+
+  // ===== GET CART BY SESSION ID =====
+  async getCartBySessionId(sessionId) {
+    try {
+      console.log("🔍 Finding cart by session_id:", sessionId);
+
+      const response = await api.get(ENDPOINTS.CARTS.BY_SESSION, {
+        params: { session_id: sessionId },
+      });
+      const data = response.data;
+
+      console.log("✅ Found cart by session_id:", data);
+
+      if (data.data) {
+        return data.data;
+      } else {
+        throw new Error("No cart data in response");
+      }
+    } catch (error) {
+      console.error("❌ Error finding cart by session_id:", error);
+
+      // ✅ Fallback: Create new cart if not found
+      console.log("🔄 Cart not found, creating new cart...");
+      try {
+        const response = await api.post(ENDPOINTS.CARTS.BASE, {
+          session_id: sessionId,
+        });
+        const data = response.data;
+
+        console.log("✅ Created new cart for session:", data);
+        return data.data || data;
+      } catch (createError) {
+        console.error("❌ Error creating new cart:", createError);
+        throw new Error("Không thể tạo giỏ hàng mới: " + createError.message);
+      }
+    }
+  }
+
+  // ===== GET CART BY ID =====
+  async getById(id) {
+    try {
+      console.log("🔍 Getting cart by ID:", id);
+
+      const response = await api.get(`${this.endpoint}/${id}`);
+      const data = response.data;
+
+      console.log("✅ Cart by ID:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error getting cart by ID:", error);
+      throw new Error("Lỗi khi tải giỏ hàng: " + error.message);
+    }
+  }
+
+  // ===== GET CART ITEMS =====
+  async getCartItems(cartId) {
+    try {
+      console.log("📦 Getting cart items for cart:", cartId);
+
+      const response = await api.get(ENDPOINTS.CARTS.ITEMS.BY_CART(cartId));
+      const data = response.data;
+
+      console.log("✅ Cart items:", data);
+      return data.data || data || [];
+    } catch (error) {
+      console.error("❌ Error getting cart items:", error);
+      throw new Error("Lỗi khi tải sản phẩm trong giỏ: " + error.message);
+    }
+  }
+
+  // ===== ADD TO CART =====
+  async addToCart(cartId, productDetailId, quantity = 1) {
+    try {
+      console.log("➕ Adding to cart:", {
+        cartId,
+        productDetailId,
+        quantity,
+      });
+
+      const payload = {
+        cart_id: cartId,
+        product_detail_id: productDetailId,
+        quantity: quantity,
+      };
+
+      const response = await api.post(ENDPOINTS.CARTS.ITEMS.BASE, payload);
+      const data = response.data;
+
+      console.log("✅ Added to cart:", data);
+      return data.data || data;
+    } catch (error) {
+      // ✅ Handle 409 Conflict - Product already in cart
+      if (error.response?.status === 409) {
+        console.log("⚠️ Product already in cart, updating quantity...");
+
+        const cartItems = await this.getCartItems(cartId);
+        const existingItem = cartItems.find(
+          (item) => item.product_detail_id === productDetailId
+        );
+
+        if (existingItem) {
+          const newQuantity = existingItem.quantity + quantity;
+          return await this.updateCartItem(existingItem.id, newQuantity);
         }
+      }
+
+      console.error("❌ Error adding to cart:", error);
+      throw new Error("Lỗi khi thêm vào giỏ hàng: " + error.message);
     }
-    static async getOrCreateCart(userId = null) {
-        try {
-            console.log('🛒 Getting or creating cart...');
-            const sessionId = this.getSessionId();
+  }
 
-            const payload = userId
-                ? { user_id: userId }
-                : { session_id: sessionId };
+  // ===== UPDATE CART ITEM =====
+  async updateCartItem(cartItemId, quantity) {
+    try {
+      console.log("🔄 Updating cart item:", { cartItemId, quantity });
 
-            const res = await fetch(`${this.baseUrl}/carts`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+      const response = await api.put(ENDPOINTS.CARTS.ITEMS.BY_ID(cartItemId), {
+        quantity,
+      });
+      const data = response.data;
 
-            if (res.status === 409) {
-                console.log(
-                    '⚠️ Cart already exists, trying to find existing cart...'
-                );
-
-                if (userId) {
-                    // ✅ TÌM CART THEO USER_ID
-                    return await this.getCartByUserId(userId);
-                } else {
-                    // ✅ TÌM CART THEO SESSION_ID
-                    return await this.getCartBySessionId(sessionId);
-                }
-            }
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-            const data = await res.json();
-            console.log('✅ Cart created/retrieved:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error in getOrCreateCart:', error);
-            throw error;
-        }
+      console.log("✅ Cart item updated:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error updating cart item:", error);
+      throw new Error("Lỗi khi cập nhật giỏ hàng: " + error.message);
     }
+  }
 
-    // ✅ THÊM METHOD TÌM CART THEO USER_ID
-    static async getCartByUserId(userId) {
-        try {
-            console.log('🔍 Finding cart by user_id:', userId);
+  // ===== REMOVE FROM CART =====
+  async removeFromCart(cartItemId) {
+    try {
+      console.log("🗑️ Removing from cart:", cartItemId);
 
-            const res = await fetch(`${this.baseUrl}/carts/user/${userId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+      const response = await api.delete(
+        ENDPOINTS.CARTS.ITEMS.BY_ID(cartItemId)
+      );
+      const data = response.data;
 
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Found cart by user_id:', data);
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error finding cart by user_id:', error);
-            throw error;
-        }
+      console.log("✅ Removed from cart:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error removing from cart:", error);
+      throw new Error("Lỗi khi xóa sản phẩm: " + error.message);
     }
+  }
 
-    // ✅ THÊM METHOD TÌM CART THEO SESSION_ID (NẾU CẦN)
-    static async getCartBySessionId(sessionId) {
-        try {
-            console.log('🔍 Finding cart by session_id:', sessionId);
+  // ===== CLEAR CART =====
+  async clearCart(cartId) {
+    try {
+      console.log("🗑️ Clearing cart:", cartId);
 
+      const response = await api.delete(ENDPOINTS.CARTS.CLEAR(cartId));
+      const data = response.data;
 
-            const res = await fetch(
-                `${this.baseUrl}/carts-by-session?session_id=${sessionId}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Found cart by session_id:', data);
-
-            // ✅ SỬA: XỬ LÝ ĐÚNG FORMAT RESPONSE TỪ API
-            if (data.data) {
-                console.log('✅ Found cart by session_id:', data.data);
-                return data.data; // Trả về cart object trực tiếp
-            } else {
-                throw new Error('No cart data in response');
-            }
-        } catch (error) {
-            console.error('❌ Error finding cart by session_id:', error);
-
-            // ✅ NẾU KHÔNG TÌM THẤY CART, TẠO MỚI
-            console.log('🔄 Cart not found for session, creating new cart...');
-            try {
-                const createRes = await fetch(`${this.baseUrl}/carts`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...this.getAuthHeader()
-                    },
-                    body: JSON.stringify({ session_id: sessionId })
-                });
-
-                if (!createRes.ok) {
-                    throw new Error(
-                        `Failed to create cart: HTTP ${createRes.status}`
-                    );
-                }
-
-                const createData = await createRes.json();
-                console.log('✅ Created new cart for session:', createData);
-                return createData.data || createData;
-            } catch (createError) {
-                console.error('❌ Error creating new cart:', createError);
-                throw createError;
-            }
-        }
+      console.log("✅ Cart cleared:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error clearing cart:", error);
+      throw new Error("Lỗi khi xóa giỏ hàng: " + error.message);
     }
-    static async getCartItems(cartId) {
-        try {
-            const res = await fetch(
-                `${this.baseUrl}/cart-items/carts/${cartId}`,
-                {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                }
-            );
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
+  }
 
-            const data = await res.json();
-            console.log('✅ Cart items:', data);
+  // ===== DELETE CART =====
+  async delete(id) {
+    try {
+      console.log("🗑️ Deleting cart:", id);
 
-            return data.data || data || []; // ✅ SỬA: Thêm return
-        } catch (error) {
-            console.error('❌ Error getting cart items:', error);
-            throw error;
-        }
+      const response = await api.delete(`${this.endpoint}/${id}`);
+      const data = response.data;
+
+      console.log("✅ Cart deleted:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error deleting cart:", error);
+      throw new Error("Lỗi khi xóa giỏ hàng: " + error.message);
     }
+  }
 
-    static async addToCart(cartId, productDetailId, quantity = 1) {
-        try {
-            console.log('➕ Adding to cart:', {
-                cartId,
-                productDetailId,
-                quantity
-            });
-            const payload = {
-                cart_id: cartId,
-                product_detail_id: productDetailId,
-                quantity: quantity
-            };
+  // ===== CHECKOUT CART =====
+  async checkoutCart(cartId, orderData) {
+    try {
+      console.log("💳 Checking out cart:", cartId, orderData);
 
-            const res = await fetch(`${this.baseUrl}/cart-items`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            });
+      const response = await api.post(`${this.endpoint}/checkout`, {
+        cart_id: cartId,
+        ...orderData,
+      });
+      const data = response.data;
 
-            //Xử lý khi mà giỏ hàng có tồn tại
-            if (res.status === 409) {
-                console.log(
-                    '⚠️ Product already in cart, trying to update quantity...'
-                );
-                //Lấy tất cả cart_items sau đó cập nhật số lượng
-                const cartItems = await this.getCartItems(cartId);
-                const existingItem = cartItems.find(
-                    (item) => item.product_detail_id === productDetailId
-                );
-
-                if (existingItem) {
-                    const newQuantity = existingItem.quantity + quantity;
-                    return await this.updateCartItem(
-                        existingItem.id,
-                        newQuantity
-                    );
-                }
-            }
-
-            if (!res.ok) {
-                const errorText = await res.text();
-                throw new Error(`HTTP ${res.status}: ${errorText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Added to cart:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error adding to cart:', error);
-            throw error;
-        }
+      console.log("✅ Checkout successful:", data);
+      return data.data || data;
+    } catch (error) {
+      console.error("❌ Error during checkout:", error);
+      throw new Error("Lỗi khi thanh toán: " + error.message);
     }
-    static async updateCartItem(cartItemId, quantity) {
-        try {
-            console.log('🔄 Updating cart item:', { cartItemId, quantity });
-            const res = await fetch(
-                `${this.baseUrl}/cart-items/${cartItemId}`,
-                {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ quantity })
-                }
-            );
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Cart item updated:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error updating cart item:', error);
-            throw error;
-        }
-    }
-
-    // ✅ XÓA SẢN PHẨM KHỎI GIỎ HÀNG
-    static async removeFromCart(cartItemId) {
-        try {
-            console.log('🗑️ Removing from cart:', cartItemId);
-
-            const res = await fetch(
-                `${this.baseUrl}/cart-items/${cartItemId}`,
-                {
-                    method: 'DELETE'
-                }
-            );
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Removed from cart:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error removing from cart:', error);
-            throw error;
-        }
-    }
-
-    // ✅ THÊM METHOD ĐỂ XÓA TẤT CẢ ITEMS TRONG CART
-    static async clearCart(cartId) {
-        try {
-            console.log('🗑️ Clearing cart:', cartId);
-
-            const res = await fetch(`${this.baseUrl}/carts/${cartId}/clear`, {
-                method: 'DELETE'
-            });
-
-            if (!res.ok) {
-                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-            }
-
-            const data = await res.json();
-            console.log('✅ Cart cleared:', data);
-
-            return data.data || data;
-        } catch (error) {
-            console.error('❌ Error clearing cart:', error);
-            throw error;
-        }
-    }
+  }
 }
 
-export default CartService;
+// ✅ Export singleton instance
+export default new CartService();
