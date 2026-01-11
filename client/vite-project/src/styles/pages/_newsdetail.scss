@@ -1,0 +1,718 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as m;
+@use 'sass:color';
+
+// =============================================
+// NEWS DETAIL PAGE STYLES
+// =============================================
+
+.news-detail-page {
+  background: #fff;
+  min-height: 100vh;
+}
+
+// ===== BREADCRUMB =====
+.breadcrumb {
+  background: #f8f9fa;
+  padding: 16px 0;
+  border-bottom: 1px solid #e5e7eb;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem; // ✅ Tăng từ 0.9rem
+
+    @media (max-width: $tablet) {
+      font-size: 0.9rem;
+    }
+  }
+
+  .breadcrumb-link {
+    background: none;
+    border: none;
+    color: $brown-primary;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    font-size: inherit;
+    font-weight: $font-weight-medium; // ✅ Thêm font weight
+
+    &:hover {
+      color: $brown-dark;
+      text-decoration: underline;
+    }
+  }
+
+  .breadcrumb-separator {
+    color: #9ca3af;
+    font-weight: $font-weight-normal;
+  }
+
+  .breadcrumb-current {
+    color: #4b5563;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 400px;
+    font-weight: $font-weight-medium; // ✅ Thêm font weight
+  }
+}
+
+// ===== MAIN CONTENT =====
+.news-detail-content {
+  padding: 60px 20px;
+
+  .container {
+    max-width: 900px; // ✅ Tăng từ 850px để thoáng hơn
+    margin: 0 auto;
+  }
+}
+
+// ===== HEADER =====
+.news-header {
+  margin-bottom: 48px; // ✅ Tăng từ 40px
+  text-align: center;
+
+  .news-title {
+    font-size: 2.75rem; // ✅ Tăng từ 2.5rem
+    font-weight: $font-weight-bold;
+    color: $admin-text;
+    line-height: 1.25; // ✅ Giảm line-height để gọn hơn
+    margin-bottom: 28px; // ✅ Tăng từ 24px
+    letter-spacing: -0.5px; // ✅ Thêm letter spacing âm cho chữ lớn
+
+    @media (max-width: $tablet) {
+      font-size: 2.2rem;
+      letter-spacing: -0.3px;
+    }
+
+    @media (max-width: $mobile) {
+      font-size: 1.75rem;
+      letter-spacing: 0;
+    }
+  }
+
+  .news-meta {
+    display: flex;
+    justify-content: center;
+    gap: 40px; // ✅ Tăng từ 32px
+    flex-wrap: wrap;
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 10px; // ✅ Tăng từ 8px
+      font-size: 1rem; // ✅ Tăng từ 0.95rem
+      color: $text-secondary;
+      font-weight: $font-weight-medium; // ✅ Thêm font weight
+
+      .meta-icon {
+        font-size: 1.25rem; // ✅ Tăng từ 1.1rem
+      }
+    }
+  }
+}
+
+// ===== FEATURED IMAGE =====
+.news-featured-image {
+  margin-bottom: 56px; // ✅ Tăng từ 48px
+  border-radius: $border-radius-xl;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 550px; // ✅ Tăng từ 500px
+    object-fit: cover;
+  }
+}
+
+// ===== CONTENT BODY =====
+.news-body {
+  font-size: 1.15rem; // ✅ Tăng từ 1.1rem
+  line-height: 1.9; // ✅ Tăng từ 1.8 để dễ đọc hơn
+  color: $text-primary;
+  margin-bottom: 60px;
+  letter-spacing: 0.2px; // ✅ Thêm letter spacing nhẹ
+
+  // ===== TYPOGRAPHY =====
+  h1, h2, h3, h4, h5, h6 {
+    color: $brown-dark;
+    font-weight: $font-weight-bold;
+    margin-top: 56px; // ✅ Tăng từ 48px
+    margin-bottom: 28px; // ✅ Tăng từ 24px
+    line-height: 1.3;
+    letter-spacing: -0.3px; // ✅ Thêm letter spacing âm
+  }
+
+  h1 {
+    font-size: 2.4rem; // ✅ Tăng từ 2.2rem
+    margin-top: 64px; // ✅ Tăng spacing trên
+    margin-bottom: 32px;
+  }
+
+  h2 {
+    font-size: 2rem; // ✅ Tăng từ 1.8rem
+    margin-top: 56px;
+    margin-bottom: 28px;
+  }
+
+  h3 {
+    font-size: 1.65rem; // ✅ Tăng từ 1.5rem
+    margin-top: 48px;
+    margin-bottom: 24px;
+  }
+
+  h4 {
+    font-size: 1.4rem; // ✅ Tăng từ 1.3rem
+    margin-top: 40px;
+    margin-bottom: 20px;
+  }
+
+  // ===== PARAGRAPHS =====
+  p {
+    margin-bottom: 28px; // ✅ Tăng từ 24px
+    line-height: 1.9;
+    text-align: justify; // ✅ Thêm căn đều 2 bên
+    
+    // ✅ First paragraph after heading - larger
+    h1 + &,
+    h2 + &,
+    h3 + & {
+      font-size: 1.2rem; // ✅ Đoạn đầu sau heading to hơn
+      line-height: 1.85;
+      color: $text-secondary;
+      margin-bottom: 32px;
+    }
+  }
+
+  // ===== LINKS =====
+  a {
+    color: $brown-primary;
+    text-decoration: underline;
+    text-decoration-thickness: 1.5px; // ✅ Gạch chân dày hơn
+    text-underline-offset: 3px; // ✅ Khoảng cách gạch chân
+    transition: all 0.3s ease;
+    font-weight: $font-weight-medium;
+
+    &:hover {
+      color: $brown-dark;
+      text-decoration-thickness: 2px;
+    }
+  }
+
+  // ===== LISTS =====
+  ul, ol {
+    margin-bottom: 32px; // ✅ Tăng từ 24px
+    padding-left: 40px; // ✅ Tăng từ 32px
+    line-height: 1.9;
+
+    li {
+      margin-bottom: 16px; // ✅ Tăng từ 12px
+      line-height: 1.9;
+      padding-left: 8px; // ✅ Thêm padding bên trái
+    }
+
+    // Nested lists
+    ul, ol {
+      margin-top: 12px;
+      margin-bottom: 12px;
+    }
+  }
+
+  ul {
+    list-style-type: disc;
+
+    ul {
+      list-style-type: circle;
+      
+      ul {
+        list-style-type: square;
+      }
+    }
+  }
+
+  // ===== IMAGES =====
+  img {
+    max-width: 100%;
+    height: auto;
+    border-radius: $border-radius-lg;
+    margin: 48px auto; // ✅ Tăng từ 32px và center
+    display: block; // ✅ Đảm bảo margin auto work
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); // ✅ Tăng shadow
+    
+    // ✅ Spacing với text
+    & + p {
+      margin-top: 32px; // ✅ Khoảng cách sau ảnh
+    }
+    
+    p + & {
+      margin-top: 40px; // ✅ Khoảng cách trước ảnh
+    }
+  }
+
+  // ===== BLOCKQUOTE =====
+  blockquote {
+    border-left: 5px solid $brown-primary; // ✅ Tăng từ 4px
+    padding: 24px 28px; // ✅ Tăng padding
+    margin: 40px 0; // ✅ Tăng từ 32px
+    font-style: italic;
+    font-size: 1.2rem; // ✅ Tăng từ 1.1rem
+    line-height: 1.8;
+    color: $text-secondary;
+    background: linear-gradient(135deg, #f8f9fa 0%, #f0f1f3 100%);
+    border-radius: $border-radius-md;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    // ✅ Quote attribution
+    cite {
+      display: block;
+      margin-top: 16px;
+      font-size: 0.95rem;
+      color: $brown-dark;
+      font-style: normal;
+      font-weight: $font-weight-semibold;
+      
+      &::before {
+        content: "— ";
+      }
+    }
+  }
+
+  // ===== CODE BLOCKS =====
+  pre {
+    background: #f5f5f5;
+    border-radius: $border-radius-md;
+    padding: 24px; // ✅ Tăng từ 20px
+    overflow-x: auto;
+    margin: 32px 0; // ✅ Tăng từ 24px
+    border: 1px solid #e5e7eb;
+
+    code {
+      font-family: $font-family-monospace;
+      font-size: 0.95rem; // ✅ Tăng từ 0.9rem
+      line-height: 1.6;
+      color: $admin-text;
+    }
+  }
+
+  code {
+    background: #f5f5f5;
+    padding: 3px 8px; // ✅ Tăng từ 2px 6px
+    border-radius: 4px;
+    font-family: $font-family-monospace;
+    font-size: 0.92em; // ✅ Tăng từ 0.9em
+    color: $brown-dark;
+    border: 1px solid #e5e7eb;
+  }
+
+  // ===== TABLES =====
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 40px 0; // ✅ Tăng từ 32px
+    font-size: 1rem; // ✅ Thêm font size
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: $border-radius-md;
+    overflow: hidden;
+
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 16px; // ✅ Tăng từ 12px
+      text-align: left;
+      line-height: 1.6;
+    }
+
+    th {
+      background: linear-gradient(135deg, #f8f9fa 0%, #f0f1f3 100%);
+      font-weight: $font-weight-bold;
+      color: $brown-dark;
+      font-size: 1.05rem; // ✅ Header to hơn
+    }
+
+    tbody tr {
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #f9fafb;
+      }
+    }
+
+    // ✅ Alternating row colors
+    tbody tr:nth-child(even) {
+      background: #fafbfc;
+    }
+  }
+
+  // ===== HORIZONTAL RULE =====
+  hr {
+    border: none;
+    height: 2px; // ✅ Tăng từ 1px
+    background: linear-gradient(90deg, transparent, #e5e7eb 50%, transparent);
+    margin: 48px 0; // ✅ Tăng từ 40px
+  }
+
+  // ===== STRONG & EM =====
+  strong, b {
+    font-weight: $font-weight-bold;
+    color: $admin-text;
+  }
+
+  em, i {
+    font-style: italic;
+    color: $text-secondary;
+  }
+
+  // ===== MARK (HIGHLIGHT) =====
+  mark {
+    background: rgba($brown-primary, 0.15);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: $brown-dark;
+  }
+}
+
+// ===== RELATED PRODUCTS =====
+.related-products {
+  margin-top: 80px;
+  padding-top: 60px;
+  border-top: 2px solid #e5e7eb;
+
+  .section-title {
+    font-size: 2rem; // ✅ Tăng từ 1.8rem
+    font-weight: $font-weight-bold;
+    color: $admin-text;
+    margin-bottom: 40px; // ✅ Tăng từ 32px
+    text-align: center;
+    letter-spacing: -0.3px;
+  }
+
+  .products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); // ✅ Tăng từ 200px
+    gap: 28px; // ✅ Tăng từ 24px
+
+    @media (max-width: $tablet) {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+    }
+
+    @media (max-width: $mobile) {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+  }
+
+  .product-card {
+    background: white;
+    border-radius: $border-radius-xl;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .product-image {
+      position: relative;
+      padding-top: 100%;
+      background: #f5f5f5;
+      overflow: hidden;
+
+      img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+      }
+    }
+
+    &:hover .product-image img {
+      transform: scale(1.1);
+    }
+
+    .product-info {
+      padding: 20px; // ✅ Tăng từ 16px
+
+      .product-name {
+        font-size: 1.05rem; // ✅ Tăng từ 1rem
+        font-weight: $font-weight-semibold;
+        color: $admin-text;
+        margin-bottom: 10px; // ✅ Tăng từ 8px
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.4;
+      }
+
+      .product-price {
+        font-size: 1.15rem; // ✅ Tăng từ 1.1rem
+        font-weight: $font-weight-bold;
+        color: $brown-primary;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// ===== ACTIONS =====
+.news-actions {
+  margin-top: 64px; // ✅ Tăng từ 60px
+  text-align: center;
+
+  .btn-back-large {
+    padding: 18px 52px; // ✅ Tăng từ 16px 48px
+    background: $brown-primary;
+    color: white;
+    border: none;
+    border-radius: $border-radius-lg;
+    font-size: 1.05rem; // ✅ Tăng từ 1rem
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba($brown-primary, 0.3);
+    letter-spacing: 0.3px; // ✅ Thêm letter spacing
+
+    &:hover {
+      background: $brown-dark;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba($brown-primary, 0.4);
+    }
+
+    @media (max-width: $mobile) {
+      width: 100%;
+      padding: 16px 40px;
+    }
+  }
+}
+
+// ===== LOADING STATE =====
+.news-detail-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 24px;
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f4f6;
+    border-top-color: $brown-primary;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: $text-secondary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+// ===== ERROR STATE =====
+.news-detail-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 24px;
+  padding: 40px 20px;
+  text-align: center;
+
+  .error-icon {
+    font-size: 4rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    color: $admin-text;
+    margin: 0;
+  }
+
+  .btn-back {
+    padding: 12px 32px;
+    background: $brown-primary;
+    color: white;
+    border: none;
+    border-radius: $border-radius-lg;
+    font-size: 1rem;
+    font-weight: $font-weight-semibold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: $brown-dark;
+      transform: translateY(-2px);
+    }
+  }
+}
+
+// ===== ANIMATIONS =====
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: $tablet) {
+  .news-detail-content {
+    padding: 40px 20px; // ✅ Tăng padding cho tablet
+  }
+
+  .news-header .news-title {
+    font-size: 2.2rem;
+  }
+
+  .news-body {
+    font-size: 1.1rem; // ✅ Giữ size lớn cho tablet
+    line-height: 1.85;
+
+    h1 {
+      font-size: 2rem;
+    }
+
+    h2 {
+      font-size: 1.7rem;
+    }
+
+    h3 {
+      font-size: 1.45rem;
+    }
+
+    img {
+      margin: 36px auto;
+    }
+
+    blockquote {
+      font-size: 1.15rem;
+      padding: 20px 24px;
+    }
+  }
+
+  .related-products .section-title {
+    font-size: 1.75rem;
+  }
+}
+
+@media (max-width: $mobile) {
+  .news-detail-content {
+    padding: 32px 16px;
+  }
+
+  .breadcrumb {
+    padding: 12px 0;
+
+    .breadcrumb-current {
+      max-width: 200px;
+    }
+  }
+
+  .news-header {
+    margin-bottom: 36px;
+
+    .news-title {
+      font-size: 1.75rem;
+      margin-bottom: 24px;
+    }
+
+    .news-meta {
+      gap: 24px;
+
+      .meta-item {
+        font-size: 0.95rem;
+
+        .meta-icon {
+          font-size: 1.1rem;
+        }
+      }
+    }
+  }
+
+  .news-body {
+    font-size: 1.05rem; // ✅ Vẫn giữ size lớn trên mobile
+    line-height: 1.8;
+    letter-spacing: 0.1px;
+
+    h1, h2, h3, h4 {
+      margin-top: 40px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      font-size: 1.3rem;
+    }
+
+    h4 {
+      font-size: 1.15rem;
+    }
+
+    p {
+      margin-bottom: 24px;
+      text-align: left; // ✅ Bỏ justify trên mobile
+    }
+
+    ul, ol {
+      padding-left: 28px;
+      margin-bottom: 24px;
+
+      li {
+        margin-bottom: 12px;
+      }
+    }
+
+    img {
+      margin: 32px auto;
+    }
+
+    blockquote {
+      font-size: 1.1rem;
+      padding: 18px 20px;
+      margin: 32px 0;
+    }
+
+    table {
+      font-size: 0.9rem;
+
+      th, td {
+        padding: 12px 10px;
+      }
+    }
+  }
+
+  .news-actions {
+    margin-top: 48px;
+
+    .btn-back-large {
+      padding: 16px 32px;
+      font-size: 1rem;
+    }
+  }
+}

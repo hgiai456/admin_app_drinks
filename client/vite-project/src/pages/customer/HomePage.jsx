@@ -102,15 +102,13 @@ export default function HomePage({
         const productsData = response.data || [];
         const pagination = response.pagination || {};
 
-        // ✅ TRANSFORM DATA - XỬ LÝ PRICE VÀ BRAND NULL
         const transformedProducts = productsData.map((product) => ({
           id: product.id,
           name: product.name,
           description: product.description,
           image: product.image,
           category_id: product.category_id,
-          brand_id: product.brand_id || null, // ✅ Handle null brand
-          // ✅ LẤY PRICE TỪ product_details[0].price
+          brand_id: product.brand_id || null,
           price:
             product.product_details && product.product_details.length > 0
               ? product.product_details[0].price
@@ -498,12 +496,11 @@ export default function HomePage({
       <section className="products-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">MENU SẢN PHẨM</h2>
+            <h2 className="section-title">FEATURED PRODUCTS</h2>
             <p className="section-subtitle">
               Khám phá những thức uống được yêu thích nhất tại HG Coffee
             </p>
 
-            {/* ✅ SEARCH BAR - CẢI THIỆN */}
             <div className="search-bar">
               <div className="search-info">
                 {selectedCategory === "all" ? (
@@ -562,7 +559,6 @@ export default function HomePage({
               </form>
             </div>
 
-            {/* ✅ CATEGORY FILTERS - CẢI THIỆN */}
             <div className="section-actions">
               <button
                 className={`filter-btn ${

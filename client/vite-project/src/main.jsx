@@ -1,32 +1,5 @@
 import { StrictMode, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
-const originalError = console.error;
-const originalWarn = console.warn;
-
-console.error = (...args) => {
-  if (
-    typeof args[0] === "string" &&
-    (args[0].includes("findDOMNode") ||
-      args[0].includes("ReactQuill") ||
-      args[0].includes("StrictMode") ||
-      args[0].includes("deprecated"))
-  ) {
-    return;
-  }
-  originalError.apply(console, args);
-};
-
-console.warn = (...args) => {
-  if (
-    typeof args[0] === "string" &&
-    (args[0].includes("findDOMNode") || args[0].includes("ReactQuill"))
-  ) {
-    return;
-  }
-  originalWarn.apply(console, args);
-};
-
-// Import các component gốc của bạn
 import StoreManagement from "@pages/admin/StoreManagement.jsx";
 import BrandManagement from "@pages/admin/BrandManagement.jsx";
 import CategoryManagement from "@pages/admin/CategoryManagement.jsx";
@@ -49,6 +22,9 @@ import Layout from "@components/common/Layout.jsx";
 import HomePage from "@pages/customer/HomePage.jsx";
 import RegisterPage from "@pages/customer/RegisterPage.jsx";
 import NewsManagement from "./pages/admin/NewsManagement";
+import NewsPage from "@pages/customer/NewsPage.jsx";
+import NewsDetailPage from "@pages/customer/NewsDetailPage.jsx"; // ← THÊM
+
 import { Component } from "react";
 
 class ErrorBoundary extends Component {
@@ -552,6 +528,10 @@ function App() {
 function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
   const [currentPage, setCurrentPage] = useState(() => {
     const hash = window.location.hash.replace("#", "");
+    // ✅ Check if it's a news detail page
+    if (hash.match(/^news\/\d+$/)) {
+      return "news-detail";
+    }
     return hash.split("?")[0] || "home";
   });
 
@@ -571,16 +551,19 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     return () => window.removeEventListener("hashchange", onHashChange);
   }, []);
   const [currentRoute, setCurrentRoute] = useState(getHashRoute());
+
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "") || "home";
       console.log("🔄 Hash changed to:", hash);
+      if (hash.match(/^news\/\d+$/)) {
+        setCurrentPage("news-detail");
+        return;
+      }
 
       if (hash.startsWith("product/")) {
-        console.log("📍 Setting page to product-detail");
         setCurrentPage("product-detail");
       } else {
-        console.log("📍 Setting page to:", hash);
         setCurrentPage(hash);
       }
     };
@@ -638,6 +621,40 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     case "home":
       return (
         <HomePage
+          user={user}
+          onLogout={onLogout}
+          isGuest={isGuest}
+          onLogin={handleLoginFromGuest}
+          onRegister={handleRegisterFromGuest}
+        />
+      );
+
+    case "news-detail":
+      const newsDetailMatch = window.location.hash.match(/^#news\/(\d+)$/);
+      if (newsDetailMatch) {
+        return (
+          <NewsDetailPage
+            user={user}
+            onLogout={onLogout}
+            isGuest={isGuest}
+            onLogin={handleLoginFromGuest}
+            onRegister={handleRegisterFromGuest}
+          />
+        );
+      }
+      // If no match, fall through to news list
+      return (
+        <NewsPage
+          user={user}
+          onLogout={onLogout}
+          isGuest={isGuest}
+          onLogin={handleLoginFromGuest}
+          onRegister={handleRegisterFromGuest}
+        />
+      );
+    case "news":
+      return (
+        <NewsPage
           user={user}
           onLogout={onLogout}
           isGuest={isGuest}
