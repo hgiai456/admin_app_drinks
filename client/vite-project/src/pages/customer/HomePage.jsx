@@ -7,6 +7,7 @@ import CartService from "@services/cart.service.js"; // Import CartAPI
 import Footer from "@components/common/Footer.jsx";
 import Header from "@components/common/Header.jsx";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
+import NewsService from "@services/news.service.js";
 
 export default function HomePage({
   user,
@@ -22,19 +23,21 @@ export default function HomePage({
   const [currentSlide, setCurrentSlide] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const headerRef = React.useRef(); // ✅ Ref để trigger refresh cart count
+  const [news, setNews] = useState([]);
+  const headerRef = React.useRef();
+  const [newsLoading, setNewsLoading] = useState(true);
 
-  // ✅ PAGINATION STATES
+  //  PAGINATION STATES
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
   const [search, setSearch] = useState("");
 
-  // ✅ FILTER STATES
+  // FILTER STATES
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [addingToCart, setAddingToCart] = useState({}); // ✅ Track adding state per product
-  const [message, setMessage] = useState(""); // ✅ Message state
+  const [addingToCart, setAddingToCart] = useState({}); // Track adding state per product
+  const [message, setMessage] = useState(""); // Message state
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -66,6 +69,59 @@ export default function HomePage({
     };
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        setNewsLoading(true);
+        const response = await NewsService.getPaging({
+          page: 1,
+          search: "",
+          pageSize: 3, // ← Lấy 3 tin tức mới nhất
+        });
+
+        console.log("📰 News API response:", response);
+
+        const newsData = response.data || [];
+        setNews(newsData);
+      } catch (error) {
+        console.error("❌ Error fetching news:", error);
+        // ✅ Fallback news data
+        setNews([
+          {
+            id: 1,
+            title: "Khám phá hương vị cà phê đặc biệt mùa thu",
+            content: "Mùa thu đến, thưởng thức những ly cà phê ấm áp...",
+            image:
+              "https://images.unsplash.com/photo-1509042239860-f550ce710b93",
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      } finally {
+        setNewsLoading(false);
+      }
+    };
+
+    fetchNews();
+  }, []);
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  };
+
+  const handleNewsClick = (newsItem) => {
+    window.location.hash = `news/${newsItem.id}`;
+  };
+
+  // ✅ VIEW ALL NEWS
+  const handleViewAllNews = () => {
+    window.location.hash = "news";
+  };
 
   // ✅ FETCH PRODUCTS WITH PAGINATION
   useEffect(() => {
@@ -757,6 +813,86 @@ export default function HomePage({
                   Cuối ⏩
                 </button>
               </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="news-section-home">
+        <div className="container">
+          <div className="section-header">
+            <div className="header-content">
+              <span className="section-badge">TIN TỨC MỚI NHẤT</span>
+              <h2 className="section-title">Câu chuyện HG Coffee</h2>
+              <p className="section-subtitle">
+                Khám phá những câu chuyện thú vị về cà phê, văn hóa thưởng thức
+                và những điều mới mẻ từ HG Coffee
+              </p>
+            </div>
+            <button className="btn-view-all" onClick={handleViewAllNews}>
+              <span>Xem tất cả</span>
+              <span className="arrow">→</span>
+            </button>
+          </div>
+
+          {newsLoading ? (
+            <div className="news-loading">
+              <div className="loading-spinner">📰</div>
+              <p>Đang tải tin tức...</p>
+            </div>
+          ) : news.length === 0 ? (
+            <div className="no-news">
+              <div className="no-news-icon">📭</div>
+              <p>Chưa có tin tức nào</p>
+            </div>
+          ) : (
+            <div className="news-grid">
+              {news.map((item, index) => (
+                <article
+                  key={item.id}
+                  className={`news-card ${index === 0 ? "featured" : ""}`}
+                  onClick={() => handleNewsClick(item)}
+                >
+                  <div className="news-image">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      onError={(e) => {
+                        e.target.src =
+                          "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&h=600&q=80&fit=crop";
+                      }}
+                    />
+                    <div className="news-overlay">
+                      <div className="news-badge">
+                        {index === 0 ? "🔥 Nổi bật" : "📰 Tin mới"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="news-content">
+                    <div className="news-meta">
+                      <span className="news-date">
+                        📅 {formatDate(item.createdAt)}
+                      </span>
+                      <span className="news-read-time">⏱️ 3 phút đọc</span>
+                    </div>
+
+                    <h3 className="news-title">{item.title}</h3>
+
+                    <p className="news-excerpt">
+                      {item.content
+                        ? item.content.replace(/<[^>]*>/g, "").slice(0, 120) +
+                          "..."
+                        : "Đọc thêm để khám phá nội dung thú vị..."}
+                    </p>
+
+                    <button className="btn-read-more">
+                      <span>Đọc thêm</span>
+                      <span className="icon">→</span>
+                    </button>
+                  </div>
+                </article>
+              ))}
             </div>
           )}
         </div>
