@@ -239,7 +239,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
 
         {/* TOOLBAR */}
         <div className="image-picker-toolbar">
-          <form onSubmit={handleSearch} className="search-form">
+          <div onSubmit={handleSearch} className="search-form">
             <input
               type="text"
               placeholder="Tìm kiếm ảnh..."
@@ -248,14 +248,14 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
               className="search-input"
             />
             <Button
-              type="submit"
+              type="button"
               variant="primary"
               size="sm"
               icon={<Search size={18} />}
             >
               Tìm kiếm
             </Button>
-          </form>
+          </div>
           <Button
             variant={showUploadForm ? "danger" : "success"}
             size="sm"
@@ -314,7 +314,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
 
             {/* SINGLE UPLOAD FORM */}
             {uploadMode === "single" && (
-              <form onSubmit={handleFileSelect} className="upload-form">
+              <div onSubmit={handleFileSelect} className="upload-form">
                 <input
                   type="file"
                   accept="image/*"
@@ -339,7 +339,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 )}
 
                 <Button
-                  type="submit"
+                  type="button"
                   variant="success"
                   size="md"
                   loading={loading}
@@ -353,12 +353,12 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 {uploadError && (
                   <div className="upload-error">❌ {uploadError}</div>
                 )}
-              </form>
+              </div>
             )}
 
             {/* MULTIPLE UPLOAD FORM */}
             {uploadMode === "multiple" && (
-              <form onSubmit={handleMultipleUpload} className="upload-form">
+              <div onSubmit={handleMultipleUpload} className="upload-form">
                 <input
                   type="file"
                   accept="image/*"
@@ -410,7 +410,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 )}
 
                 <Button
-                  type="submit"
+                  type="button"
                   variant="success"
                   size="md"
                   loading={loading}
@@ -426,7 +426,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 {uploadError && (
                   <div className="upload-error">❌ {uploadError}</div>
                 )}
-              </form>
+              </div>
             )}
           </div>
         )}

@@ -27,6 +27,12 @@ $admin-border: #dee2e6; // Màu viền
 $admin-text: #333333; // Màu text chính
 $admin-text-light: #6c757d; // Màu text nhạt
 
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+$font-family-monospace: 'Courier New', Courier, monospace;
+$font-family-heading: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
 //Biến spacing
 $spacing-xs: 4px;
 $spacing-sm: 8px;
@@ -34,6 +40,7 @@ $spacing-md: 12px;
 $spacing-lg: 16px;
 $spacing-xl: 20px;
 $spacing-xxl: 24px;
+$spacing-xxxl: 32px;
 
 //Biến font
 $font-size-xs: 12px;

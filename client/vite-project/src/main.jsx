@@ -1,5 +1,30 @@
 import { StrictMode, useState, useEffect } from "react";
 import { createRoot } from "react-dom/client";
+const originalError = console.error;
+const originalWarn = console.warn;
+
+console.error = (...args) => {
+  if (
+    typeof args[0] === "string" &&
+    (args[0].includes("findDOMNode") ||
+      args[0].includes("ReactQuill") ||
+      args[0].includes("StrictMode") ||
+      args[0].includes("deprecated"))
+  ) {
+    return;
+  }
+  originalError.apply(console, args);
+};
+
+console.warn = (...args) => {
+  if (
+    typeof args[0] === "string" &&
+    (args[0].includes("findDOMNode") || args[0].includes("ReactQuill"))
+  ) {
+    return;
+  }
+  originalWarn.apply(console, args);
+};
 
 // Import các component gốc của bạn
 import StoreManagement from "@pages/admin/StoreManagement.jsx";
@@ -24,6 +49,100 @@ import Layout from "@components/common/Layout.jsx";
 import HomePage from "@pages/customer/HomePage.jsx";
 import RegisterPage from "@pages/customer/RegisterPage.jsx";
 import NewsManagement from "./pages/admin/NewsManagement";
+import { Component } from "react";
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null, errorInfo: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error("❌ ErrorBoundary caught error:", error);
+    console.error("📍 Error info:", errorInfo);
+    this.setState({ error, errorInfo });
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div
+          style={{
+            padding: "40px",
+            maxWidth: "800px",
+            margin: "50px auto",
+            background: "#fff3cd",
+            border: "2px solid #ffc107",
+            borderRadius: "12px",
+          }}
+        >
+          <h1 style={{ color: "#856404", marginBottom: "20px" }}>
+            ⚠️ Có lỗi xảy ra!
+          </h1>
+          <details style={{ cursor: "pointer" }}>
+            <summary
+              style={{
+                fontSize: "16px",
+                fontWeight: "bold",
+                color: "#856404",
+                marginBottom: "10px",
+              }}
+            >
+              📋 Chi tiết lỗi (Click để xem)
+            </summary>
+            <pre
+              style={{
+                background: "#f8f9fa",
+                padding: "20px",
+                borderRadius: "8px",
+                overflow: "auto",
+                fontSize: "13px",
+                lineHeight: "1.6",
+              }}
+            >
+              <strong>Error:</strong>
+              {this.state.error?.toString()}
+
+              <br />
+              <br />
+
+              <strong>Stack:</strong>
+              {this.state.error?.stack}
+
+              <br />
+              <br />
+
+              <strong>Component Stack:</strong>
+              {this.state.errorInfo?.componentStack}
+            </pre>
+          </details>
+          <button
+            onClick={() => window.location.reload()}
+            style={{
+              marginTop: "20px",
+              padding: "12px 24px",
+              background: "#007bff",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontSize: "16px",
+              fontWeight: "bold",
+            }}
+          >
+            🔄 Tải lại trang
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 // THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -395,7 +514,9 @@ function App() {
         case "Quản lý tin tức":
           return (
             <StyledComponentWrapper>
-              <NewsManagement />
+              <ErrorBoundary>
+                <NewsManagement />
+              </ErrorBoundary>
             </StyledComponentWrapper>
           );
         default:
@@ -600,7 +721,11 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
 }
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  <ErrorBoundary>
     <App />
-  </StrictMode>
+  </ErrorBoundary>
 );
+
+console.log("✅ Suppress code loaded!");
+console.error("TEST findDOMNode warning"); // ← Phải BỊ BỎ QUA
+console.error("TEST normal error"); // ← Phải HIỂN THỊ

@@ -38,8 +38,6 @@ export default function ProductDetailPage({
         setLoading(true);
         setError("");
 
-        console.log("🔍 Loading product:", productId);
-
         // ===== LOAD DATA =====
         const [productData, allSizesData, productDetailsData] =
           await Promise.all([
@@ -48,23 +46,14 @@ export default function ProductDetailPage({
             ProdetailService.getProductDetailsByProductId(productId),
           ]);
 
-        console.log("✅ RAW API Response:", {
-          productData,
-          allSizesData,
-          productDetailsData,
-        });
-
         setProduct(productData);
 
-        // ✅ RESET STATE TRƯỚC
         setSizes([]);
         setProductDetails([]);
         setSelectedSize("");
         setSelectedProductDetail(null);
 
-        // ===== VALIDATE DATA =====
         if (!Array.isArray(allSizesData) || allSizesData.length === 0) {
-          console.error("❌ No sizes data from system");
           setError("Lỗi: Không tải được danh sách sizes");
           return;
         }
@@ -73,34 +62,18 @@ export default function ProductDetailPage({
           !Array.isArray(productDetailsData) ||
           productDetailsData.length === 0
         ) {
-          console.error("❌ No product details found");
           setError("Sản phẩm này chưa có thông tin chi tiết");
           return;
         }
 
-        // ===== CHỈ HIỂN THỊ SIZES CÓ TRONG PRODUCT_DETAILS =====
-        console.log("✅ Filtering sizes from product_details");
-        console.log("📊 All System Sizes:", allSizesData);
-        console.log("📦 Product Details:", productDetailsData);
-
-        // Step 1: Lấy danh sách size_id từ product_details
         const availableSizeIds = new Set(
           productDetailsData.map((detail) => detail.size_id)
         );
 
-        console.log("🎯 Available Size IDs:", Array.from(availableSizeIds));
-
-        // Step 2: CHỈ GIỮ LẠI sizes có trong product_details
         const filteredSizes = allSizesData.filter((size) =>
           availableSizeIds.has(size.id)
         );
 
-        console.log(
-          "📏 Filtered Sizes (SHOULD ONLY HAVE AVAILABLE):",
-          filteredSizes
-        );
-
-        // Step 3: Tạo productDetails với size_name
         const enrichedProductDetails = productDetailsData.map((detail) => {
           const sizeInfo = allSizesData.find((s) => s.id === detail.size_id);
 
@@ -118,7 +91,6 @@ export default function ProductDetailPage({
 
         console.log("📦 Enriched Product Details:", enrichedProductDetails);
 
-        // ✅ QUAN TRỌNG: SET STATE VỚI FILTERED SIZES
         console.log("🔄 Setting sizes state with:", filteredSizes);
         setSizes(filteredSizes);
         setProductDetails(enrichedProductDetails);
@@ -254,7 +226,6 @@ export default function ProductDetailPage({
     window.location.hash = "cart";
   };
 
-  // ✅ LOADING STATE
   if (loading) {
     return (
       <Layout user={user} onLogout={onLogout} currentPage="product-detail">
@@ -287,12 +258,11 @@ export default function ProductDetailPage({
       user={user}
       onLogout={onLogout}
       currentPage="product-detail"
-      isGuest={isGuest} // ✅ PASS PROP
-      onLogin={onLogin} // ✅ PASS PROP
+      isGuest={isGuest}
+      onLogin={onLogin}
       onRegister={onRegister}
     >
       <div className="product-detail-container">
-        {/* ✅ BREADCRUMB */}
         <div className="breadcrumb">
           <span onClick={handleGoHome} className="breadcrumb-link">
             🏠 Trang chủ
@@ -305,7 +275,6 @@ export default function ProductDetailPage({
           <span className="breadcrumb-current">{product.name}</span>
         </div>
 
-        {/* ✅ MESSAGE */}
         {message && (
           <div
             className={`message ${
@@ -323,9 +292,7 @@ export default function ProductDetailPage({
           </div>
         )}
 
-        {/* ✅ PRODUCT DETAIL CONTENT */}
         <div className="product-detail-content">
-          {/* ✅ PRODUCT IMAGES */}
           <div className="product-images">
             <div className="main-image">
               <img
@@ -342,7 +309,6 @@ export default function ProductDetailPage({
             </div>
           </div>
 
-          {/* ✅ PRODUCT INFO */}
           <div className="product-info">
             <h1 className="product-title">{product.name}</h1>
 
@@ -350,7 +316,6 @@ export default function ProductDetailPage({
               <p>{product.description}</p>
             </div>
 
-            {/* ✅ PRICE */}
             <div className="product-pricing">
               {selectedProductDetail ? (
                 <>
@@ -440,7 +405,6 @@ export default function ProductDetailPage({
               )}
             </div>
 
-            {/* ✅ QUANTITY SELECTOR */}
             {selectedProductDetail && selectedProductDetail.quantity > 0 && (
               <div className="quantity-selector">
                 <h3>📦 Số lượng:</h3>

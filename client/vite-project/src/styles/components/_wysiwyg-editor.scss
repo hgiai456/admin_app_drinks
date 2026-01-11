@@ -1,0 +1,220 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as m;
+
+.wysiwyg-editor-wrapper {
+  border: 2px solid $border-color-light;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+  background: white;
+  transition: $transition-normal;
+
+  &:focus-within {
+    border-color: $brown-primary;
+    box-shadow: 0 0 0 4px rgba($brown-primary, 0.1);
+  }
+
+  // ===== QUICK TOOLBAR =====
+  .quick-toolbar {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-md $spacing-lg;
+    background: $brown-bg;
+    border-bottom: 1px solid $border-color-light;
+    flex-wrap: wrap;
+
+    .char-counter {
+      margin-left: auto;
+      font-size: $font-size-sm;
+      color: $admin-text-light;
+      font-weight: $font-weight-medium;
+
+      .warning {
+        color: $danger-color;
+        font-weight: $font-weight-semibold;
+      }
+    }
+
+    button {
+      min-width: auto;
+      padding: $spacing-xs $spacing-sm;
+      
+      &:hover {
+        background: white;
+        border-color: $brown-primary;
+        color: $brown-primary;
+      }
+    }
+  }
+
+  // ===== QUILL EDITOR CUSTOMIZATION =====
+  .quill {
+    border: none;
+
+    .ql-toolbar {
+      border: none;
+      border-bottom: 1px solid $border-color-light;
+      background: white;
+      padding: $spacing-md $spacing-lg;
+
+      .ql-stroke {
+        stroke: $admin-text;
+      }
+
+      .ql-fill {
+        fill: $admin-text;
+      }
+
+      .ql-picker-label {
+        color: $admin-text;
+      }
+
+      button:hover,
+      button.ql-active {
+        .ql-stroke {
+          stroke: $brown-primary;
+        }
+
+        .ql-fill {
+          fill: $brown-primary;
+        }
+      }
+
+      .ql-picker-label:hover,
+      .ql-picker-label.ql-active {
+        color: $brown-primary;
+      }
+    }
+
+    .ql-container {
+      border: none;
+      font-family: $font-family-base;
+      font-size: $font-size-md;
+      color: $admin-text;
+
+      .ql-editor {
+        min-height: 300px;
+        padding: $spacing-lg;
+        line-height: 1.8;
+
+        &.ql-blank::before {
+          color: $admin-text-light;
+          font-style: italic;
+        }
+
+        // ===== CONTENT STYLING =====
+        h1, h2, h3, h4, h5, h6 {
+          color: $brown-dark;
+          font-weight: $font-weight-semibold;
+          margin: $spacing-lg 0 $spacing-md 0;
+          font-family: $font-family-heading;
+        }
+
+        h1 { font-size: $font-size-xxxl; }
+        h2 { font-size: $font-size-xxl; }
+        h3 { font-size: $font-size-xl; }
+        h4 { font-size: $font-size-lg; }
+
+        p {
+          margin-bottom: $spacing-md;
+        }
+
+        img {
+          max-width: 100%;
+          height: auto;
+          border-radius: $border-radius-md;
+          margin: $spacing-md 0;
+          box-shadow: $box-shadow-sm;
+        }
+
+        a {
+          color: $brown-primary;
+          text-decoration: underline;
+
+          &:hover {
+            color: $brown-dark;
+          }
+        }
+
+        ul, ol {
+          padding-left: $spacing-xl;
+          margin: $spacing-md 0;
+
+          li {
+            margin-bottom: $spacing-sm;
+          }
+        }
+
+        blockquote {
+          border-left: 4px solid $brown-primary;
+          padding-left: $spacing-lg;
+          margin: $spacing-lg 0;
+          font-style: italic;
+          color: $admin-text-light;
+          background: $brown-bg;
+          border-radius: $border-radius-sm;
+          padding: $spacing-md $spacing-lg;
+        }
+
+        code {
+          background: $admin-light;
+          padding: $spacing-xs $spacing-sm;
+          border-radius: $border-radius-sm;
+          font-family: $font-family-monospace;
+          color: $danger-color;
+        }
+
+        pre {
+          background: $admin-light;
+          padding: $spacing-lg;
+          border-radius: $border-radius-md;
+          overflow-x: auto;
+          margin: $spacing-md 0;
+
+          code {
+            background: none;
+            padding: 0;
+            color: $admin-text;
+            font-family: $font-family-monospace;
+          }
+        }
+      }
+    }
+  }
+
+  // ===== DISABLED STATE =====
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    background: $admin-light;
+  }
+}
+
+// =============================================
+// ✅ RESPONSIVE
+// =============================================
+@media (max-width: $tablet) {
+  .wysiwyg-editor-wrapper {
+    .quick-toolbar {
+      padding: $spacing-sm;
+      gap: $spacing-xs;
+
+      .char-counter {
+        width: 100%;
+        margin-top: $spacing-sm;
+        text-align: right;
+      }
+    }
+
+    .quill {
+      .ql-toolbar {
+        padding: $spacing-sm;
+      }
+
+      .ql-container .ql-editor {
+        padding: $spacing-md;
+        min-height: 200px;
+      }
+    }
+  }
+}

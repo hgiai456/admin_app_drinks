@@ -8,7 +8,14 @@ import Button from "@components/common/Button.jsx";
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_news.scss";
 import { Image } from "lucide-react";
-import ImagePicker from "../../components/admin/ImagePicker";
+import ImagePicker from "@components/admin/ImagePicker";
+import WysiwygEditor from "@components/admin/WysiwygEditor.jsx";
+import { useWysiwygEditor } from "@hooks/useWysiwygEditor.js";
+import {
+  sanitizeHtml,
+  getExcerpt as getHtmlExcerpt,
+  formatDate,
+} from "@utils/editorHelpers.js";
 
 function NewsManagement() {
   const [newsList, setNewsList] = useState([]);
@@ -28,6 +35,7 @@ function NewsManagement() {
   const [errors, setErrors] = useState({});
   const [showImagePicker, setShowImagePicker] = useState(false);
 
+  const editorHook = useWysiwygEditor("");
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -46,12 +54,6 @@ function NewsManagement() {
       hour: "2-digit",
       minute: "2-digit",
     });
-  };
-
-  const getExcerpt = (text, maxLength = 100) => {
-    if (!text) return "";
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
   };
 
   const handleImageSelect = (imagePath) => {
@@ -135,6 +137,7 @@ function NewsManagement() {
   const openCreateModal = () => {
     setModalMode("create");
     setEditingId(null);
+    editorHook.reset();
     setForm({ title: "", content: "", image: "", product_ids: [] });
     setErrors({});
     setShowModal(true);
@@ -154,6 +157,8 @@ function NewsManagement() {
         image: news.image || "",
         product_ids: relatedProductIds,
       });
+
+      editorHook.setContent(news.content || "");
     } catch (error) {
       console.error("Error loading news details:", error);
       setForm({
@@ -176,6 +181,7 @@ function NewsManagement() {
   const closeModal = () => {
     setShowModal(false);
     setShowDetailModal(false);
+    editorHook.reset();
     setForm({ title: "", content: "", image: "", product_ids: [] });
     setErrors({});
     setSelectedNews(null);
@@ -201,7 +207,22 @@ function NewsManagement() {
     setLoading(true);
 
     try {
-      const newsData = new News(form);
+      if (editorHook.isEmpty()) {
+        setErrors({ content: "Nội dung không được để trống" });
+        setLoading(false);
+        return;
+      }
+
+      if (editorHook.getTextLength() > 30000) {
+        setErrors({ content: "Nội dung không được vượt quá 10000 ký tự" });
+        setLoading(false);
+        return;
+      }
+      const newsData = new News({
+        ...form,
+        content: sanitizeHtml(editorHook.content),
+      });
+
       const validation = newsData.validate();
 
       if (!validation.isValid) {
@@ -213,7 +234,7 @@ function NewsManagement() {
       if (modalMode === "create") {
         const payload = {
           title: form.title,
-          content: form.content,
+          content: sanitizeHtml(editorHook.content),
           image: form.image,
           product_ids: form.product_ids, // GIỮ NGUYÊN product_ids
         };
@@ -225,7 +246,7 @@ function NewsManagement() {
       } else {
         await NewsService.update(editingId, {
           title: form.title,
-          content: form.content,
+          content: sanitizeHtml(editorHook.content),
           image: form.image,
         });
 
@@ -259,10 +280,8 @@ function NewsManagement() {
           error.message;
         setMessage(`❌ ${errorMsg}`);
       } else if (error.request) {
-        console.error("📍 No response received:", error.request);
         setMessage("❌ Không nhận được phản hồi từ server");
       } else {
-        console.error("📍 Error message:", error.message);
         setMessage("❌ " + error.message);
       }
     } finally {
@@ -284,7 +303,6 @@ function NewsManagement() {
       setMessage("✅ Xóa tin tức thành công!");
       fetchNews(page, search);
     } catch (error) {
-      console.error("Delete error:", error);
       setMessage("❌ " + error.message);
     } finally {
       setLoading(false);
@@ -306,7 +324,19 @@ function NewsManagement() {
     setPage(1);
   };
 
-  // Loading State
+  const handleEditorChange = (content) => {
+    editorHook.handleChange(content);
+    setForm((prev) => ({ ...prev, content: sanitizeHtml(content) }));
+    // Clear error nếu có
+    if (errors.content) {
+      setErrors((prev) => ({ ...prev, content: "" }));
+    }
+  };
+
+  const getExcerpt = (htmlContent, maxLength = 100) => {
+    return getHtmlExcerpt(htmlContent, maxLength);
+  };
+
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -344,9 +374,12 @@ function NewsManagement() {
         </div>
       )}
 
-      <div className="news-content">
-        <p>{selectedNews?.content}</p>
-      </div>
+      <div
+        className="news-content"
+        dangerouslySetInnerHTML={{
+          __html: sanitizeHtml(selectedNews?.content || ""),
+        }}
+      />
     </div>
   );
 
@@ -626,14 +659,12 @@ function NewsManagement() {
 
           <div className="form-group">
             <label className="form-label">📋 Nội dung *</label>
-            <textarea
-              name="content"
-              value={form.content}
-              onChange={handleChange}
-              className={`form-input ${errors.content ? "error" : ""}`}
-              rows="8"
-              placeholder="Nhập nội dung tin tức..."
-              required
+            <WysiwygEditor
+              value={editorHook.content}
+              onChange={handleEditorChange}
+              placeholder="Nhập nội dung tin tức... (Hỗ trợ định dạng, ảnh, video)"
+              minHeight={200}
+              disabled={loading}
             />
             {errors.content && (
               <span className="form-error">{errors.content}</span>
