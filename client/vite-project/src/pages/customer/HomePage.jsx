@@ -36,8 +36,8 @@ export default function HomePage({
   // FILTER STATES
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [addingToCart, setAddingToCart] = useState({}); // Track adding state per product
-  const [message, setMessage] = useState(""); // Message state
+  const [addingToCart, setAddingToCart] = useState({});
+  const [message, setMessage] = useState("");
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -51,12 +51,8 @@ export default function HomePage({
         } else if (Array.isArray(response)) {
           categoriesData = response;
         }
-
-        console.log("✅ Categories data:", categoriesData);
         setCategories(categoriesData || []);
       } catch (error) {
-        console.error("❌ Error fetching categories:", error);
-        // ✅ Fallback categories từ API data bạn cung cấp
         setCategories([
           { id: 1, name: "Cà phê" },
           { id: 2, name: "Trà" },
@@ -85,8 +81,6 @@ export default function HomePage({
         const newsData = response.data || [];
         setNews(newsData);
       } catch (error) {
-        console.error("❌ Error fetching news:", error);
-        // ✅ Fallback news data
         setNews([
           {
             id: 1,
@@ -118,12 +112,10 @@ export default function HomePage({
     window.location.hash = `news/${newsItem.id}`;
   };
 
-  // ✅ VIEW ALL NEWS
   const handleViewAllNews = () => {
     window.location.hash = "news";
   };
 
-  // ✅ FETCH PRODUCTS WITH PAGINATION
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -138,7 +130,6 @@ export default function HomePage({
             search: search || "",
           });
         } else {
-          // ✅ LẤY SẢN PHẨM THEO CATEGORY
           response = await ProductService.getByCategory(selectedCategory, {
             page: page || 1,
             search: search || "",
@@ -147,7 +138,6 @@ export default function HomePage({
 
         console.log("📦 Raw API response:", response);
 
-        // ✅ XỬ LÝ RESPONSE DATA
         if (!response || !response.data) {
           setProducts([]);
           setTotalPage(1);

@@ -5,9 +5,11 @@ import ProductService from "@services/product.service.js";
 import News from "@models/news.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import Button from "@components/common/Button.jsx";
+import Image from "@components/common/Image.jsx";
+
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_news.scss";
-import { Image } from "lucide-react";
+import { Image as ImageIcon } from "lucide-react";
 import ImagePicker from "@components/admin/ImagePicker";
 import WysiwygEditor from "@components/admin/WysiwygEditor.jsx";
 import { useWysiwygEditor } from "@hooks/useWysiwygEditor.js";
@@ -213,7 +215,7 @@ function NewsManagement() {
         return;
       }
 
-      if (editorHook.getTextLength() > 30000) {
+      if (editorHook.getTextLength() > 10000) {
         setErrors({ content: "Nội dung không được vượt quá 10000 ký tự" });
         setLoading(false);
         return;
@@ -236,10 +238,8 @@ function NewsManagement() {
           title: form.title,
           content: sanitizeHtml(editorHook.content),
           image: form.image,
-          product_ids: form.product_ids, // GIỮ NGUYÊN product_ids
+          product_ids: form.product_ids,
         };
-
-        console.log("📤 Payload gửi đi:", JSON.stringify(payload, null, 2));
 
         await NewsService.create(payload);
         setMessage("✅ Thêm tin tức thành công!");
@@ -628,7 +628,7 @@ function NewsManagement() {
                 type="button"
                 variant="primary"
                 size="md"
-                icon={<Image size={18} />}
+                icon={<ImageIcon size={18} />}
                 onClick={() => setShowImagePicker(true)}
               >
                 Chọn từ thư viện
@@ -636,22 +636,13 @@ function NewsManagement() {
             </div>
             {errors.image && <span className="form-error">{errors.image}</span>}
             {form.image && (
-              <div className="image-preview" style={{ marginTop: "12px" }}>
-                <img
+              <div style={{ marginTop: "12px" }}>
+                <Image
                   src={form.image}
                   alt="Preview"
-                  style={{
-                    width: "200px",
-                    height: "120px",
-                    objectFit: "cover",
-                    borderRadius: "8px",
-                    border: "2px solid #ddd",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                  }}
-                  onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/200x120?text=Invalid+Image";
-                  }}
+                  width={200}
+                  height={200}
+                  borderRadius={8}
                 />
               </div>
             )}
@@ -669,37 +660,40 @@ function NewsManagement() {
             {errors.content && (
               <span className="form-error">{errors.content}</span>
             )}
-            <div className="char-count">{form.content.length} / 5000 ký tự</div>
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">🛍️ Sản phẩm liên quan</label>
-            <select
-              multiple
-              value={form.product_ids}
-              onChange={handleProductsChange}
-              className="form-input"
-            >
-              {products.length === 0 ? (
-                <option disabled>Đang tải sản phẩm...</option>
-              ) : (
-                products.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    [{product.id}] {product.name}
-                  </option>
-                ))
-              )}
-            </select>
-            <div className="select-hint">
-              💡 Giữ Ctrl (Windows) hoặc Cmd (Mac) để chọn nhiều sản phẩm
+            <div className="char-count">
+              {form.content.length} / 10000 ký tự
             </div>
-            {form.product_ids.length > 0 && (
-              <div className="selected-products">
-                <strong>Đã chọn {form.product_ids.length} sản phẩm:</strong>{" "}
-                {getProductNames(form.product_ids)}
-              </div>
-            )}
           </div>
+          {modalMode !== "edit" ? (
+            <div className="form-group">
+              <label className="form-label">🛍️ Sản phẩm liên quan</label>
+              <select
+                multiple
+                value={form.product_ids}
+                onChange={handleProductsChange}
+                className="form-input"
+              >
+                {products.length === 0 ? (
+                  <option disabled>Đang tải sản phẩm...</option>
+                ) : (
+                  products.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      [{product.id}] {product.name}
+                    </option>
+                  ))
+                )}
+              </select>
+              <div className="select-hint">
+                💡 Giữ Ctrl (Windows) hoặc Cmd (Mac) để chọn nhiều sản phẩm
+              </div>
+              {form.product_ids.length > 0 && (
+                <div className="selected-products">
+                  <strong>Đã chọn {form.product_ids.length} sản phẩm:</strong>{" "}
+                  {getProductNames(form.product_ids)}
+                </div>
+              )}
+            </div>
+          ) : null}
 
           <div className="form-buttons">
             <Button

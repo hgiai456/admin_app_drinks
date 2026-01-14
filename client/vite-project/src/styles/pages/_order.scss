@@ -7,6 +7,7 @@
 // =============================================
 
 .order-container {
+
     // ✅ ORDER STATS CARDS
     .order-stats {
         display: grid;
@@ -32,7 +33,7 @@
                 right: 0;
                 width: 60px;
                 height: 60px;
-                background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(0,0,0,0.02));
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.02));
                 border-radius: 0 0 0 100%;
             }
 
@@ -41,10 +42,21 @@
                 box-shadow: $box-shadow-md;
             }
 
-            &.pending { border-color: #ff9800; }
-            &.processing { border-color: #2196f3; }
-            &.completed { border-color: #4caf50; }
-            &.cancelled { border-color: #f44336; }
+            &.pending {
+                border-color: #ff9800;
+            }
+
+            &.processing {
+                border-color: #2196f3;
+            }
+
+            &.completed {
+                border-color: #4caf50;
+            }
+
+            &.cancelled {
+                border-color: #f44336;
+            }
 
             .stat-icon {
                 font-size: 2rem;
@@ -390,7 +402,7 @@
                         font-size: $font-size-sm;
                         color: $admin-text-light;
                         margin-bottom: 4px;
-                        
+
                         .size-badge {
                             background: #e3f2fd;
                             color: #1976d2;
@@ -423,7 +435,7 @@
         .order-total {
             margin-top: $spacing-lg;
             padding: $spacing-lg $spacing-xl;
-              background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -8%) 100%);
+            background: linear-gradient(135deg, $success-color 0%, color.adjust($success-color, $lightness: -8%) 100%);
             border-radius: $border-radius-lg;
             display: flex;
             justify-content: space-between;
@@ -455,25 +467,29 @@
 .update-status-modal {
     .current-order-info {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        padding: $spacing-md $spacing-lg;
+        padding: $spacing-lg;
         border-radius: $border-radius-lg;
         margin-bottom: $spacing-xl;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: $spacing-sm;
-        border: 1px solid #dee2e6;
+        border: 2px solid $admin-border;
 
-        .order-id {
-            font-weight: $font-weight-bold;
-            color: $admin-text;
-            font-size: 1.1rem;
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: $spacing-md;
+            font-weight: $font-weight-semibold;
         }
 
-        .order-phone {
-            color: $admin-text-light;
-            font-size: $font-size-sm;
+        .current-status-display {
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+            padding: $spacing-sm 0;
+
+            .label {
+                font-weight: $font-weight-medium;
+                color: $admin-text-light;
+            }
         }
     }
 
@@ -481,59 +497,204 @@
         margin-bottom: $spacing-xl;
 
         .status-label {
+            display: block;
+            font-size: $font-size-lg;
             font-weight: $font-weight-semibold;
-            margin-bottom: $spacing-sm;
-            display: flex;
-            align-items: center;
-            gap: $spacing-sm;
             color: $admin-text;
+            margin-bottom: $spacing-md;
+
+            .required-mark {
+                color: $danger-color;
+                margin-left: 4px;
+            }
         }
 
-        .status-select {
-            width: 100%;
-            padding: $spacing-md $spacing-lg;
-            border: 2px solid #e9ecef;
-            border-radius: $border-radius-lg;
-            font-size: 1rem;
-            color: $admin-text;
-            background: white;
+        .status-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: $spacing-md;
+            margin-top: $spacing-md;
+        }
+
+        .status-option {
+            position: relative;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.3s ease;
 
-            &:focus {
-                outline: none;
-                border-color: $admin-primary;
-                box-shadow: 0 0 0 4px rgba($admin-primary, 0.1);
+            input[type="radio"] {
+                position: absolute;
+                opacity: 0;
+                pointer-events: none;
             }
 
-            &:hover {
+            .option-content {
+                display: flex;
+                align-items: center;
+                gap: $spacing-md;
+                padding: $spacing-md $spacing-lg;
+                border: 2px solid $admin-border;
+                border-radius: $border-radius-lg;
+                background: white;
+                transition: all 0.3s ease;
+                min-height: 70px;
+                position: relative;
+
+                .option-icon {
+                    font-size: 1.5rem;
+                    flex-shrink: 0;
+                }
+
+                .option-text {
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 4px;
+
+                    .option-label {
+                        font-weight: $font-weight-semibold;
+                        color: $admin-text;
+                        font-size: $font-size-md;
+                    }
+
+                    .current-badge {
+                        display: inline-block;
+                        padding: 2px 8px;
+                        background: $info-color;
+                        color: white;
+                        border-radius: 12px;
+                        font-size: 11px;
+                        font-weight: $font-weight-bold;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .disabled-reason {
+                        color: $admin-text-light;
+                        font-size: $font-size-xs;
+                        font-style: italic;
+                    }
+                }
+
+                .check-icon {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    width: 24px;
+                    height: 24px;
+                    background: $success-color;
+                    color: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: $font-weight-bold;
+                    font-size: 14px;
+                }
+            }
+
+            // Selected state
+            &.selected .option-content {
+                border-color: $success-color;
+                background: rgba($success-color, 0.05);
+                box-shadow: 0 4px 12px rgba($success-color, 0.2);
+                transform: translateY(-2px);
+            }
+
+            // Current status highlight
+            &.current .option-content {
+                border-color: $info-color;
+                background: rgba($info-color, 0.05);
+            }
+
+            // Disabled state
+            &.disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+
+                .option-content {
+                    background: $admin-light;
+                    border-color: #ddd;
+
+                    &:hover {
+                        transform: none;
+                        box-shadow: none;
+                    }
+                }
+            }
+
+            // Hover effect (only for enabled)
+            &:not(.disabled):hover .option-content {
                 border-color: $admin-secondary;
-            }
-
-            option {
-                padding: $spacing-sm;
+                box-shadow: 0 4px 12px rgba($admin-primary, 0.1);
+                transform: translateY(-2px);
             }
         }
     }
 
-    .status-note {
-        background: linear-gradient(135deg, #e7f3ff 0%, #f0f7ff 100%);
-        padding: $spacing-md $spacing-lg;
+    // Status Flow Guide
+    .status-flow-guide {
+        background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+        padding: $spacing-lg;
         border-radius: $border-radius-lg;
-        border: 1px solid #b3d9ff;
-        font-size: $font-size-sm;
-        color: #1565c0;
-        display: flex;
-        align-items: flex-start;
-        gap: $spacing-sm;
+        border: 2px solid #ffc107;
+        margin-bottom: $spacing-xl;
 
-        .note-icon {
-            font-size: 1.1rem;
-            flex-shrink: 0;
+        .guide-title {
+            font-size: $font-size-lg;
+            font-weight: $font-weight-bold;
+            color: #856404;
+            margin-bottom: $spacing-md;
+            text-align: center;
         }
 
-        strong {
-            color: #0d47a1;
+        .flow-steps {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: $spacing-sm;
+            margin-bottom: $spacing-md;
+            flex-wrap: wrap;
+
+            .flow-step {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 4px;
+                padding: $spacing-sm $spacing-md;
+                background: white;
+                border-radius: $border-radius-md;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                min-width: 100px;
+
+                .step-number {
+                    font-size: 1.2rem;
+                    font-weight: $font-weight-bold;
+                    color: $primary-color;
+                }
+
+                .step-label {
+                    font-size: $font-size-sm;
+                    color: $admin-text;
+                    text-align: center;
+                    font-weight: $font-weight-medium;
+                }
+            }
+
+            .flow-arrow {
+                font-size: 1.5rem;
+                color: #856404;
+                font-weight: $font-weight-bold;
+            }
+        }
+
+        .flow-note {
+            padding: $spacing-sm $spacing-md;
+            background: white;
+            border-radius: $border-radius-md;
+            font-size: $font-size-sm;
+            color: #856404;
+            line-height: 1.6;
+            border-left: 4px solid #ffc107;
         }
     }
 }
@@ -587,7 +748,8 @@
             display: none;
         }
 
-        td, th {
+        td,
+        th {
             padding: $spacing-sm !important;
             font-size: $font-size-sm;
         }
@@ -611,8 +773,10 @@
     }
 
     .order-detail-modal {
+
         .order-info-section,
         .payment-info-section {
+
             .info-grid,
             .payment-grid {
                 grid-template-columns: 1fr;
@@ -657,6 +821,7 @@
     }
 
     .order-detail-modal {
+
         .order-info-section,
         .payment-info-section {
             padding: $spacing-md;
@@ -767,7 +932,9 @@ $shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 // Empty & Error States
@@ -970,6 +1137,7 @@ $shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
         opacity: 0;
         transform: translateY(-10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1084,10 +1252,12 @@ $shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
     }
 }
 
+
+
 // Responsive
 @media (max-width: 768px) {
     .order-card-header {
-        flex-direction: column;
+        flex-direction: columan;
         align-items: flex-start;
         gap: 8px;
 
@@ -1109,6 +1279,36 @@ $shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
         .product-image {
             width: 56px;
             height: 56px;
+        }
+    }
+}
+
+.text-bold {
+    font-weight: $font-weight-medium;
+}
+
+.address-cell {
+    max-width: "150px";
+    overflow: "hidden";
+    text-overflow: "ellipsis";
+    white-space: "nowrap";
+    font-weight: $font-weight-medium;
+}
+
+@media (max-width: $tablet) {
+    .update-status-modal {
+        .status-options {
+            grid-template-columns: 1fr;
+        }
+
+        .status-flow-guide {
+            .flow-steps {
+                flex-direction: column;
+
+                .flow-arrow {
+                    transform: rotate(90deg);
+                }
+            }
         }
     }
 }

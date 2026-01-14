@@ -6,8 +6,32 @@ import {
 } from "@services/order.service.js";
 import { orderStatusMap } from "@models/order";
 import Modal from "@components/admin/ModelComponent.jsx";
+import Button from "@components/common/Button.jsx";
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_order.scss";
+
+const getAvailableStatuses = (currentStatus) => {
+  const statusFlow = {
+    1: [2, 6, 7],
+    2: [3, 6, 7],
+    3: [4, 5, 7], // Đã vận chuyển => Đã hoàn tất | Trả hàng | Đã thất bại
+    4: [5], // Đã hoàn tất => Trả hàng
+    5: [], // Trả hàng => Không thể chuyển (trạng thái cuối)
+    6: [], // Đã hủy => Không thể chuyển (trạng thái cuối)
+    7: [],
+  };
+
+  const availableStatuses = [
+    currentStatus,
+    ...(statusFlow[currentStatus] || []),
+  ];
+  return availableStatuses;
+};
+
+const isStatusDisabled = (currentStatus, targetStatus) => {
+  const availableStatuses = getAvailableStatuses(currentStatus);
+  return !availableStatuses.includes(targetStatus);
+};
 
 //  CONSTANTS
 const STATUS_CONFIG = {
@@ -27,7 +51,7 @@ const PAYMENT_STATUS_CONFIG = {
 };
 
 const PAYMENT_METHOD_CONFIG = {
-  cod: { icon: "💵", label: "COD (Tiền mặt)" },
+  cod: { icon: "💵", label: "COD" },
   vnpay: { icon: "🏦", label: "VNPAY" },
   payos: { icon: "📱", label: "PayOS" },
 };
@@ -65,7 +89,6 @@ export default function OrderManagement() {
     return new Intl.NumberFormat("vi-VN").format(amount) + "đ";
   };
 
-  //  BADGE COMPONENTS
   const StatusBadge = ({ status }) => {
     const config = STATUS_CONFIG[status] || {
       color: "#666",
@@ -96,10 +119,8 @@ export default function OrderManagement() {
     return (
       <span
         style={{
-          display: "flex",
           alignItems: "center",
-          gap: "6px",
-          fontWeight: 600,
+          fontWeight: "500",
         }}
       >
         <span>{config.icon}</span>
@@ -228,7 +249,6 @@ export default function OrderManagement() {
     }
   };
 
-  // LOADING STATE
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -237,7 +257,6 @@ export default function OrderManagement() {
     );
   }
 
-  //  RENDER ORDER DETAIL MODAL
   const renderDetailModal = () => (
     <div
       className="order-detail-modal"
@@ -379,53 +398,129 @@ export default function OrderManagement() {
     </div>
   );
 
-  //  RENDER UPDATE STATUS MODAL
-  const renderUpdateModal = () => (
-    <div className="update-status-modal">
-      <div className="current-order-info">
-        <span className="order-id">📦 Đơn hàng #{selectedOrder?.id}</span>
-        <span className="order-phone">📞 {selectedOrder?.phone}</span>
-      </div>
+  const renderUpdateModal = () => {
+    const currentStatus = selectedOrder?.status;
+    const availableStatuses = getAvailableStatuses(currentStatus);
 
-      <div className="status-select-wrapper">
-        <label className="status-label">🔄 Trạng thái mới</label>
-        <select
-          className="status-select"
-          value={newStatus}
-          onChange={(e) => setNewStatus(Number(e.target.value))}
-        >
-          {Object.entries(orderStatusMap).map(([key, label]) => (
-            <option key={key} value={Number(key)}>
-              {STATUS_CONFIG[key]?.icon} {label}
-            </option>
-          ))}
-        </select>
-      </div>
+    return (
+      <div className="update-status-modal">
+        {/* Current Order Info */}
+        <div className="current-order-info">
+          <div className="info-row">
+            <span className="order-id">📦 Đơn hàng #{selectedOrder?.id}</span>
+            <span className="order-phone">📞 {selectedOrder?.phone}</span>
+          </div>
+          <div className="current-status-display">
+            <span className="label">Trạng thái hiện tại:</span>
+            <StatusBadge status={currentStatus} />
+          </div>
+        </div>
 
-      <div className="status-note">
-        <span className="note-icon">💡</span>
-        <strong>Lưu ý:</strong> Việc thay đổi trạng thái sẽ ảnh hưởng đến quy
-        trình xử lý đơn hàng.
-      </div>
+        {/* Status Selection */}
+        <div className="status-select-wrapper">
+          <label className="status-label">
+            🔄 Chọn trạng thái mới
+            <span className="required-mark">*</span>
+          </label>
 
-      <div className="form-buttons" style={{ marginTop: "24px" }}>
-        <button
-          className="modal-btn modal-btn--secondary"
-          onClick={closeModal}
-          disabled={loading}
-        >
-          ❌ Hủy
-        </button>
-        <button
-          className="modal-btn modal-btn--warning"
-          onClick={handleUpdateStatus}
-          disabled={loading}
-        >
-          {loading ? "⏳ Đang cập nhật..." : "💾 Cập nhật"}
-        </button>
+          <div className="status-options">
+            {Object.entries(orderStatusMap).map(([statusKey, label]) => {
+              const statusNum = Number(statusKey);
+              const isDisabled = isStatusDisabled(currentStatus, statusNum);
+              const isCurrentStatus = statusNum === currentStatus;
+              const isSelected = statusNum === newStatus;
+
+              return (
+                <label
+                  key={statusKey}
+                  className={`status-option ${isDisabled ? "disabled" : ""} ${
+                    isSelected ? "selected" : ""
+                  } ${isCurrentStatus ? "current" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="status"
+                    value={statusNum}
+                    checked={isSelected}
+                    onChange={(e) => setNewStatus(Number(e.target.value))}
+                    disabled={isDisabled}
+                  />
+                  <div className="option-content">
+                    <span className="option-icon">
+                      {STATUS_CONFIG[statusNum]?.icon}
+                    </span>
+                    <div className="option-text">
+                      <span className="option-label">{label}</span>
+                      {isCurrentStatus && (
+                        <span className="current-badge">Hiện tại</span>
+                      )}
+                      {isDisabled && !isCurrentStatus && (
+                        <span className="disabled-reason">Không khả dụng</span>
+                      )}
+                    </div>
+                    {isSelected && <span className="check-icon">✓</span>}
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Status Flow Visualization */}
+        <div className="status-flow-guide">
+          <div className="guide-title">📋 Luồng xử lý đơn hàng</div>
+          <div className="flow-steps">
+            <div className="flow-step">
+              <span className="step-number">1</span>
+              <span className="step-label">Chờ xử lý</span>
+            </div>
+            <span className="flow-arrow">→</span>
+            <div className="flow-step">
+              <span className="step-number">2</span>
+              <span className="step-label">Đang chuẩn bị</span>
+            </div>
+            <span className="flow-arrow">→</span>
+            <div className="flow-step">
+              <span className="step-number">3</span>
+              <span className="step-label">Đã vận chuyển</span>
+            </div>
+            <span className="flow-arrow">→</span>
+            <div className="flow-step">
+              <span className="step-number">4</span>
+              <span className="step-label">Đã hoàn tất</span>
+            </div>
+          </div>
+          <div className="flow-note">
+            💡 <strong>Lưu ý:</strong> Có thể Hủy hoặc Thất bại từ bất kỳ trạng
+            thái nào. Trạng thái Trả hàng chỉ áp dụng sau khi Đã hoàn tất.
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="form-buttons">
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={closeModal}
+            disabled={loading}
+          >
+            ❌ Hủy
+          </Button>
+          <Button
+            type="button"
+            variant="warning"
+            size="md"
+            onClick={handleUpdateStatus}
+            disabled={loading || newStatus === currentStatus}
+            loading={loading}
+          >
+            💾 Cập nhật trạng thái
+          </Button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   //  MAIN RENDER
   return (
@@ -501,7 +596,7 @@ export default function OrderManagement() {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Khách hàng</th>
+              <th>SDT</th>
               <th className="mobile-hide">Địa chỉ</th>
               <th>Trạng thái</th>
               <th>Thanh toán</th>
@@ -537,25 +632,17 @@ export default function OrderManagement() {
               orders.map((order) => (
                 <tr key={order.id}>
                   <td className="table-id">#{order.id}</td>
-                  <td>📞 {order.phone || "N/A"}</td>
+                  <td className="text-bold"> {order.phone || "N/A"}</td>
                   <td className="mobile-hide">
-                    <div
-                      style={{
-                        maxWidth: "150px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                      title={order.address}
-                    >
-                      🏠 {order.address || "-"}
+                    <div className="address-cell" title={order.address}>
+                      {order.address || "-"}
                     </div>
                   </td>
                   <td>
                     <StatusBadge status={order.status} />
                   </td>
                   <td>
-                    <PaymentStatusBadge status={order.payment_status} />
+                    <PaymentMethodBadge method={order.payment_method} />
                   </td>
                   <td className="price" style={{ fontWeight: "bold" }}>
                     {formatCurrency(order.total)}
@@ -565,24 +652,23 @@ export default function OrderManagement() {
                   </td>
                   <td className="actions">
                     <div className="action-buttons">
-                      <button
-                        className="btn-edit"
+                      <Button
+                        size="sm"
+                        variant="info"
                         onClick={() => openDetailModal(order)}
                         disabled={loading}
                       >
                         👁️ Chi tiết
-                      </button>
-                      <button
-                        className="btn-delete"
+                      </Button>
+
+                      <Button
+                        size="sm"
+                        variant="primary"
                         onClick={() => openUpdateModal(order)}
                         disabled={loading}
-                        style={{
-                          background: "#ff9800",
-                          borderColor: "#ff9800",
-                        }}
                       >
                         ✏️ Cập nhật
-                      </button>
+                      </Button>
                     </div>
                   </td>
                 </tr>
