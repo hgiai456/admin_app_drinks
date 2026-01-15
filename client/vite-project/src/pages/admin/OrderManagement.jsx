@@ -500,7 +500,7 @@ export default function OrderManagement() {
         <div className="form-buttons">
           <Button
             type="button"
-            variant="secondary"
+            variant="danger"
             size="md"
             onClick={closeModal}
             disabled={loading}

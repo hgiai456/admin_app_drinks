@@ -1,196 +1,188 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as m;
 
-// ✅ RESPONSIVE BREAKPOINTS
-$mobile-small: 320px;
-$mobile: 480px;
-$tablet: 768px;
-$tablet-large: 1024px;
-$desktop: 1200px;
+// ============================================
+// 🎨 HEADER COMPONENT - NEW RESPONSIVE LAYOUT
+// ============================================
 
-// ✅ MODERN HEADER STYLES
 .homepage-header {
-    background: linear-gradient(
-        135deg,
-        $brown-color 0%,
-        rgba($brown-color, 0.95) 100%
-    );
+    background: linear-gradient(135deg, $brown-color 0%, rgba($brown-color, 0.95) 100%);
     backdrop-filter: blur(10px);
-    box-shadow: 0 4px 20px rgba($black-color, 0.15);
+    box-shadow: $box-shadow-lg;
     position: sticky;
     top: 0;
     z-index: 1000;
     width: 100%;
     border-bottom: 1px solid rgba(white, 0.1);
 
+    // TOP ACCENT LINE
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, $red-color, $brown-light, $red-color);
+        animation: shimmer 3s ease-in-out infinite;
+    }
+
+    // ============================================
+    // 📦 HEADER CONTAINER
+    // ============================================
     .header-container {
-        max-width: 1400px;
+        max-width: $desktop;
         margin: 0 auto;
-        padding: 1rem 2rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 2rem;
         width: 100%;
-        min-height: 80px;
 
-        .auth-section {
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-
-            @media (max-width: 768px) {
-                gap: 0.5rem;
-            }
-        }
-
-        .auth-btn {
+        // 🖥️ DESKTOP: 1 HÀNG - FLEXBOX (GIỮ NGUYÊN 100%)
+        @media (min-width: #{$tablet + 1px}) {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.6rem 1.2rem;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            font-family: inherit;
+            justify-content: space-between;
+            gap: $spacing-xl;
+            padding: $spacing-lg $spacing-xxxl;
+            min-height: 80px;
 
-            .btn-icon {
-                font-size: 1rem;
+            .logo-section {
+                flex: 0 0 auto;
             }
 
-            &.login-btn {
-                background: transparent;
-                color: var(--primary-color, #8b4513);
-                border: 2px solid var(--primary-color, #8b4513);
-
-                &:hover {
-                    background: var(--primary-color, #8b4513);
-                    color: white;
-                    transform: translateY(-1px);
-                    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.2);
-                }
+            .main-nav {
+                flex: 1;
+                justify-content: center;
             }
 
-            &.register-btn {
-                background: var(--primary-color, #8b4513);
-                color: white;
-                border: 2px solid var(--primary-color, #8b4513);
-
-                &:hover {
-                    background: var(--primary-dark, #6b3410);
-                    border-color: var(--primary-dark, #6b3410);
-                    transform: translateY(-1px);
-                    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.3);
-                }
+            .header-actions {
+                flex: 0 0 auto;
             }
 
-            &:active {
-                transform: translateY(0);
-            }
-
-            @media (max-width: 768px) {
-                padding: 0.5rem 1rem;
-                font-size: 0.85rem;
-
-                .btn-icon {
-                    font-size: 0.9rem;
-                }
-            }
-
-            @media (max-width: 480px) {
-                padding: 0.4rem 0.8rem;
-                font-size: 0.8rem;
-                gap: 0.3rem;
-
-                span:last-child {
-                    display: none; // Ẩn text trên mobile rất nhỏ, chỉ hiển thị icon
-                }
+            // ✅ ẨN NAV-ACTIONS-WRAPPER TRÊN DESKTOP
+            .nav-actions-wrapper {
+                display: none;
             }
         }
 
-        // ✅ TABLET LARGE RESPONSIVE
-        @media (max-width: $tablet-large) {
-            padding: 1rem 1.5rem;
-            gap: 1.5rem;
-            min-height: 75px;
-        }
-
-        // ✅ TABLET RESPONSIVE
+        // 📱 TABLET & MOBILE: 2 HÀNG
         @media (max-width: $tablet) {
+            display: flex;
             flex-direction: column;
-            gap: 1rem;
-            padding: 1rem;
-            min-height: auto;
+            gap: $spacing-md;
+            padding: $spacing-md $spacing-lg;
+
+            // HÀNG 1: LOGO GIỮA
+            .logo-section {
+                display: flex;
+                justify-content: center;
+                width: 100%;
+            }
+
+
+            .main-nav {
+                flex: 1 1 auto;
+                overflow-x: auto;
+                overflow-y: hidden;
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
+                min-width: 0;
+
+                // ẨN SCROLLBAR
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+
+                display: flex;
+                gap: $spacing-md;
+                padding: $spacing-xs 0;
+            }
+
+            .header-actions {
+                flex: 0 0 auto;
+                display: flex;
+                gap: $spacing-sm;
+                margin-left: auto;
+            }
+
+            .nav-actions-wrapper {
+                display: none;
+            }
         }
 
-        // ✅ MOBILE RESPONSIVE
         @media (max-width: $mobile) {
-            padding: 0.75rem;
-            gap: 0.75rem;
+            padding: $spacing-sm $spacing-md;
+            gap: $spacing-sm;
+
+            .nav-actions-wrapper {
+                gap: $spacing-sm;
+
+                .main-nav {
+                    gap: $spacing-sm;
+                }
+
+                .header-actions {
+                    gap: $spacing-xs;
+                    margin-left: $spacing-sm;
+                }
+            }
         }
 
         @media (max-width: $mobile-small) {
-            padding: 0.5rem;
-            gap: 0.5rem;
+            padding: $spacing-sm;
+            gap: $spacing-xs;
+
+            .nav-actions-wrapper {
+                gap: $spacing-xs;
+
+                .main-nav {
+                    gap: $spacing-xs;
+                }
+
+                .header-actions {
+                    margin-left: $spacing-xs;
+                }
+            }
         }
     }
 
-    // ✅ LOGO SECTION - ENHANCED RESPONSIVE
+    // ============================================
+    // 🏷️ LOGO SECTION
+    // ============================================
     .logo-section {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        flex: 0 0 auto;
+        gap: $spacing-md;
         cursor: pointer;
-        transition: transform 0.3s ease;
+        transition: transform $transition-normal;
 
         &:hover {
             transform: scale(1.02);
         }
 
-        // ✅ TABLET OPTIMIZATION
-        @media (max-width: $tablet-large) {
-            gap: 0.75rem;
-        }
-
         @media (max-width: $tablet) {
-            justify-content: center;
-            width: 100%;
-        }
-
-        @media (max-width: $mobile) {
-            gap: 0.5rem;
+            gap: $spacing-sm;
         }
 
         .logo-container {
             position: relative;
-            width: 75px;
-            height: 75px;
-            border-radius: 12px;
+            width: 70px;
+            height: 70px;
+            border-radius: $border-radius-xl;
             overflow: hidden;
             box-shadow: 0 4px 15px rgba(white, 0.2);
-
-            // ✅ RESPONSIVE LOGO SIZES
-            @media (max-width: $tablet-large) {
-                width: 65px;
-                height: 65px;
-                border-radius: 10px;
-            }
+            flex-shrink: 0;
+            border: 2px solid rgba(white, 0.3);
+            background: linear-gradient(135deg, rgba(white, 0.1), rgba(white, 0.05));
 
             @media (max-width: $tablet) {
                 width: 55px;
                 height: 55px;
-                border-radius: 8px;
             }
 
             @media (max-width: $mobile) {
                 width: 45px;
                 height: 45px;
-                border-radius: 6px;
             }
 
             @media (max-width: $mobile-small) {
@@ -202,139 +194,103 @@ $desktop: 1200px;
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.3s ease;
+                transition: transform $transition-normal;
 
                 &:hover {
-                    transform: scale(1.05);
-                }
-            }
-
-            .logo-fallback {
-                display: none;
-                width: 100%;
-                height: 100%;
-                background: linear-gradient(135deg, $red-color, $brown-color);
-                @include m.flex-center;
-                font-size: 1.5rem;
-                color: white;
-                font-weight: 700;
-
-                @media (max-width: $tablet) {
-                    font-size: 1.3rem;
-                }
-
-                @media (max-width: $mobile) {
-                    font-size: 1.1rem;
+                    transform: scale(1.1);
                 }
             }
         }
 
         .brand-info {
-            @media (max-width: $mobile) {
-                text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: $spacing-xs;
+
+            @media (max-width: $tablet) {
+                gap: 2px;
             }
 
             .brand-name {
-                font-size: 1.8rem;
-                font-weight: 700;
+                font-size: $font-size-huge;
+                font-weight: $font-weight-bold;
                 color: white;
                 margin: 0;
                 letter-spacing: 2px;
-                text-shadow: 2px 2px 4px rgba($black-color, 0.3);
+                text-shadow: 2px 2px 4px rgba($brown-dark, 0.5);
                 line-height: 1;
+                font-family: $font-family-heading;
 
-                // ✅ RESPONSIVE TYPOGRAPHY
-                @media (max-width: $tablet-large) {
-                    font-size: 1.6rem;
+                @media (max-width: $tablet) {
+                    font-size: $font-size-xxxl;
                     letter-spacing: 1.5px;
                 }
 
-                @media (max-width: $tablet) {
-                    font-size: 1.4rem;
+                @media (max-width: $mobile) {
+                    font-size: $font-size-xxl;
                     letter-spacing: 1px;
                 }
 
-                @media (max-width: $mobile) {
-                    font-size: 1.2rem;
-                    letter-spacing: 0.5px;
-                }
-
                 @media (max-width: $mobile-small) {
-                    font-size: 1.1rem;
-                    letter-spacing: 0.25px;
+                    font-size: $font-size-xl;
+                    letter-spacing: 0.5px;
                 }
             }
 
             .brand-subtitle {
-                font-size: 0.8rem;
-                color: rgba(white, 0.8);
-                font-weight: 500;
-                letter-spacing: 1px;
+                font-size: $font-size-sm;
+                color: rgba(white, 0.9);
+                font-weight: $font-weight-medium;
+                letter-spacing: 1.5px;
                 text-transform: uppercase;
-                margin-top: 2px;
-
-                @media (max-width: $tablet-large) {
-                    font-size: 0.75rem;
-                    letter-spacing: 0.8px;
-                }
+                line-height: 1;
 
                 @media (max-width: $tablet) {
-                    font-size: 0.7rem;
-                    letter-spacing: 0.6px;
+                    font-size: $font-size-xs;
+                    letter-spacing: 1px;
                 }
 
                 @media (max-width: $mobile) {
-                    font-size: 0.65rem;
-                    letter-spacing: 0.4px;
+                    font-size: 10px;
+                    letter-spacing: 0.5px;
                 }
 
                 @media (max-width: $mobile-small) {
-                    font-size: 0.6rem;
-                    display: none; // ✅ Ẩn trên màn hình rất nhỏ
+                    display: none;
                 }
             }
         }
     }
 
-    // ✅ NAVIGATION - ENHANCED RESPONSIVE
+    // ============================================
+    // 🧭 MAIN NAVIGATION
+    // ============================================
     .main-nav {
         display: flex;
-        gap: 2rem;
-        flex: 1;
-        justify-content: center;
+        gap: $spacing-xl;
         align-items: center;
 
-        // ✅ TABLET OPTIMIZATION
-        @media (max-width: $tablet-large) {
-            gap: 1.5rem;
-        }
-
         @media (max-width: $tablet) {
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            width: 100%;
-            justify-content: center;
-            order: 2; // ✅ Đưa navigation xuống dưới
-        }
-
-        @media (max-width: $mobile) {
-            gap: 0.5rem;
+            // Đã được xử lý trong .nav-actions-wrapper
         }
 
         .nav-link {
-            color: rgba(white, 0.9);
+            color: rgba(white, 0.95);
             text-decoration: none;
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            font-weight: $font-weight-semibold;
+            font-size: $font-size-md;
+            padding: $spacing-sm $spacing-lg;
+            border-radius: $border-radius-lg;
+            transition: all $transition-normal;
             letter-spacing: 0.5px;
-            white-space: nowrap;
+            white-space: nowrap; // ✅ QUAN TRỌNG: Không cho wrap
             position: relative;
             overflow: hidden;
+            border: 1px solid transparent;
+            font-family: $font-family-base;
+            flex-shrink: 0; // ✅ QUAN TRỌNG: Không cho shrink
 
-            // ✅ HOVER EFFECT
+            // SHINE EFFECT
             &::before {
                 content: '';
                 position: absolute;
@@ -342,316 +298,289 @@ $desktop: 1200px;
                 left: -100%;
                 width: 100%;
                 height: 100%;
-                background: linear-gradient(
-                    90deg,
-                    transparent,
-                    rgba(white, 0.1),
-                    transparent
-                );
-                transition: left 0.5s ease;
+                background: linear-gradient(90deg, transparent, rgba(white, 0.2), transparent);
+                transition: left 0.6s ease;
             }
 
             &:hover::before {
                 left: 100%;
             }
 
-            // ✅ RESPONSIVE NAV LINKS
-            @media (max-width: $tablet-large) {
-                font-size: 0.85rem;
-                padding: 0.45rem 0.9rem;
-                letter-spacing: 0.4px;
-            }
-
             @media (max-width: $tablet) {
-                font-size: 0.8rem;
-                padding: 0.4rem 0.8rem;
-                border-radius: 6px;
-                letter-spacing: 0.3px;
+                font-size: $font-size-sm;
+                padding: $spacing-xs $spacing-md;
+                border-radius: $border-radius-md;
             }
 
             @media (max-width: $mobile) {
-                font-size: 0.75rem;
-                padding: 0.35rem 0.7rem;
-                letter-spacing: 0.2px;
-                border-radius: 4px;
+                font-size: $font-size-xs;
+                padding: $spacing-xs $spacing-sm;
+                border-radius: $border-radius-sm;
             }
 
-            @media (max-width: $mobile-small) {
-                font-size: 0.7rem;
-                padding: 0.3rem 0.6rem;
-                letter-spacing: 0.1px;
-            }
-
+            // HOVER STATE
             &:hover {
-                background: rgba(white, 0.1);
+                background: rgba(white, 0.15);
                 color: white;
                 transform: translateY(-2px);
-                box-shadow: 0 4px 8px rgba($black-color, 0.2);
+                box-shadow: $box-shadow-md;
+                border-color: rgba(white, 0.3);
 
                 @media (max-width: $tablet) {
                     transform: translateY(-1px);
-                    box-shadow: 0 2px 4px rgba($black-color, 0.2);
+                    box-shadow: $box-shadow-sm;
                 }
             }
 
+            // ACTIVE STATE
             &.active {
-                background: linear-gradient(
-                    135deg,
-                    $red-color,
-                    rgba($red-color, 0.8)
-                );
+                background: linear-gradient(135deg, $red-color, rgba($red-color, 0.8));
                 color: white;
-                box-shadow: 0 4px 15px rgba($red-color, 0.3);
+                box-shadow: 0 4px 15px rgba($red-color, 0.4);
                 transform: translateY(-1px);
+                border-color: rgba($red-color, 0.5);
 
                 @media (max-width: $tablet) {
-                    box-shadow: 0 2px 8px rgba($red-color, 0.3);
+                    box-shadow: $box-shadow-sm;
                     transform: none;
                 }
 
+                // ACTIVE INDICATOR (CHỈ DESKTOP)
                 &::after {
-                    content: '';
-                    position: absolute;
-                    bottom: -2px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 20px;
-                    height: 3px;
-                    background: white;
-                    border-radius: 2px;
-
-                    @media (max-width: $tablet) {
-                        display: none;
+                    @media (min-width: #{$tablet + 1px}) {
+                        content: '';
+                        position: absolute;
+                        bottom: -2px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 20px;
+                        height: 3px;
+                        background: white;
+                        border-radius: $border-radius-sm;
                     }
                 }
+            }
+
+            // FOCUS STATE
+            &:focus {
+                outline: 2px solid rgba(white, 0.5);
+                outline-offset: 2px;
             }
         }
     }
 
-    // ✅ HEADER ACTIONS - ENHANCED
+    // ============================================
+    // 🎬 HEADER ACTIONS
+    // ============================================
     .header-actions {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        flex: 0 0 auto;
-
-        // ✅ RESPONSIVE ACTIONS
-        @media (max-width: $tablet-large) {
-            gap: 0.75rem;
-        }
+        gap: $spacing-md;
+        flex-shrink: 0;
 
         @media (max-width: $tablet) {
-            order: 1; // ✅ Đưa actions lên trên
-            gap: 1rem;
-            width: 100%;
-            justify-content: center;
+            gap: $spacing-sm;
         }
 
         @media (max-width: $mobile) {
-            gap: 0.75rem;
+            gap: $spacing-xs;
         }
 
-        @media (max-width: $mobile-small) {
-            gap: 0.5rem;
-        }
-
-        // ✅ CART BUTTON INTEGRATION
+        // CART BUTTON
         .cart-btn {
-            background: rgba(white, 0.1);
-            border-color: rgba(white, 0.2);
+            background: rgba(white, 0.15);
+            border: 2px solid rgba(white, 0.3);
             color: white;
             backdrop-filter: blur(5px);
+            padding: $spacing-sm $spacing-lg;
+            gap: $spacing-sm;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border-radius: $border-radius-lg;
+            font-weight: $font-weight-semibold;
+            transition: all $transition-normal;
+            cursor: pointer;
+            font-family: $font-family-base;
+            display: flex;
+            align-items: center;
 
             &:hover {
-                background: rgba(white, 0.2);
-                border-color: rgba(white, 0.3);
-                color: white;
+                background: rgba(white, 0.25);
+                border-color: rgba(white, 0.5);
                 transform: translateY(-2px);
-                box-shadow: 0 6px 20px rgba($black-color, 0.2);
+                box-shadow: $box-shadow-lg;
             }
 
             &.active {
-                background: linear-gradient(135deg, $red-color, $brown-color);
+                background: linear-gradient(135deg, $red-color, $brown-light);
                 border-color: $red-color;
-                color: white;
-                box-shadow: 0 4px 15px rgba($red-color, 0.3);
+                box-shadow: 0 4px 15px rgba($red-color, 0.4);
             }
 
             .cart-icon {
+                width: 24px;
+                height: 24px;
+                flex-shrink: 0;
+
+                @media (max-width: $tablet) {
+                    width: 20px;
+                    height: 20px;
+                }
+
+                @media (max-width: $mobile) {
+                    width: 18px;
+                    height: 18px;
+                }
+
                 .cart-badge-bg {
                     fill: $red-color;
                 }
 
                 .cart-badge-text {
                     fill: white;
+                    font-weight: $font-weight-bold;
                 }
             }
 
-            // ✅ RESPONSIVE CART BUTTON
-            @media (max-width: $tablet-large) {
-                padding: 8px 14px;
-                gap: 8px;
+            .cart-text {
+                display: inline;
+                font-size: $font-size-md;
 
-                .cart-icon {
-                    width: 20px;
-                    height: 20px;
+                @media (max-width: $tablet) {
+                    font-size: $font-size-sm;
+                }
+
+                @media (max-width: 640px) {
+                    display: none;
                 }
             }
 
             @media (max-width: $tablet) {
-                padding: 6px 12px;
-                gap: 6px;
+                padding: $spacing-xs $spacing-md;
+                gap: $spacing-xs;
+            }
 
-                .cart-icon {
-                    width: 18px;
-                    height: 18px;
-                }
-
-                .cart-text {
-                    display: block; // ✅ Hiển thị text trên tablet
-                    font-size: 0.8rem;
-                }
+            @media (max-width: 640px) {
+                padding: $spacing-xs;
+                min-width: 36px;
+                justify-content: center;
             }
 
             @media (max-width: $mobile) {
-                padding: 5px 10px;
-                gap: 4px;
-
-                .cart-icon {
-                    width: 16px;
-                    height: 16px;
-                }
-
-                .cart-text {
-                    display: none; // ✅ Ẩn text trên mobile
-                }
+                min-width: 32px;
             }
         }
     }
 
-    // ✅ USER SECTION - ENHANCED RESPONSIVE
+    // ============================================
+    // 👤 USER SECTION
+    // ============================================
     .user-section {
         position: relative;
+        flex-shrink: 0;
 
         .user-dropdown {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            background: rgba(white, 0.1);
+            gap: $spacing-md;
+            background: rgba(white, 0.15);
             backdrop-filter: blur(5px);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
+            padding: $spacing-sm $spacing-lg;
+            border-radius: 30px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(white, 0.2);
+            transition: all $transition-normal;
+            border: 2px solid rgba(white, 0.3);
+            white-space: nowrap;
 
             &:hover {
-                background: rgba(white, 0.15);
-                box-shadow: 0 4px 15px rgba(white, 0.1);
+                background: rgba(white, 0.25);
+                box-shadow: $box-shadow-lg;
                 transform: translateY(-1px);
-            }
-
-            // ✅ RESPONSIVE USER DROPDOWN
-            @media (max-width: $tablet-large) {
-                padding: 0.45rem 0.9rem;
-                gap: 0.6rem;
-                border-radius: 20px;
+                border-color: rgba(white, 0.5);
             }
 
             @media (max-width: $tablet) {
-                padding: 0.4rem 0.8rem;
-                border-radius: 18px;
+                padding: $spacing-xs $spacing-md;
+                gap: $spacing-sm;
+                border-radius: 20px;
+            }
+
+            @media (max-width: 640px) {
+                padding: $spacing-xs;
+                min-width: 36px;
+                justify-content: center;
+                border-radius: 50%;
             }
 
             @media (max-width: $mobile) {
-                padding: 0.35rem 0.7rem;
-                gap: 0.5rem;
-                border-radius: 15px;
-            }
-
-            @media (max-width: $mobile-small) {
-                padding: 0.3rem 0.6rem;
-                gap: 0.4rem;
-                border-radius: 12px;
+                min-width: 32px;
             }
 
             .user-avatar {
-                width: 35px;
-                height: 35px;
-                background: linear-gradient(135deg, $red-color, $brown-color);
+                width: 38px;
+                height: 38px;
                 border-radius: 50%;
-                @include m.flex-center;
+                background: linear-gradient(135deg, $red-color, $brown-light);
+                display: flex;
+                align-items: center;
+                justify-content: center;
                 color: white;
-                font-weight: 600;
-                font-size: 0.9rem;
-                box-shadow: 0 2px 8px rgba($black-color, 0.2);
-                border: 2px solid rgba(white, 0.2);
-
-                // ✅ RESPONSIVE AVATAR
-                @media (max-width: $tablet-large) {
-                    width: 32px;
-                    height: 32px;
-                    font-size: 0.85rem;
-                }
+                font-weight: $font-weight-bold;
+                font-size: $font-size-lg;
+                box-shadow: $box-shadow-md;
+                flex-shrink: 0;
+                border: 2px solid rgba(white, 0.3);
 
                 @media (max-width: $tablet) {
-                    width: 30px;
-                    height: 30px;
-                    font-size: 0.8rem;
+                    width: 32px;
+                    height: 32px;
+                    font-size: $font-size-md;
                 }
 
                 @media (max-width: $mobile) {
                     width: 28px;
                     height: 28px;
-                    font-size: 0.75rem;
-                }
-
-                @media (max-width: $mobile-small) {
-                    width: 25px;
-                    height: 25px;
-                    font-size: 0.7rem;
+                    font-size: $font-size-sm;
                 }
             }
 
             .user-info {
                 display: flex;
                 flex-direction: column;
+                gap: 2px;
 
-                // ✅ HIDE USER INFO ON SMALL SCREENS
-                @media (max-width: $tablet) {
+                @media (max-width: 640px) {
                     display: none;
                 }
 
                 .user-name {
                     color: white;
-                    font-weight: 600;
-                    font-size: 0.9rem;
+                    font-weight: $font-weight-semibold;
+                    font-size: $font-size-md;
                     line-height: 1;
 
-                    @media (max-width: $tablet-large) {
-                        font-size: 0.85rem;
+                    @media (max-width: $tablet) {
+                        font-size: $font-size-sm;
                     }
                 }
 
                 .user-role {
-                    color: rgba(white, 0.7);
-                    font-size: 0.75rem;
+                    color: rgba(white, 0.8);
+                    font-size: $font-size-sm;
                     line-height: 1;
-                    margin-top: 2px;
 
-                    @media (max-width: $tablet-large) {
-                        font-size: 0.7rem;
+                    @media (max-width: $tablet) {
+                        font-size: $font-size-xs;
                     }
                 }
             }
 
             .dropdown-arrow {
-                color: rgba(white, 0.7);
-                font-size: 0.7rem;
-                transition: transform 0.3s ease;
+                color: rgba(white, 0.8);
+                font-size: $font-size-xs;
+                transition: transform $transition-normal;
 
-                // ✅ HIDE ARROW ON MOBILE
-                @media (max-width: $mobile) {
+                @media (max-width: 640px) {
                     display: none;
                 }
             }
@@ -665,148 +594,202 @@ $desktop: 1200px;
             position: absolute;
             top: calc(100% + 8px);
             right: 0;
-            margin-top: 0.5rem;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba($black-color, 0.15);
+            border-radius: $border-radius-xl;
+            box-shadow: $box-shadow-lg;
             overflow: hidden;
-            min-width: 200px;
+            min-width: 220px;
             z-index: 1000;
-            animation: dropdownSlide 0.3s ease;
+            animation: dropdownSlide $transition-normal ease;
+            border: 1px solid $border-color-light;
 
-            // ✅ RESPONSIVE USER MENU
             @media (max-width: $tablet) {
                 min-width: 180px;
-                border-radius: 10px;
+                border-radius: $border-radius-lg;
             }
 
             @media (max-width: $mobile) {
                 min-width: 160px;
-                border-radius: 8px;
-                right: -10px; // ✅ Adjust position on mobile
+                right: -10px;
             }
 
             .menu-item {
                 display: flex;
                 align-items: center;
-                gap: 0.75rem;
+                gap: $spacing-md;
                 width: 100%;
-                padding: 0.75rem 1rem;
+                padding: $spacing-md $spacing-lg;
                 background: none;
                 border: none;
                 text-align: left;
                 cursor: pointer;
-                transition: all 0.3s ease;
-                font-size: 0.9rem;
-                color: $brown-color;
+                transition: all $transition-fast;
+                font-size: $font-size-md;
+                color: $text-primary;
+                font-weight: $font-weight-medium;
+                border-bottom: 1px solid $border-color-light;
 
-                @media (max-width: $tablet) {
-                    padding: 0.65rem 0.9rem;
-                    font-size: 0.85rem;
-                    gap: 0.6rem;
+                &:last-child {
+                    border-bottom: none;
                 }
 
-                @media (max-width: $mobile) {
-                    padding: 0.6rem 0.8rem;
-                    font-size: 0.8rem;
-                    gap: 0.5rem;
+                @media (max-width: $tablet) {
+                    padding: $spacing-sm $spacing-md;
+                    font-size: $font-size-sm;
+                    gap: $spacing-sm;
                 }
 
                 &:hover {
-                    background: $light-color;
-                    color: $primary-color;
+                    background: rgba($brown-light, 0.1);
+                    color: $brown-primary;
+                    padding-left: calc($spacing-lg + $spacing-xs);
                 }
 
                 &.logout:hover {
                     background: rgba($danger-color, 0.1);
                     color: $danger-color;
                 }
+            }
+        }
+    }
 
-                .menu-icon {
-                    font-size: 1rem;
-                    opacity: 0.7;
+    // ============================================
+    // 🔐 AUTH SECTION
+    // ============================================
+    .auth-section {
+        display: flex;
+        gap: $spacing-md;
+        align-items: center;
+        flex-shrink: 0;
 
-                    @media (max-width: $mobile) {
-                        font-size: 0.9rem;
-                    }
+        @media (max-width: $tablet) {
+            gap: $spacing-sm;
+        }
+
+        @media (max-width: $mobile) {
+            gap: $spacing-xs;
+        }
+
+        .auth-btn {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            padding: $spacing-sm $spacing-xl;
+            border: none;
+            border-radius: $border-radius-lg;
+            font-size: $font-size-md;
+            font-weight: $font-weight-semibold;
+            cursor: pointer;
+            transition: all $transition-normal;
+            text-decoration: none;
+            font-family: $font-family-base;
+            white-space: nowrap;
+            flex-shrink: 0;
+            border: 2px solid transparent;
+
+            .btn-icon {
+                font-size: $font-size-lg;
+                flex-shrink: 0;
+            }
+
+            &.login-btn {
+                background: transparent;
+                color: white;
+                border-color: rgba(white, 0.4);
+
+                &:hover {
+                    background: rgba(white, 0.2);
+                    border-color: rgba(white, 0.6);
+                    transform: translateY(-2px);
+                    box-shadow: $box-shadow-md;
+                }
+            }
+
+            &.register-btn {
+                background: linear-gradient(135deg, $red-color, $brown-light);
+                color: white;
+                border-color: rgba($red-color, 0.5);
+
+                &:hover {
+                    background: linear-gradient(135deg, $brown-light, $red-color);
+                    border-color: $red-color;
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba($red-color, 0.4);
+                }
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
+
+            @media (max-width: $tablet) {
+                padding: $spacing-xs $spacing-md;
+                font-size: $font-size-sm;
+                gap: $spacing-xs;
+
+                .btn-icon {
+                    font-size: $font-size-md;
+                }
+            }
+
+            @media (max-width: 640px) {
+                padding: $spacing-xs;
+                min-width: 36px;
+                justify-content: center;
+                border-radius: 50%;
+
+                span:last-child {
+                    display: none;
+                }
+
+                .btn-icon {
+                    font-size: $font-size-lg;
+                }
+            }
+
+            @media (max-width: $mobile) {
+                min-width: 32px;
+
+                .btn-icon {
+                    font-size: $font-size-md;
                 }
             }
         }
     }
 }
 
-// ✅ MOBILE MENU TOGGLE (For future hamburger menu)
-.mobile-menu-toggle {
-    display: none;
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-
-    @media (max-width: $mobile) {
-        display: block;
-    }
-
-    &:hover {
-        background: rgba(white, 0.1);
-    }
-
-    .hamburger {
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-
-        span {
-            width: 20px;
-            height: 2px;
-            background: white;
-            border-radius: 1px;
-            transition: all 0.3s ease;
-
-            &:nth-child(1) {
-                transform-origin: top left;
-            }
-
-            &:nth-child(3) {
-                transform-origin: bottom left;
-            }
-        }
-
-        &.active {
-            span:nth-child(1) {
-                transform: rotate(45deg) translate(3px, -3px);
-            }
-
-            span:nth-child(2) {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-
-            span:nth-child(3) {
-                transform: rotate(-45deg) translate(3px, 3px);
-            }
-        }
-    }
-}
-
-// ✅ ANIMATIONS
+// ============================================
+// 🎬 ANIMATIONS
+// ============================================
 @keyframes dropdownSlide {
     0% {
         opacity: 0;
         transform: translateY(-10px) scale(0.95);
     }
+
     100% {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
 }
 
-// ✅ HIGH DPI DISPLAYS
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+@keyframes shimmer {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+// ============================================
+// 🖼️ HIGH DPI SCREENS
+// ============================================
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
     .homepage-header {
         .logo-section .logo-container .logo {
             image-rendering: -webkit-optimize-contrast;
@@ -815,37 +798,14 @@ $desktop: 1200px;
     }
 }
 
-// ✅ DARK MODE SUPPORT
-@media (prefers-color-scheme: $brown-color) {
-    .homepage-header {
-        background: linear-gradient(
-            135deg,
-            #1a1a1a 0%,
-            rgba(#1a1a1a, 0.95) 100%
-        );
-
-        .user-menu {
-            background: #2a2a2a;
-            color: white;
-
-            .menu-item {
-                color: rgba(white, 0.9);
-
-                &:hover {
-                    background: rgba(white, 0.1);
-                    color: white;
-                }
-            }
-        }
-    }
-}
-
-// ✅ LANDSCAPE ORIENTATION MOBILE
+// ============================================
+// 📱 LANDSCAPE MODE
+// ============================================
 @media (max-height: 500px) and (orientation: landscape) {
     .homepage-header {
         .header-container {
             min-height: 60px;
-            padding: 0.5rem 1rem;
+            padding: $spacing-sm $spacing-lg;
         }
 
         .logo-section {
@@ -855,7 +815,7 @@ $desktop: 1200px;
             }
 
             .brand-info .brand-name {
-                font-size: 1rem;
+                font-size: $font-size-lg;
             }
 
             .brand-info .brand-subtitle {
@@ -864,8 +824,8 @@ $desktop: 1200px;
         }
 
         .main-nav .nav-link {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.7rem;
+            padding: $spacing-xs $spacing-sm;
+            font-size: $font-size-xs;
         }
     }
 }

@@ -1,4 +1,4 @@
-@use 'sass:color'; // ✅ Thêm dòng này để dùng hàm màu mới
+@use 'sass:color';
 @use '../abstracts/variables' as *;
 
 // ===== MIXINS & RESET CỤC BỘ =====
@@ -17,7 +17,7 @@
 
 // ===== LAYOUT CHÍNH =====
 .checkout-container {
-  max-width: $desktop; // 1200px
+  max-width: $desktop;
   margin: 0 auto;
   padding: $spacing-xxl $spacing-lg;
   background: #ffffff;
@@ -89,7 +89,7 @@
   }
 }
 
-// ===== MESSAGES (Success/Error) =====
+// ===== MESSAGES =====
 .success-message,
 .error-message {
   padding: $spacing-md $spacing-lg;
@@ -106,17 +106,15 @@
 .success-message {
   background: rgba($success-color, 0.08);
   border: 1px solid rgba($success-color, 0.2);
-  // ✅ SỬA LỖI: darken -> color.adjust
   color: color.adjust($success-color, $lightness: -10%);
 }
 
 .error-message {
   background: rgba($danger-color, 0.08);
   border: 1px solid rgba($danger-color, 0.2);
-  // ✅ SỬA LỖI: darken -> color.adjust
   color: color.adjust($danger-color, $lightness: -10%);
   position: relative;
-  
+
   .close-error {
     position: absolute;
     right: $spacing-md;
@@ -127,32 +125,36 @@
     cursor: pointer;
     opacity: 0.6;
     transition: $transition-fast;
-    &:hover { opacity: 1; }
+
+    &:hover {
+      opacity: 1;
+    }
   }
 }
 
-// ===== CONTENT LAYOUT (GRID) =====
+// ===== CONTENT LAYOUT =====
 .checkout-content {
   display: grid;
-  grid-template-columns: 1fr 400px; // Form rộng, Summary cố định 400px
+  grid-template-columns: 1fr 420px;
   gap: 32px;
   align-items: start;
 
   @media (max-width: $tablet-large) {
-    grid-template-columns: 1fr; // Mobile: Xếp chồng
+    grid-template-columns: 1fr;
     gap: $spacing-xl;
   }
 }
 
-// ===== ORDER SUMMARY (CỘT PHẢI) =====
+// ===== ORDER SUMMARY =====
 .order-summary {
   @include card-base;
-  background: $brown-bg; // Nền màu kem đặc trưng
+  background: $brown-bg;
   padding: $spacing-xl;
   position: sticky;
   top: $spacing-xl;
   border: 1px solid rgba($brown-border, 0.6);
   box-shadow: $box-shadow-sm;
+  grid-row: 1/3;
 
   h2 {
     font-size: $font-size-lg;
@@ -171,14 +173,17 @@
     flex-direction: column;
     gap: $spacing-md;
     margin-bottom: $spacing-lg;
-    max-height: 400px;
+    max-height: 350px;
     overflow-y: auto;
     padding-right: 4px;
 
-    &::-webkit-scrollbar { width: 4px; }
-    &::-webkit-scrollbar-thumb { 
-        background: $brown-border; 
-        border-radius: 4px; 
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $brown-border;
+      border-radius: 4px;
     }
   }
 
@@ -203,7 +208,7 @@
       border-radius: $border-radius-sm;
       overflow: hidden;
       border: 1px solid $brown-border;
-      
+
       img {
         width: 100%;
         height: 100%;
@@ -236,13 +241,13 @@
         font-size: $font-size-sm;
 
         .quantity {
-            background: $brown-bg;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: $font-size-xs;
-            color: $brown-dark;
-            font-weight: 600;
-            border: 1px solid rgba($brown-border, 0.5);
+          background: $brown-bg;
+          padding: 2px 8px;
+          border-radius: 4px;
+          font-size: $font-size-xs;
+          color: $brown-dark;
+          font-weight: 600;
+          border: 1px solid rgba($brown-border, 0.5);
         }
 
         .total {
@@ -250,6 +255,143 @@
           font-weight: $font-weight-bold;
         }
       }
+    }
+
+  }
+
+  .payment-section-sidebar {
+    margin-top: $spacing-xl;
+    padding-top: $spacing-xl;
+    border-top: 2px solid rgba($brown-border, 0.5);
+
+    h3 {
+      font-size: $font-size-lg;
+      color: $brown-dark;
+      margin-bottom: $spacing-lg;
+      font-weight: $font-weight-bold;
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+    }
+
+    .payment-methods {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm; // Giảm gap để fit sidebar
+
+      .payment-method-card {
+        padding: $spacing-md; // Giảm padding
+        font-size: $font-size-sm; // Giảm font
+
+        .method-icon {
+          font-size: 1.5rem; // Giảm icon size
+        }
+
+        .method-info {
+          h4 {
+            font-size: $font-size-sm;
+          }
+
+          p {
+            font-size: $font-size-xs;
+          }
+        }
+      }
+    }
+
+    .payment-info-box {
+      margin-top: $spacing-md;
+      padding: $spacing-md;
+      font-size: $font-size-xs;
+
+      h4 {
+        font-size: $font-size-sm;
+      }
+
+      ul {
+        font-size: $font-size-xs;
+      }
+    }
+  }
+
+  .form-actions-sidebar {
+    margin-top: $spacing-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+
+    button {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: $border-radius-lg;
+      font-weight: $font-weight-semibold;
+      font-size: $font-size-md;
+      cursor: pointer;
+      transition: $transition-normal;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+    }
+
+    .btn-back {
+      background: #ffffff;
+      color: $brown-primary;
+      border: 2px solid $brown-primary;
+
+      &:hover:not(:disabled) {
+        background: $brown-bg;
+      }
+    }
+
+    .btn-checkout {
+      background: $brown-primary;
+      color: #ffffff;
+      border: none;
+      box-shadow: $box-shadow-md;
+
+      &:hover:not(:disabled) {
+        background: $brown-dark;
+        box-shadow: $box-shadow-lg;
+        transform: translateY(-2px);
+      }
+
+      .loading-spinner {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+
+  @media (max-width: $tablet-large) {
+    .checkout-content {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .checkout-form {
+      order: 1; // Form lên đầu
+    }
+
+    .order-summary {
+      order: 2; // Summary xuống dưới
+      position: static; // Không sticky trên mobile
+
+      .payment-section-sidebar {
+        display: none; // Ẩn payment trong sidebar trên mobile
+      }
+
+      .form-actions-sidebar {
+        display: none; // Ẩn buttons trong sidebar trên mobile
+      }
+    }
+
+    .checkout-form .form-section.payment-section {
+      display: block !important; // Hiện payment trong form trên mobile
     }
   }
 
@@ -272,12 +414,13 @@
         margin-top: $spacing-lg;
         padding-top: $spacing-md;
         border-top: 1px dashed $brown-border;
-        
-        span:first-child { 
-            font-weight: $font-weight-bold; 
-            color: $black-color; 
-            font-size: $font-size-lg;
+
+        span:first-child {
+          font-weight: $font-weight-bold;
+          color: $black-color;
+          font-size: $font-size-lg;
         }
+
         span:last-child {
           color: $brown-primary;
           font-size: 1.5rem;
@@ -288,10 +431,41 @@
   }
 }
 
-// ===== CHECKOUT FORM (CỘT TRÁI) =====
+@media (max-width: $tablet-large) {
+  .checkout-content {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .checkout-form {
+    order: 1; // Form lên đầu
+  }
+
+  .order-summary {
+    order: 2; // Summary xuống dưới
+    position: static; // Không sticky trên mobile
+
+    .payment-section-sidebar {
+      display: none; // Ẩn payment trong sidebar trên mobile
+    }
+
+    .form-actions-sidebar {
+      display: none;
+    }
+  }
+
+  .checkout-form .form-section.payment-section {
+    display: block !important; // Hiện payment trong form trên mobile
+  }
+}
+
+// ===== CHECKOUT FORM =====
 .checkout-form {
-  
-  > h2 {
+
+  grid-column: 1;
+  grid-row: 1/3;
+
+  >h2 {
     font-size: 1.5rem;
     color: $brown-primary;
     margin-bottom: $spacing-lg;
@@ -305,8 +479,7 @@
     border: 1px solid $brown-border;
     border-radius: $border-radius-xl;
     box-shadow: $box-shadow-sm;
-    
-    // Tiêu đề section
+
     h3 {
       font-size: $font-size-lg;
       color: $brown-dark;
@@ -315,40 +488,49 @@
       display: flex;
       align-items: center;
       gap: $spacing-sm;
-      
+
       &::before {
-          content: '';
-          display: block;
-          width: 4px;
-          height: 20px;
-          background: $brown-primary;
-          border-radius: 2px;
+        content: "";
+        display: block;
+        width: 4px;
+        height: 20px;
+        background: $brown-primary;
+        border-radius: 2px;
+      }
+    }
+
+    &.payment-section {
+      display: none;
+
+      @media (max-width: $tablet-large) {
+        display: block; // Hiện lại trên mobile
       }
     }
   }
 
-  // --- User Info Display ---
   .user-info-display {
     background: rgba($brown-bg, 0.6);
     padding: $spacing-md;
     border-radius: $border-radius-md;
     border: 1px solid rgba($brown-border, 0.5);
-    
+
     p {
-        margin-bottom: 6px;
-        color: $black-color;
-        font-size: $font-size-md;
-        &:last-child { margin-bottom: 0; }
-        
-        strong { 
-            color: $brown-primary; 
-            min-width: 60px;
-            display: inline-block;
-        }
+      margin-bottom: 6px;
+      color: $black-color;
+      font-size: $font-size-md;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      strong {
+        color: $brown-primary;
+        min-width: 60px;
+        display: inline-block;
+      }
     }
   }
 
-  // --- Form Inputs ---
   .form-group {
     margin-bottom: $spacing-lg;
 
@@ -359,10 +541,13 @@
       color: $brown-dark;
       font-size: $font-size-sm;
 
-      .required { color: $danger-color; }
+      .required {
+        color: $danger-color;
+      }
     }
 
-    input, textarea {
+    input,
+    textarea {
       width: 100%;
       padding: 12px 16px;
       border: 1px solid $brown-border;
@@ -373,9 +558,8 @@
       transition: $transition-normal;
       font-family: inherit;
 
-      // ✅ SỬA LỖI: lighten -> color.adjust
-      &::placeholder { 
-        color: color.adjust($secondary-color, $lightness: 20%); 
+      &::placeholder {
+        color: color.adjust($secondary-color, $lightness: 20%);
       }
 
       &:hover {
@@ -385,18 +569,21 @@
       &:focus {
         outline: none;
         border-color: $brown-primary;
-        box-shadow: 0 0 0 3px rgba($brown-primary, 0.15); // Hiệu ứng glow nâu
+        box-shadow: 0 0 0 3px rgba($brown-primary, 0.15);
       }
 
       &.error {
         border-color: $danger-color;
-        &:focus { box-shadow: 0 0 0 3px rgba($danger-color, 0.1); }
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba($danger-color, 0.1);
+        }
       }
-      
+
       &:disabled {
-          background: $light-color;
-          cursor: not-allowed;
-          opacity: 0.7;
+        background: $light-color;
+        cursor: not-allowed;
+        opacity: 0.7;
       }
     }
 
@@ -408,20 +595,21 @@
       color: $danger-color;
       font-size: $font-size-xs;
       font-weight: $font-weight-medium;
-      
-      &::before { content: '⚠'; }
+
+      &::before {
+        content: "⚠";
+      }
     }
-    
+
     .char-count {
-        display: block;
-        text-align: right;
-        font-size: $font-size-xs;
-        color: $secondary-color;
-        margin-top: 4px;
+      display: block;
+      text-align: right;
+      font-size: $font-size-xs;
+      color: $secondary-color;
+      margin-top: 4px;
     }
   }
 
-  // --- Payment Methods ---
   .payment-methods {
     display: flex;
     flex-direction: column;
@@ -450,24 +638,25 @@
       background: rgba($brown-primary, 0.04);
       box-shadow: 0 0 0 1px $brown-primary inset;
 
-      .method-radio input[type='radio'] {
+      .method-radio input[type="radio"] {
         accent-color: $brown-primary;
       }
-      
+
       .method-check {
-          opacity: 1;
-          transform: scale(1);
+        opacity: 1;
+        transform: scale(1);
       }
     }
 
     .method-radio {
-        display: flex;
-        align-items: center;
-        input {
-            width: 18px; 
-            height: 18px; 
-            cursor: pointer;
-        }
+      display: flex;
+      align-items: center;
+
+      input {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
     }
 
     .method-icon {
@@ -477,12 +666,14 @@
 
     .method-info {
       flex: 1;
+
       h4 {
         font-size: $font-size-md;
         font-weight: $font-weight-bold;
         color: $brown-dark;
         margin-bottom: 4px;
       }
+
       p {
         font-size: $font-size-xs;
         color: $secondary-color;
@@ -490,16 +681,15 @@
     }
 
     .method-check {
-        color: $brown-primary;
-        font-weight: bold;
-        font-size: 1.25rem;
-        opacity: 0;
-        transform: scale(0.5);
-        transition: $transition-fast;
+      color: $brown-primary;
+      font-weight: bold;
+      font-size: 1.25rem;
+      opacity: 0;
+      transform: scale(0.5);
+      transition: $transition-fast;
     }
   }
 
-  // --- Payment Info Box (VNPAY/PayOS) ---
   .payment-info-box {
     margin-top: $spacing-lg;
     padding: $spacing-lg;
@@ -509,25 +699,41 @@
     animation: slideIn 0.3s ease;
     box-shadow: $box-shadow-sm;
 
-    h4 { margin-bottom: 8px; font-weight: $font-weight-bold; font-size: $font-size-md; }
-    ul { padding-left: 20px; font-size: $font-size-sm; color: $black-color; }
-    li { margin-bottom: 4px; }
-    
+    h4 {
+      margin-bottom: 8px;
+      font-weight: $font-weight-bold;
+      font-size: $font-size-md;
+    }
+
+    ul {
+      padding-left: 20px;
+      font-size: $font-size-sm;
+      color: $black-color;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
     &.vnpay {
       border-left-color: $info-color;
       background: rgba($info-color, 0.05);
-      // ✅ SỬA LỖI: darken -> color.adjust
-      h4 { color: color.adjust($info-color, $lightness: -10%); }
+
+      h4 {
+        color: color.adjust($info-color, $lightness: -10%);
+      }
     }
 
     &.payos {
-      border-left-color: #5d25aa; 
+      border-left-color: #5d25aa;
       background: rgba(93, 37, 170, 0.05);
-      h4 { color: #5d25aa; }
+
+      h4 {
+        color: #5d25aa;
+      }
     }
   }
 
-  // --- Form Actions (Buttons) ---
   .form-actions {
     display: flex;
     gap: $spacing-lg;
@@ -581,7 +787,7 @@
         box-shadow: $box-shadow-lg;
         transform: translateY(-2px);
       }
-      
+
       .loading-spinner {
         animation: spin 1s linear infinite;
       }
@@ -589,12 +795,316 @@
   }
 }
 
+// =============================================
+// ✅ ADDRESS AUTOCOMPLETE - FIX CRITICAL
+// =============================================
+.address-autocomplete-wrapper {
+  position: relative;
+  width: 100%;
+
+  .address-autocomplete-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1px solid $brown-border;
+    border-radius: $border-radius-md;
+    font-size: $font-size-md;
+    font-family: inherit;
+    resize: vertical;
+    transition: all $transition-normal;
+    background: #ffffff;
+    color: $black-color;
+    position: relative; // ✅ FIX: Đảm bảo z-index hoạt động
+    z-index: 1; // ✅ FIX: Cao hơn loading indicator
+
+    &::placeholder {
+      color: color.adjust($secondary-color, $lightness: 20%);
+    }
+
+    &:hover {
+      border-color: $brown-light;
+    }
+
+    &:focus {
+      outline: none;
+      border-color: $brown-primary;
+      box-shadow: 0 0 0 3px rgba($brown-primary, 0.15);
+      z-index: 2; // ✅ FIX: Cao hơn khi focus
+    }
+
+    &.error {
+      border-color: $danger-color;
+
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($danger-color, 0.1);
+      }
+    }
+
+    &:disabled {
+      background: $light-color;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+  }
+
+  .address-autocomplete-loading {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 12px;
+    color: #999;
+    pointer-events: none; // ✅ FIX: Không chặn input
+    z-index: 0; // ✅ FIX: Thấp hơn input
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+
+  .address-autocomplete-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: white;
+    border: 2px solid $brown-primary;
+    border-radius: $border-radius-md;
+    box-shadow: $box-shadow-lg;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 9999; // ✅ FIX: Cao nhất
+    animation: slideDown 0.2s ease;
+
+    scrollbar-width: thin;
+    scrollbar-color: $brown-primary #f1f1f1;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: $brown-primary;
+      border-radius: 4px;
+
+      &:hover {
+        background: $brown-dark;
+      }
+    }
+  }
+
+  .address-autocomplete-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background $transition-fast;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: rgba($brown-primary, 0.05);
+    }
+
+    &:active {
+      background: rgba($brown-primary, 0.1);
+    }
+
+    .item-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .item-content {
+      flex: 1;
+      min-width: 0;
+
+      .item-primary {
+        font-weight: $font-weight-semibold;
+        color: $brown-dark;
+        font-size: $font-size-md;
+        margin-bottom: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .item-secondary {
+        font-size: $font-size-sm;
+        color: $secondary-color;
+        line-height: 1.4;
+      }
+    }
+  }
+
+  .address-autocomplete-no-results {
+    padding: 16px;
+    text-align: center;
+    color: $secondary-color;
+    font-size: $font-size-sm;
+    border: 1px solid #ddd;
+    border-radius: $border-radius-md;
+    margin-top: 4px;
+    background: white;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 9999;
+  }
+
+  .address-autocomplete-attribution {
+    font-size: 10px;
+    color: #999;
+    text-align: right;
+    margin-top: 4px;
+
+    a {
+      color: $brown-primary;
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
+.address-details-box {
+  margin-top: 8px;
+  padding: 12px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border-radius: $border-radius-md;
+  border: 1px solid #4caf50;
+  animation: slideDown 0.3s ease;
+
+  .details-title {
+    font-weight: $font-weight-bold;
+    color: #2e7d32;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: $font-size-sm;
+  }
+
+  .details-grid {
+    display: grid;
+    gap: 6px;
+    font-size: $font-size-sm;
+    color: $black-color;
+
+    .detail-row {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+
+      .detail-label {
+        font-weight: $font-weight-medium;
+        color: $secondary-color;
+      }
+
+      .detail-value {
+        font-weight: $font-weight-semibold;
+        color: $brown-dark;
+      }
+    }
+
+    .detail-coordinates {
+      font-size: $font-size-xs;
+      color: #666;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px solid rgba(#4caf50, 0.2);
+    }
+  }
+}
+
+.address-usage-hint {
+  margin-top: 8px;
+  font-size: $font-size-xs;
+  color: $secondary-color;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  em {
+    font-style: italic;
+  }
+}
+
 // ===== KEYFRAMES =====
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes slideIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// ===== RESPONSIVE =====
+@media (max-width: $tablet) {
+  .address-autocomplete-wrapper {
+    .address-autocomplete-dropdown {
+      max-height: 200px;
+    }
+
+    .address-autocomplete-item {
+      padding: 10px 12px;
+
+      .item-content {
+        .item-primary {
+          font-size: $font-size-sm;
+        }
+
+        .item-secondary {
+          font-size: $font-size-xs;
+        }
+      }
+    }
+  }
+
+  .address-details-box {
+    padding: 10px;
+    font-size: $font-size-xs;
+  }
 }

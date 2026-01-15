@@ -3,6 +3,7 @@ import Layout from "@components/common/Layout.jsx";
 import CartAPI from "@services/cart.service.js";
 import CheckoutService from "@services/checkout.service.js";
 import "@styles/pages/_checkout.scss";
+import AddressAutocomplete from "@components/common/AddressAutocomplete.jsx";
 
 export default function CheckoutPage({
   user,
@@ -25,6 +26,7 @@ export default function CheckoutPage({
   });
 
   const [formErrors, setFormErrors] = useState({});
+  const [addressDetails, setAddressDetails] = useState(null);
 
   const paymentMethods = [
     {
@@ -122,6 +124,11 @@ export default function CheckoutPage({
         [name]: "",
       }));
     }
+  };
+
+  const handlePlaceSelected = (placeData) => {
+    console.log("📍 Place data:", placeData);
+    setAddressDetails(placeData);
   };
 
   const handlePaymentMethodChange = (methodId) => {
@@ -393,7 +400,7 @@ export default function CheckoutPage({
 
             <form onSubmit={handleCheckout}>
               <div className="form-section">
-                <h3>👤 Thông tin khách hàng</h3>
+                <h3>Thông tin khách hàng</h3>
                 <div className="user-info-display">
                   <p>
                     <strong>Tên:</strong> {user?.name || "N/A"}
@@ -405,7 +412,7 @@ export default function CheckoutPage({
               </div>
 
               <div className="form-section">
-                <h3>📞 Thông tin liên hệ</h3>
+                <h3>Thông tin liên hệ</h3>
 
                 <div className="form-group">
                   <label htmlFor="phone">
@@ -430,19 +437,61 @@ export default function CheckoutPage({
                   <label htmlFor="address">
                     Địa chỉ giao hàng <span className="required">*</span>
                   </label>
-                  <textarea
-                    id="address"
-                    name="address"
+
+                  <AddressAutocomplete
                     value={formData.address}
                     onChange={handleInputChange}
-                    placeholder="Nhập địa chỉ chi tiết (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)"
-                    rows={3}
-                    className={formErrors.address ? "error" : ""}
+                    placeholder="Nhập địa chỉ chi tiết (bắt đầu gõ để tìm kiếm...)"
+                    error={formErrors.address}
                     disabled={submitting}
+                    onPlaceSelected={handlePlaceSelected}
                   />
-                  {formErrors.address && (
-                    <span className="field-error">{formErrors.address}</span>
+
+                  {addressDetails && (
+                    <div className="address-details-box">
+                      <div className="details-title">
+                        📍 Thông tin địa chỉ đã chọn:
+                      </div>
+                      <div className="details-grid">
+                        {addressDetails.street && (
+                          <div className="detail-row">
+                            <span className="detail-label">🛣️ Đường:</span>
+                            <span className="detail-value">
+                              {addressDetails.street}
+                            </span>
+                          </div>
+                        )}
+                        {addressDetails.ward && (
+                          <div className="detail-row">
+                            <span className="detail-label">🏡 Phường/Xã:</span>
+                            <span className="detail-value">
+                              {addressDetails.ward}
+                            </span>
+                          </div>
+                        )}
+                        {addressDetails.district && (
+                          <div className="detail-row">
+                            <span className="detail-label">🏘️ Quận/Huyện:</span>
+                            <span className="detail-value">
+                              {addressDetails.district}
+                            </span>
+                          </div>
+                        )}
+                        {addressDetails.city && (
+                          <div className="detail-row">
+                            <span className="detail-label">🏙️ Thành phố:</span>
+                            <span className="detail-value">
+                              {addressDetails.city}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
+
+                  <div className="address-usage-hint">
+                    💡 <em>Gõ ít nhất 3 ký tự để tìm kiếm địa chỉ</em>
+                  </div>
                 </div>
 
                 <div className="form-group">
@@ -467,9 +516,8 @@ export default function CheckoutPage({
                 </div>
               </div>
 
-              <div className="form-section">
-                <h3>💳 Phương thức thanh toán</h3>
-
+              <div className="payment-section-sidebar">
+                <h3>💳 Thanh toán</h3>
                 <div className="payment-methods">
                   {paymentMethods.map((method) => (
                     <div
@@ -484,7 +532,7 @@ export default function CheckoutPage({
                       <div className="method-radio">
                         <input
                           type="radio"
-                          id={`payment-${method.id}`}
+                          id={`payment-desktop-${method.id}`}
                           name="payment_method"
                           value={method.id}
                           checked={formData.payment_method === method.id}
@@ -492,52 +540,34 @@ export default function CheckoutPage({
                           disabled={submitting}
                         />
                       </div>
-                      <div className="method-info">{method.icon}</div>
+                      <span className="method-icon">{method.icon}</span>
                       <div className="method-info">
                         <h4>{method.name}</h4>
-                        <p>{method.description}</p>
                       </div>
                       {formData.payment_method === method.id && (
-                        <div className="method-check">✓</div>
+                        <span className="method-check">✓</span>
                       )}
                     </div>
                   ))}
                 </div>
+
                 {formData.payment_method === "vnpay" && (
                   <div className="payment-info-box vnpay">
-                    <h4>🏦 Thông tin VNPAY Sandbox (Test)</h4>
+                    <h4>🏦 VNPAY Test</h4>
                     <ul>
-                      <li>
-                        <strong>Ngân hàng:</strong> NCB
-                      </li>
-                      <li>
-                        <strong>Số thẻ:</strong> 9704198526191432198
-                      </li>
-                      <li>
-                        <strong>Tên:</strong> NGUYEN VAN A
-                      </li>
-                      <li>
-                        <strong>Ngày phát hành:</strong> 07/15
-                      </li>
-                      <li>
-                        <strong>Mật khẩu OTP:</strong> 123456
-                      </li>
+                      <li>NCB: 9704198526191432198</li>
+                      <li>OTP: 123456</li>
                     </ul>
                   </div>
                 )}
 
                 {formData.payment_method === "payos" && (
                   <div className="payment-info-box payos">
-                    <h4>📱 Thông tin PayOS</h4>
-                    <p>Bạn sẽ được chuyển đến trang PayOS để thanh toán qua:</p>
-                    <ul>
-                      <li>Quét mã QR bằng ứng dụng ngân hàng</li>
-                      <li>Chuyển khoản ngân hàng</li>
-                    </ul>
+                    <h4>📱 PayOS</h4>
+                    <p>Quét QR hoặc chuyển khoản</p>
                   </div>
                 )}
               </div>
-              {/* ✅ SUBMIT BUTTONS */}
               <div className="form-actions">
                 <button
                   type="button"
