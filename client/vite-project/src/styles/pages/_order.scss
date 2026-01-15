@@ -54,6 +54,13 @@
     }
 }
 
+.address-cell {
+    font-weight: $font-weight-medium;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 // =============================================
 // ✅ ORDERS LIST
 // =============================================

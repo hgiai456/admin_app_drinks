@@ -8,7 +8,7 @@ import { orderStatusMap } from "@models/order";
 import Modal from "@components/admin/ModelComponent.jsx";
 import Button from "@components/common/Button.jsx";
 import "@styles/pages/_admin.scss";
-import "@styles/pages/_order.scss";
+import "@styles/pages/_order-manager.scss";
 
 const getAvailableStatuses = (currentStatus) => {
   const statusFlow = {

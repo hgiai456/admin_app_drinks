@@ -8,6 +8,7 @@ import Footer from "@components/common/Footer.jsx";
 import Header from "@components/common/Header.jsx";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
 import NewsService from "@services/news.service.js";
+import BestSellerGrid from "@components/common/BestSellerGrid";
 
 export default function HomePage({
   user,
@@ -344,7 +345,6 @@ export default function HomePage({
     window.location.hash = `product/${product.id}`;
   };
 
-  // ✅ PAGINATION HANDLERS
   const handlePageChange = (newPage) => {
     if (
       newPage >= 1 &&
@@ -808,6 +808,15 @@ export default function HomePage({
         </div>
       </section>
 
+      <BestSellerGrid
+        limit={8}
+        onProductClick={handleViewProduct}
+        onViewMore={() => (window.location.hash = "menu?sort=bestseller")}
+        formatPrice={formatPrice}
+        getCategoryName={getCategoryName}
+        title="🏆 SẢN PHẨM BÁN CHẠY"
+      />
+
       <section className="news-section-home">
         <div className="container">
           <div className="section-header">
@@ -887,7 +896,6 @@ export default function HomePage({
           )}
         </div>
       </section>
-
       <Footer />
     </div>
   );

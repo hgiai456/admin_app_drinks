@@ -6,6 +6,7 @@ class Product {
     image = "",
     brand_id = 1,
     category_id = 0,
+    total_buyturn = 0,
     createdAt = null,
     updatedAt = null
   ) {
@@ -17,6 +18,7 @@ class Product {
     this.category_id = category_id;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
+    this.total_buyturn = total_buyturn;
     this.product_details = [];
   }
 
@@ -40,6 +42,7 @@ class Product {
       data.image || "",
       data.brand_id || 1,
       data.category_id || 0,
+      data.total_buyturn || 0,
       data.createdAt,
       data.updatedAt
     );
@@ -73,6 +76,7 @@ class Product {
       image: this.image,
       brand_id: this.brand_id,
       category_id: this.category_id,
+      total_buyturn: this.total_buyturn,
     };
   }
 
