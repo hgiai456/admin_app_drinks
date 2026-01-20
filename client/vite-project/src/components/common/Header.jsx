@@ -70,7 +70,7 @@ export default function Header({
       const count = await CartService.getCartItemCount(userId);
       setCartItemCount(count);
       console.log(
-        `📊 Cart count loaded: ${count} (${userId ? "user" : "guest"})`
+        `📊 Cart count loaded: ${count} (${userId ? "user" : "guest"})`,
       );
     } catch (error) {
       console.error("❌ Error loading cart count:", error);
@@ -101,7 +101,6 @@ export default function Header({
   return (
     <header className="homepage-header">
       <div className="header-container">
-        {/* ✅ LOGO SECTION - LUÔN Ở TRÊN (DESKTOP + MOBILE) */}
         <div className="logo-section">
           <div className="logo-container">
             <img
@@ -119,7 +118,6 @@ export default function Header({
           </div>
         </div>
 
-        {/* ✅ NAV (DESKTOP - FLEXBOX CENTER) */}
         <nav className="main-nav">
           <a
             href="#home"
@@ -161,7 +159,6 @@ export default function Header({
           </a>
         </nav>
 
-        {/* ✅ ACTIONS (DESKTOP - FLEXBOX RIGHT) */}
         <div className="header-actions">
           <CartButton
             cartItemCount={cartItemCount}
@@ -226,7 +223,6 @@ export default function Header({
           )}
         </div>
 
-        {/* ✅ NAV + ACTIONS WRAPPER (CHỈ MOBILE/TABLET) */}
         <div className="nav-actions-wrapper">
           <nav className="main-nav">
             <a

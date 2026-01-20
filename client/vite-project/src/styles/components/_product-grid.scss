@@ -241,8 +241,10 @@
         }
 
         .section-subtitle {
-            font-size: $font-size-lg;
-            color: $text-secondary;
+
+            font-size: 1.1rem;
+            color: #6c757d;
+            line-height: 1.6;
             margin: $spacing-lg 0 0 0;
 
             @media (max-width: $mobile) {

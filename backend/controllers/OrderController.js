@@ -72,6 +72,77 @@ export async function getOrders(req, res) {
     totalOrders,
   });
 }
+
+export async function getAll(req, res) {
+  const { search = "", page = 1, status } = req.query;
+  const pageSize = 1000;
+  const offset = (page - 1) * pageSize;
+
+  let whereClause = {};
+  if (search.trim() !== "") {
+    whereClause = {
+      [Op.or]: [
+        { phone: { [Op.like]: `%${search}%` } },
+        { address: { [Op.like]: `%${search}%` } },
+      ],
+    };
+  }
+  if (status) {
+    whereClause.status = status;
+  }
+
+  const [orders, totalOrders] = await Promise.all([
+    db.Order.findAll({
+      where: whereClause,
+      limit: pageSize,
+      offset: offset,
+      attributes: [
+        "id",
+        "user_id",
+        "phone",
+        "address",
+        "note",
+        "total",
+        "status",
+        "createdAt",
+        "updatedAt",
+      ],
+      include: [
+        {
+          model: db.Payment,
+          as: "payments",
+          attributes: ["id", "payment_method", "status", "transaction_id"],
+          required: false, // LEFT JOIN - order không có payment vẫn hiển thị
+        },
+      ],
+
+      order: [["createdAt", "DESC"]],
+    }),
+    db.Order.count({
+      where: whereClause,
+    }),
+  ]);
+  const transformedOrders = orders.map((order) => {
+    const orderData = order.toJSON();
+    const payment = orderData.payments?.[0];
+
+    return {
+      ...orderData,
+      payment_method: payment?.payment_method || "cod",
+      payment_status: payment?.status || "pending",
+      transaction_id: payment?.transaction_id || null,
+    };
+  });
+
+  res.status(200).json({
+    message: "Lấy danh sách sản phẩm thành công",
+    data: transformedOrders,
+    currentPage: parseInt(page, 10),
+    totalPage: Math.ceil(totalOrders / pageSize), //ceil(11 / 5) = 2.1 => 3 (Lam tron)
+    totalOrders,
+  });
+}
+
 export async function getOrdersByUserId(req, res) {
   try {
     const { user_id } = req.params;
@@ -192,7 +263,7 @@ export async function updateOrder(req, res) {
   // 3. Tiến hành cập nhật
   const [updated] = await db.Order.update(
     { status: status },
-    { where: { id } }
+    { where: { id } },
   );
 
   if (updated) {
@@ -216,7 +287,7 @@ export async function deleteOrder(req, res) {
     { status: OrderStatus.FAILED },
     {
       where: { id },
-    }
+    },
   );
 
   if (update) {

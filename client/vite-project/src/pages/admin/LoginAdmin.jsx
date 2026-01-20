@@ -53,7 +53,7 @@ export default function LoginAdmin({
           localStorage.setItem("admin_token", data.data.token);
           onLogin(data.data.user);
         } else {
-          console.log("❌ Not admin role:", data.data?.user?.role);
+          console.log("Not admin role:", data.data?.user?.role);
           setError("Sai tài khoản hoặc mật khẩu.");
         }
       } else {
@@ -68,7 +68,7 @@ export default function LoginAdmin({
         }
       }
     } catch (err) {
-      console.error("❌ Network/Server error:", err);
+      console.error("Network/Server error:", err);
       setError("Lỗi kết nối server! Vui lòng thử lại.");
     } finally {
       setLoading(false);

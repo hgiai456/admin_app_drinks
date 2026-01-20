@@ -1,9 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  getOrders,
-  getOrderById,
-  updateOrderStatus,
-} from "@services/order.service.js";
+import OrderService from "@services/order.service.js";
 import { orderStatusMap } from "@models/order";
 import Modal from "@components/admin/ModelComponent.jsx";
 import Button from "@components/common/Button.jsx";
@@ -66,7 +62,7 @@ export default function OrderManagement() {
   const [loadingData, setLoadingData] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalOrders, setTotalItems] = useState(0);
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -132,22 +128,22 @@ export default function OrderManagement() {
   const fetchOrders = async (
     pageNum = 1,
     searchTerm = "",
-    statusFilter = "all"
+    statusFilter = "all",
   ) => {
     setLoading(true);
     try {
-      const response = await getOrders(pageNum, 10);
+      const response = await OrderService.getOrders(pageNum, 10);
 
-      if (!response?.data?.data) {
+      if (!response?.data) {
         setOrders([]);
         setTotalPage(1);
         setTotalItems(0);
         return;
       }
 
-      let ordersData = response.data.data || [];
-      const totalOrdersCount = response.data.totalOrders || 0;
-      const totalPagesFromAPI = response.data.totalPage || 1;
+      let ordersData = response.data || [];
+      const totalOrdersCount = response.totalOrders || 0;
+      const totalPagesFromAPI = response.totalPage || 1;
 
       // Client-side filters
       if (searchTerm) {
@@ -155,13 +151,13 @@ export default function OrderManagement() {
           (order) =>
             order.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.address?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.id?.toString().includes(searchTerm)
+            order.id?.toString().includes(searchTerm),
         );
       }
 
       if (statusFilter !== "all") {
         ordersData = ordersData.filter(
-          (order) => String(order.status) === String(statusFilter)
+          (order) => String(order.status) === String(statusFilter),
         );
       }
 
@@ -191,7 +187,7 @@ export default function OrderManagement() {
   const openDetailModal = async (order) => {
     try {
       setLoading(true);
-      const response = await getOrderById(order.id);
+      const response = await OrderService.getOrderById(order.id);
       setSelectedOrder(response.data.data);
       setModalMode("detail");
       setEditingId(order.id);
@@ -223,7 +219,7 @@ export default function OrderManagement() {
 
     setLoading(true);
     try {
-      await updateOrderStatus(selectedOrder.id, newStatus);
+      await OrderService.updateOrderStatus(selectedOrder.id, newStatus);
       setMessage("✅ Cập nhật trạng thái thành công!");
       closeModal();
       await fetchOrders(page, search, filterStatus);
@@ -539,7 +535,7 @@ export default function OrderManagement() {
       <div className="header">
         <h2>📦 Quản lý đơn hàng</h2>
         <div style={{ fontSize: "14px", color: "#666" }}>
-          📊 Tổng: <strong>{totalItems}</strong> đơn hàng
+          📊 Tổng: <strong>{totalOrders}</strong> đơn hàng
         </div>
       </div>
 
@@ -547,7 +543,7 @@ export default function OrderManagement() {
       <div className="search-bar">
         <div className="search-info">
           Hiển thị <strong>{orders.length}</strong> /{" "}
-          <strong>{totalItems}</strong> đơn hàng
+          <strong>{totalOrders}</strong> đơn hàng
         </div>
         <div
           style={{
@@ -679,7 +675,7 @@ export default function OrderManagement() {
       </div>
 
       {/* Pagination */}
-      {totalItems > 0 && (
+      {totalOrders > 0 && (
         <div className="pagination">
           <div className="pagination-controls">
             <button

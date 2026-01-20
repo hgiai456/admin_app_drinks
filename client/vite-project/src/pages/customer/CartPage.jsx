@@ -4,7 +4,13 @@ import CartService from "@services/cart.service.js";
 import "@styles/pages/_cart.scss";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
 
-export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
+export default function CartPage({
+  user,
+  onLogout,
+  isGuest = false,
+  onLogin,
+  onRegister,
+}) {
   const [cart, setCart] = useState(null);
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,8 +47,8 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
               item.product_details?.size_id === 1
                 ? "S"
                 : item.product_details?.size_id === 2
-                ? "M"
-                : "L"
+                  ? "M"
+                  : "L"
             }`,
             price: item.product_details?.price,
             oldprice: item.product_details?.oldprice,
@@ -70,8 +76,8 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
 
       setCartItems((prevItems) =>
         prevItems.map((item) =>
-          item.id === cartItemId ? { ...item, quantity: newQuantity } : item
-        )
+          item.id === cartItemId ? { ...item, quantity: newQuantity } : item,
+        ),
       );
 
       setMessage("✓ Đã cập nhật");
@@ -84,14 +90,14 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
     }
   };
 
-  const handleRemoveItem = async (cartItemId) =>  {
+  const handleRemoveItem = async (cartItemId) => {
     if (!confirm("Xóa sản phẩm này?")) return;
 
-    try { 
+    try {
       setUpdating((prev) => ({ ...prev, [cartItemId]: true }));
       await CartService.removeFromCart(cartItemId);
       setCartItems((prevItems) =>
-        prevItems.filter((item) => item.id !== cartItemId)
+        prevItems.filter((item) => item.id !== cartItemId),
       );
       setMessage("✓ Đã xóa");
       setTimeout(() => setMessage(""), 2000);
@@ -131,7 +137,7 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
   const calculateCartTotal = () => {
     return cartItems.reduce(
       (total, item) => total + calculateItemTotal(item),
-      0
+      0,
     );
   };
 
@@ -146,9 +152,22 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
     }
 
     if (isGuest) {
-      if (confirm("Bạn cần đăng nhập để thanh toán. Đăng nhập ngay?")) {
-        onLogin?.();
+      const shouldLogin = confirm(
+        "Bạn cần đăng nhập để đặt hàng. Đăng nhập ngay?",
+      );
+
+      if (shouldLogin) {
+        if (onLogin) {
+          onLogin();
+        } else {
+          alert(
+            "Lỗi: Không thể chuyển trang đăng nhập. Vui lòng reload trang.",
+          );
+        }
+      } else {
+        console.log("User cancelled login");
       }
+
       return;
     }
     window.location.hash = "checkout";
@@ -156,7 +175,12 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
 
   if (loading) {
     return (
-      <Layout user={user} onLogout={onLogout} currentPage="cart">
+      <Layout
+        user={user}
+        onLogout={onLogout}
+        onRegister={onRegister}
+        currentPage="cart"
+      >
         <div className="cart-simple">
           <div className="loading-state">
             <div className="spinner"></div>
@@ -169,7 +193,12 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
 
   if (error) {
     return (
-      <Layout user={user} onLogout={onLogout} currentPage="cart">
+      <Layout
+        user={user}
+        onLogout={onLogout}
+        onRegister={onRegister}
+        currentPage="cart"
+      >
         <div className="cart-simple">
           <div className="error-state">
             <h2>Có lỗi xảy ra</h2>
@@ -184,7 +213,13 @@ export default function CartPage({ user, onLogout, isGuest = false, onLogin }) {
   }
 
   return (
-    <Layout user={user} onLogout={onLogout} currentPage="cart">
+    <Layout
+      user={user}
+      onLogout={onLogout}
+      onLogin={onLogin}
+      onRegister={onRegister}
+      currentPage="cart"
+    >
       <div className="cart-simple">
         <div className="cart-header">
           <div className="header-top">

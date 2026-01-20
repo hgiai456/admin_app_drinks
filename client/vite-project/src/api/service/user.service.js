@@ -14,11 +14,55 @@ class UserService {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          ...this.getAuthHeader(), //xác thực token
-        }, //await thì trả về async function
-      }); //Goi API với method GET
+          ...this.getAuthHeader(),
+        },
+      });
       if (!res.ok) {
-        //Nếu như res không thành công thì trả vể res báo lỗi
+        const errorText = await res.text();
+        console.error("Lỗi UserAPI - getAll:", errorText);
+        throw new Error(`HTTP ${res.status}: ${errorText}`);
+      }
+
+      const data = await res.json();
+
+      //Xử lý respondata
+      const users = data.data || data.users || data || [];
+
+      return Array.isArray(users)
+        ? users.map((item) =>
+            User && User.fromApiResponse
+              ? User.fromApiResponse(item)
+              : {
+                  id: item.id,
+                  email: item.id,
+                  password: item.password,
+                  name: item.name,
+                  role: item.role,
+                  avatar: item.avatar,
+                  phone: item.phone,
+                  address: item.address,
+                  is_locked: item.is_locked,
+                  password_changed: item.password_changed_ad,
+                  createdAt: item.createdAt,
+                  updatedAt: item.updatedAt,
+                },
+          )
+        : [];
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      throw error;
+    }
+  }
+
+  static async getAllUsers() {
+    try {
+      const res = await fetch(`${this.baseUrl}/all`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (!res.ok) {
         const errorText = await res.text();
         console.error("Lỗi UserAPI - getAll:", errorText);
         throw new Error(`HTTP ${res.status}: ${errorText}`);
@@ -46,7 +90,7 @@ class UserService {
                   password_changed: item.password_changed_ad,
                   createdAt: item.createdAt,
                   updatedAt: item.updatedAt,
-                }
+                },
           )
         : [];
     } catch (error) {
@@ -58,7 +102,7 @@ class UserService {
   static async getPaging({ page = 1, search = "" } = {}) {
     try {
       const url = `${this.baseUrl}?search=${encodeURIComponent(
-        search
+        search,
       )}&page=${page}`;
 
       const res = await fetch(url, {
@@ -122,7 +166,7 @@ class UserService {
         const errorText = await res.text();
         console.error("Create error response:", errorText);
         throw new Error(
-          `HTTP error! status: ${res.status}, message: ${errorText}`
+          `HTTP error! status: ${res.status}, message: ${errorText}`,
         );
       }
 

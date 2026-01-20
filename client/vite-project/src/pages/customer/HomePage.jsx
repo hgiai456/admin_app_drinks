@@ -9,7 +9,7 @@ import Header from "@components/common/Header.jsx";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
-import { scrollToTop } from "@utils/editorHelpers";
+import { scrollToTop, navigation } from "@utils/editorHelpers";
 
 export default function HomePage({
   user,
@@ -297,11 +297,10 @@ export default function HomePage({
         !productDetails.sizes ||
         productDetails.sizes.length === 0
       ) {
-        setMessage("❌ Sản phẩm không có thông tin chi tiết");
+        setMessage("Sản phẩm không có thông tin chi tiết");
         return;
       }
 
-      // ✅ Lấy size đầu tiên có quantity > 0
       const availableSize = productDetails.sizes.find(
         (size) => size.quantity > 0,
       );
@@ -316,7 +315,6 @@ export default function HomePage({
 
       setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
 
-      // ✅ THÔNG BÁO KHÁC NHAU CHO USER VÀ GUEST
       if (isGuest) {
         setMessage(
           `✅ Đã thêm "${product.name}" vào giỏ hàng (khách vãng lai)`,
@@ -325,17 +323,17 @@ export default function HomePage({
         setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
       }
       triggerCartRefresh();
-      // ✅ Auto clear message after 3 seconds
       setTimeout(() => setMessage(""), 3000);
     } catch (error) {
-      console.error("❌ Error adding to cart:", error);
-      setMessage("❌ Lỗi khi thêm vào giỏ hàng: " + error.message);
+      console.error("Error adding to cart:", error);
+      setMessage("Lỗi khi thêm vào giỏ hàng: " + error.message);
     } finally {
       setAddingToCart((prev) => ({ ...prev, [product.id]: false }));
     }
   };
   const handleViewProduct = (product) => {
     window.location.hash = `product/${product.id}`;
+    scrollToTop();
   };
 
   const handlePageChange = (newPage) => {
@@ -413,7 +411,6 @@ export default function HomePage({
   }
   return (
     <div className="homepage">
-      {/* ✅ ENHANCED HEADER */}
       <Header
         user={user}
         onLogout={onLogout}
@@ -423,7 +420,6 @@ export default function HomePage({
         onRegister={onRegister}
       />
 
-      {/* ✅ MESSAGE NOTIFICATION */}
       {message && (
         <div
           className={`message-notification ${

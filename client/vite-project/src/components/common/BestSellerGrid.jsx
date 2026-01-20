@@ -227,9 +227,8 @@ export default function BestSellerGrid({
                         </button>
                       </div>
                       <div className="product-badge bestseller-badge">
-                        <span>🏆 Top {index + 1}</span>
+                        <span>Top {index + 1}</span>
                       </div>
-                      {/* ✅ FIX: Hiển thị total_buyturn */}
                       <div className="buyturns-badge">
                         <span>🔥 {product.total_buyturn} lượt mua</span>
                       </div>
@@ -259,7 +258,6 @@ export default function BestSellerGrid({
             </div>
           </div>
 
-          {/* RIGHT ARROW */}
           {products.length > visibleItems && (
             <button
               className="carousel-arrow next"
@@ -271,7 +269,6 @@ export default function BestSellerGrid({
           )}
         </div>
 
-        {/* ✅ PROGRESS DOTS */}
         {products.length > visibleItems && (
           <div className="carousel-progress">
             {Array.from({ length: maxIndex + 1 }).map((_, index) => (
@@ -287,7 +284,6 @@ export default function BestSellerGrid({
           </div>
         )}
 
-        {/* ✅ VIEW MORE BUTTON */}
         <div className="section-footer">
           <button className="btn-view-more" onClick={handleViewMore}>
             <span>XEM THÊM</span>

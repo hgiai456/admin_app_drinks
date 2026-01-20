@@ -10,7 +10,25 @@ import ProductManagement from "@pages/admin/ProductManagement.jsx";
 import SizeManagement from "@pages/admin/SizeManagement.jsx";
 import OrderManagement from "@pages/admin/OrderManagement.jsx";
 import LoginAdmin from "@pages/admin/LoginAdmin.jsx";
-
+import {
+  LayoutDashboard,
+  ShoppingCart,
+  Store,
+  Tag,
+  FolderTree,
+  Package,
+  Users,
+  Ruler,
+  Image as ImageIcon,
+  FileText,
+  Newspaper,
+  LogOut,
+  Menu,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  UserCircle,
+} from "lucide-react";
 import "@styles/pages/_admin.scss";
 import ProductPage from "@pages/customer/ProductPage.jsx";
 import ProductDetailPage from "@pages/customer/ProductDetailPage.jsx";
@@ -24,101 +42,102 @@ import RegisterPage from "@pages/customer/RegisterPage.jsx";
 import NewsManagement from "./pages/admin/NewsManagement";
 import NewsPage from "@pages/customer/NewsPage.jsx";
 import NewsDetailPage from "@pages/customer/NewsDetailPage.jsx"; // ← THÊM
-
+import { navigation } from "@utils/editorHelpers";
+import Dashboard from "@pages/admin/Dashboard.jsx";
 import { Component } from "react";
 
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null, errorInfo: null };
-  }
+// class ErrorBoundary extends Component {
+//   constructor(props) {
+//     super(props);
+//     this.state = { hasError: false, error: null, errorInfo: null };
+//   }
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
+//   static getDerivedStateFromError(error) {
+//     return { hasError: true };
+//   }
 
-  componentDidCatch(error, errorInfo) {
-    console.error("❌ ErrorBoundary caught error:", error);
-    console.error("📍 Error info:", errorInfo);
-    this.setState({ error, errorInfo });
-  }
+//   componentDidCatch(error, errorInfo) {
+//     console.error("❌ ErrorBoundary caught error:", error);
+//     console.error("📍 Error info:", errorInfo);
+//     this.setState({ error, errorInfo });
+//   }
 
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div
-          style={{
-            padding: "40px",
-            maxWidth: "800px",
-            margin: "50px auto",
-            background: "#fff3cd",
-            border: "2px solid #ffc107",
-            borderRadius: "12px",
-          }}
-        >
-          <h1 style={{ color: "#856404", marginBottom: "20px" }}>
-            ⚠️ Có lỗi xảy ra!
-          </h1>
-          <details style={{ cursor: "pointer" }}>
-            <summary
-              style={{
-                fontSize: "16px",
-                fontWeight: "bold",
-                color: "#856404",
-                marginBottom: "10px",
-              }}
-            >
-              📋 Chi tiết lỗi (Click để xem)
-            </summary>
-            <pre
-              style={{
-                background: "#f8f9fa",
-                padding: "20px",
-                borderRadius: "8px",
-                overflow: "auto",
-                fontSize: "13px",
-                lineHeight: "1.6",
-              }}
-            >
-              <strong>Error:</strong>
-              {this.state.error?.toString()}
+//   render() {
+//     if (this.state.hasError) {
+//       return (
+//         <div
+//           style={{
+//             padding: "40px",
+//             maxWidth: "800px",
+//             margin: "50px auto",
+//             background: "#fff3cd",
+//             border: "2px solid #ffc107",
+//             borderRadius: "12px",
+//           }}
+//         >
+//           <h1 style={{ color: "#856404", marginBottom: "20px" }}>
+//             ⚠️ Có lỗi xảy ra!
+//           </h1>
+//           <details style={{ cursor: "pointer" }}>
+//             <summary
+//               style={{
+//                 fontSize: "16px",
+//                 fontWeight: "bold",
+//                 color: "#856404",
+//                 marginBottom: "10px",
+//               }}
+//             >
+//               📋 Chi tiết lỗi (Click để xem)
+//             </summary>
+//             <pre
+//               style={{
+//                 background: "#f8f9fa",
+//                 padding: "20px",
+//                 borderRadius: "8px",
+//                 overflow: "auto",
+//                 fontSize: "13px",
+//                 lineHeight: "1.6",
+//               }}
+//             >
+//               <strong>Error:</strong>
+//               {this.state.error?.toString()}
 
-              <br />
-              <br />
+//               <br />
+//               <br />
 
-              <strong>Stack:</strong>
-              {this.state.error?.stack}
+//               <strong>Stack:</strong>
+//               {this.state.error?.stack}
 
-              <br />
-              <br />
+//               <br />
+//               <br />
 
-              <strong>Component Stack:</strong>
-              {this.state.errorInfo?.componentStack}
-            </pre>
-          </details>
-          <button
-            onClick={() => window.location.reload()}
-            style={{
-              marginTop: "20px",
-              padding: "12px 24px",
-              background: "#007bff",
-              color: "white",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontSize: "16px",
-              fontWeight: "bold",
-            }}
-          >
-            🔄 Tải lại trang
-          </button>
-        </div>
-      );
-    }
+//               <strong>Component Stack:</strong>
+//               {this.state.errorInfo?.componentStack}
+//             </pre>
+//           </details>
+//           <button
+//             onClick={() => window.location.reload()}
+//             style={{
+//               marginTop: "20px",
+//               padding: "12px 24px",
+//               background: "#007bff",
+//               color: "white",
+//               border: "none",
+//               borderRadius: "6px",
+//               cursor: "pointer",
+//               fontSize: "16px",
+//               fontWeight: "bold",
+//             }}
+//           >
+//             🔄 Tải lại trang
+//           </button>
+//         </div>
+//       );
+//     }
 
-    return this.props.children;
-  }
-}
+//     return this.props.children;
+//   }
+// }
 
 // THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
@@ -138,31 +157,32 @@ function StyledComponentWrapper({ children, title, description }) {
 function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+
   const menuItems = [
-    { name: "Quản lý đơn hàng", icon: "📋" },
-    { name: "Quản lý cửa hàng", icon: "🏪" },
-    { name: "Quản lý thương hiệu", icon: "🏷️" },
-    { name: "Quản lý danh mục", icon: "📁" },
-    { name: "Quản lý sản phẩm", icon: "🛍️" },
-    { name: "Quản lý người dùng", icon: "👥" },
-    { name: "Quản lý kích thước", icon: "📏" },
-    { name: "Quản lý banner", icon: "🎨" },
-    { name: "Quản lý chi tiết sản phẩm", icon: "🛍️" },
-    { name: "Quản lý tin tức", icon: "📰" },
+    { name: "Dashboard", icon: LayoutDashboard, color: "#4B5563" },
+    { name: "Quản lý đơn hàng", icon: ShoppingCart, color: "#4B5563" },
+    { name: "Quản lý cửa hàng", icon: Store, color: "#4B5563" },
+    { name: "Quản lý thương hiệu", icon: Tag, color: "#4B5563" },
+    { name: "Quản lý danh mục", icon: FolderTree, color: "#4B5563" },
+    { name: "Quản lý sản phẩm", icon: Package, color: "#4B5563" },
+    { name: "Quản lý người dùng", icon: Users, color: "#4B5563" },
+    { name: "Quản lý kích thước", icon: Ruler, color: "#4B5563" },
+    { name: "Quản lý banner", icon: ImageIcon, color: "#4B5563" },
+    { name: "Quản lý chi tiết sản phẩm", icon: FileText, color: "#4B5563" },
+    { name: "Quản lý tin tức", icon: Newspaper, color: "#4B5563" },
   ];
 
   const handleMenuClick = (itemName) => {
     setCurrentPage(itemName);
     setIsMobileOpen(false);
   };
-
   return (
     <div>
       <button
         className="mobile-menu-toggle"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
-        {isMobileOpen ? "✖️" : "☰"}
+        {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
       </button>
 
       <div
@@ -170,7 +190,9 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
         onClick={() => setIsMobileOpen(false)}
       />
 
-      <aside className={`sidebar ${isCollapsed ? "collapsed" : ""}`}>
+      <aside
+        className={`sidebar ${isCollapsed ? "collapsed" : ""} ${isMobileOpen ? "mobile-open" : ""}`}
+      >
         <div className="sidebar-header">
           <div className="sidebar-brand">
             <div className="brand-logo">
@@ -180,10 +202,12 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
                 className="sidebar-logo"
                 onError={(e) => {
                   e.target.style.display = "none";
-                  e.target.nextElementSibling.style.display = "block";
+                  e.target.nextElementSibling.style.display = "flex";
                 }}
               />
-              <span className="brand-icon">🍹</span>
+              <div className="brand-icon">
+                <Package size={32} strokeWidth={2.5} />
+              </div>
             </div>
 
             {!isCollapsed && (
@@ -198,34 +222,43 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
             className="sidebar-toggle"
             onClick={() => setIsCollapsed(!isCollapsed)}
           >
-            {isCollapsed ? "➡️" : "⬅️"}
+            {isCollapsed ? (
+              <ChevronRight size={18} />
+            ) : (
+              <ChevronLeft size={18} />
+            )}
           </button>
         </div>
 
         <nav className="sidebar-nav">
-          {menuItems.map((page) => (
-            <button
-              key={page.name}
-              onClick={() => setCurrentPage(page.name)}
-              className={`nav-item ${
-                currentPage === page.name ? "active" : ""
-              }`}
-              data-page={page.name}
-              style={{ "--accent-color": page.color }}
-              title={isCollapsed ? page.name : ""}
-            >
-              <span className="nav-icon">{page.icon}</span>
-              {!isCollapsed && <span className="nav-text">{page.name}</span>}
-              {currentPage === page.name && <div className="nav-indicator" />}
-            </button>
-          ))}
+          {menuItems.map((page) => {
+            const IconComponent = page.icon;
+            return (
+              <button
+                key={page.name}
+                onClick={() => handleMenuClick(page.name)}
+                className={`nav-item ${currentPage === page.name ? "active" : ""}`}
+                data-page={page.name}
+                style={{ "--accent-color": page.color }}
+                title={isCollapsed ? page.name : ""}
+              >
+                <span className="nav-icon">
+                  <IconComponent size={20} strokeWidth={2} />
+                </span>
+                {!isCollapsed && <span className="nav-text">{page.name}</span>}
+                {currentPage === page.name && <div className="nav-indicator" />}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="sidebar-footer">
           {!isCollapsed && (
             <>
               <div className="admin-info">
-                <div className="admin-avatar">👨‍💼</div>
+                <div className="admin-avatar">
+                  <UserCircle size={28} />
+                </div>
                 <div className="admin-details">
                   <span className="admin-name">Admin</span>
                   <span className="admin-role">Super User</span>
@@ -237,8 +270,9 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
                 onClick={onLogout}
                 title="Đăng xuất khỏi hệ thống"
               >
+                <LogOut size={18} className="logout-icon" />
                 <span className="logout-text">Đăng xuất</span>
-                <div className="logout-arrow">→</div>
+                <ChevronRight size={16} className="logout-arrow" />
               </button>
             </>
           )}
@@ -248,7 +282,7 @@ function Sidebar({ currentPage, setCurrentPage, onLogout, admin }) {
               onClick={onLogout}
               title="Đăng xuất"
             >
-              <span className="logout-icon">🚪</span>
+              <LogOut size={20} />
             </button>
           )}
         </div>
@@ -307,7 +341,6 @@ function AdminLayout({
 
       <div className="main-content">
         <Header currentPage={currentPage} />
-
         <main className="content-area">
           <div className="content-wrapper">{children}</div>
         </main>
@@ -354,7 +387,7 @@ export default function AuthContainer({ onLogin, onGuestMode }) {
 }
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("Order");
+  const [currentPage, setCurrentPage] = useState("Dashboard");
   const [user, setUser] = useState(null);
   const [isGuestMode, setIsGuestMode] = useState(true);
 
@@ -384,6 +417,8 @@ function App() {
   const handleGuestToLogin = () => {
     setIsGuestMode(false);
     setUser(null);
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("admin_user");
   };
   // Hàm xử lý khi đăng nhập thành công
   const handleLogin = (userData) => {
@@ -392,7 +427,9 @@ function App() {
     localStorage.setItem("admin_user", JSON.stringify(userData));
 
     if (userData.role === 2) {
-      setCurrentPage("Quản lý đơn hàng");
+      setCurrentPage("Dashboard");
+    } else if (userData.role === 1) {
+      window.location.hash = "home";
     }
   };
   const handleGuestMode = () => {
@@ -407,16 +444,13 @@ function App() {
       setIsGuestMode(true);
       localStorage.removeItem("admin_token");
       localStorage.removeItem("admin_user");
-      setCurrentPage("Quản lý đơn hàng");
+      setCurrentPage("Dashboard");
     }
   };
   //Route từ login sang Register
   if (!user && !isGuestMode) {
     return (
-      <AuthContainer
-        onLogin={handleLogin}
-        onGuestMode={() => setIsGuestMode(true)}
-      />
+      <AuthContainer onLogin={handleLogin} onGuestMode={handleGuestMode} />
     );
   }
   if (isGuestMode || (user && user.role === 1)) {
@@ -433,6 +467,12 @@ function App() {
   if (user.role === 2) {
     const renderPage = () => {
       switch (currentPage) {
+        case "Dashboard":
+          return (
+            <StyledComponentWrapper>
+              <Dashboard />
+            </StyledComponentWrapper>
+          );
         case "Quản lý đơn hàng":
           return (
             <StyledComponentWrapper>
@@ -490,15 +530,13 @@ function App() {
         case "Quản lý tin tức":
           return (
             <StyledComponentWrapper>
-              <ErrorBoundary>
-                <NewsManagement />
-              </ErrorBoundary>
+              <NewsManagement />
             </StyledComponentWrapper>
           );
         default:
           return (
             <StyledComponentWrapper>
-              <OrderManagement />
+              <Dashboard />
             </StyledComponentWrapper>
           );
       }
@@ -528,7 +566,6 @@ function App() {
 function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
   const [currentPage, setCurrentPage] = useState(() => {
     const hash = window.location.hash.replace("#", "");
-    // ✅ Check if it's a news detail page
     if (hash.match(/^news\/\d+$/)) {
       return "news-detail";
     }
@@ -585,13 +622,12 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
-  // ✅ HÀM XỬ LÝ ĐĂNG NHẬP (TỪ GUEST MODE)
   const handleLoginFromGuest = () => {
-    console.log("🔄 Switching from guest to login mode");
     if (onLogin) {
       onLogin(); //  CHUYỂN SANG LOGIN FORM
     } else {
-      console.warn("⚠️ No onLogin handler in CustomerRouter");
+      console.error("❌ onLogin is not defined or not a function!");
+      alert("Lỗi hệ thống: Không thể chuyển trang đăng nhập.");
     }
   };
 
@@ -710,6 +746,7 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
           onLogout={onLogout}
           isGuest={isGuest}
           onLogin={handleLoginFromGuest}
+          onRegister={handleRegisterFromGuest}
         />
       );
     case "checkout":
@@ -738,9 +775,9 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
 }
 
 createRoot(document.getElementById("root")).render(
-  <ErrorBoundary>
+  <StrictMode>
     <App />
-  </ErrorBoundary>,
+  </StrictMode>,
 );
 
 console.log("✅ Suppress code loaded!");

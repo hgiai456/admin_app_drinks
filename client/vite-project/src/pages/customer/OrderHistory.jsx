@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getOrdersByUserId } from "@services/order.service.js";
+import OrderService from "@services/order.service.js";
 import "@styles/pages/_order.scss";
 
 export default function OrderHistory({ user }) {
@@ -9,18 +9,43 @@ export default function OrderHistory({ user }) {
   const [totalPage, setTotalPage] = useState(1);
   const [error, setError] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    if (!user?.id) return;
-    setLoading(true);
-    getOrdersByUserId(user.id, page)
-      .then((res) => {
-        setOrders(res.data || []);
-        setTotalPage(res.totalPage || 1);
+    const fetchOrders = async () => {
+      if (!user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
         setError("");
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
+
+        // ✅ GỌI API
+        const response = await OrderService.getOrdersByUserId(
+          user.id,
+          currentPage,
+        );
+
+        console.log("📦 OrderHistory response:", response);
+
+        // ✅ LẤY DATA
+        const ordersData = response?.data || [];
+
+        setOrders(ordersData);
+        setTotalPage(response.totalPage || 1);
+
+        console.log(`✅ Loaded ${ordersData.length} orders`);
+      } catch (err) {
+        console.error("❌ Error loading orders:", err);
+        setError(err.message || "Không thể tải lịch sử đơn hàng");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
   }, [user, page]);
 
   const getStatusInfo = (status) => {
@@ -240,7 +265,7 @@ export default function OrderHistory({ user }) {
                           </div>
                           <div className="product-total">
                             {(item.price * item.quantity).toLocaleString(
-                              "vi-VN"
+                              "vi-VN",
                             )}
                             ₫
                           </div>
