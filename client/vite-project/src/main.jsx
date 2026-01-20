@@ -740,7 +740,7 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
 createRoot(document.getElementById("root")).render(
   <ErrorBoundary>
     <App />
-  </ErrorBoundary>
+  </ErrorBoundary>,
 );
 
 console.log("✅ Suppress code loaded!");

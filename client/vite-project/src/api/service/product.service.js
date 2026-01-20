@@ -17,7 +17,7 @@ class ProductService extends BaseService {
 
       return Array.isArray(products)
         ? products.map((item) =>
-            Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+            Product?.fromApiResponse ? Product.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
@@ -35,7 +35,7 @@ class ProductService extends BaseService {
 
       return Array.isArray(products)
         ? products.map((item) =>
-            Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+            Product?.fromApiResponse ? Product.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
@@ -47,7 +47,7 @@ class ProductService extends BaseService {
   async getPaging({ page = 1, search = "" } = {}) {
     try {
       console.log(
-        `🔗 Gọi API Products getPaging - page: ${page}, search: "${search}"`
+        `🔗 Gọi API Products getPaging - page: ${page}, search: "${search}"`,
       );
 
       const params = { page, search };
@@ -57,7 +57,7 @@ class ProductService extends BaseService {
 
       return {
         data: (data.data || []).map((item) =>
-          Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+          Product?.fromApiResponse ? Product.fromApiResponse(item) : item,
         ),
         pagination: {
           currentPage: data.currentPage || parseInt(page),
@@ -85,7 +85,7 @@ class ProductService extends BaseService {
 
       console.log(
         `🔗 Fetching products by category ${categoryId}:`,
-        queryParams
+        queryParams,
       );
 
       const response = await api.get(ENDPOINTS.PRODUCTS.BY_CATEGORY, {
@@ -97,13 +97,14 @@ class ProductService extends BaseService {
 
       return {
         data: (result.data || []).map((item) =>
-          Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+          Product?.fromApiResponse ? Product.fromApiResponse(item) : item,
         ),
         totalProducts: result.totalProducts || 0,
-        pagination: {
+        pagination: result.pagination || {
           currentPage: page,
+          pageSize: limit,
           totalPage: Math.ceil((result.totalProducts || 0) / limit),
-          totalItems: result.totalProducts || 0,
+          totalProducts: result.totalProducts || 0,
         },
       };
     } catch (error) {
@@ -113,34 +114,26 @@ class ProductService extends BaseService {
   }
 
   async getCustomizePage({ page = 1, search = "", pageSize = 4 } = {}) {
+    //hàm này là hàm lấy response từ server (Sai format không là không lấy được dữ liệu)
     try {
-      console.log(`🔗 getCustomizePage called with:`, {
-        page,
-        search,
-        pageSize,
+      const params = { page, search, pageSize };
+      const response = await api.get(ENDPOINTS.PRODUCTS.CUSTOMIZE_PAGE, {
+        params,
       });
 
-      const params = { page, search, limit: pageSize };
-      const response = await api.get(this.endpoint, { params });
-
       const data = response.data;
-      console.log("✅ getCustomizePage raw response:", data);
-
-      // ✅ CHECK: product_details có trong data không?
-      if (data.data && data.data[0]) {
-        console.log("🔍 First product structure:", data.data[0]);
-        console.log("🔍 First product_details:", data.data[0].product_details);
-      }
 
       return {
         data: (data.data || []).map((item) =>
-          Product?.fromApiResponse ? Product.fromApiResponse(item) : item
+          Product?.fromApiResponse ? Product.fromApiResponse(item) : item,
         ),
         pagination: {
-          currentPage: data.currentPage || parseInt(page),
-          totalPage: data.totalPage || 1,
-          totalItems: data.totalProducts || data.totalItems || 0,
-          limit: pageSize,
+          currentPage: data.pagination.currentPage || parseInt(page),
+          totalPage: data.pagination.totalPage || 1,
+          totalProducts: data.pagination.totalProducts || 0,
+          pageSize: data.pagination?.pageSize || pageSize,
+          hasNextPage: data.pagination?.hasNextPage || false,
+          hasPrevPage: data.pagination?.hasPrevPage || false,
         },
       };
     } catch (error) {

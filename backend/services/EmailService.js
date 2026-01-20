@@ -1,36 +1,165 @@
-import nodemailer from 'nodemailer';
-import dotenv from 'dotenv';
+// import nodemailer from "nodemailer";
+// import dotenv from "dotenv";
+
+// dotenv.config();
+
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
+// export async function sendOrderConfirmationEmail(toEmail, orderData) {
+//   const { orderId, customerName, phone, address, total, paymentMethod, items } =
+//     orderData;
+
+//   const formatPrice = (price) => {
+//     return new Intl.NumberFormat("vi-VN", {
+//       style: "currency",
+//       currency: "VND",
+//     }).format(price);
+//   };
+
+//   const itemsHtml = items
+//     .map(
+//       (item) => `
+//       <tr>
+//         <td style="padding: 12px; border-bottom: 1px solid #eee;">
+//           ${item.name} ${item.size ? `(Size ${item.size})` : ""}
+//         </td>
+//         <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: center;">
+//           ${item.quantity}
+//         </td>
+//         <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
+//           ${formatPrice(item.price * item.quantity)}
+//         </td>
+//       </tr>
+//     `,
+//     )
+//     .join("");
+
+//   const htmlContent = `
+//     <!DOCTYPE html>
+//     <html>
+//     <head>
+//       <meta charset="utf-8">
+//       <style>
+//         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+//         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+//         .header { background: linear-gradient(135deg, #8B4513, #D2691E); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
+//         .content { background: #fff; padding: 30px; border: 1px solid #ddd; }
+//         .order-info { background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0; }
+//         .order-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+//         .order-table th { background: #8B4513; color: white; padding: 12px; text-align: left; }
+//         .total-row { font-weight: bold; font-size: 18px; color: #8B4513; }
+//         .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
+//         .success-badge { background: #4CAF50; color: white; padding: 10px 20px; border-radius: 20px; display: inline-block; margin: 10px 0; }
+//       </style>
+//     </head>
+//     <body>
+//       <div class="container">
+//         <div class="header">
+//           <h1>☕ HG COFFEE</h1>
+//           <p>Xác nhận đơn hàng thành công</p>
+//         </div>
+
+//         <div class="content">
+//           <div class="success-badge">✅ Thanh toán thành công</div>
+
+//           <h2>Xin chào ${customerName}!</h2>
+//           <p>Cảm ơn bạn đã đặt hàng tại HG Coffee. Đơn hàng của bạn đã được xác nhận.</p>
+
+//           <div class="order-info">
+//             <h3>📋 Thông tin đơn hàng #${orderId}</h3>
+//             <p><strong>Số điện thoại:</strong> ${phone}</p>
+//             <p><strong>Địa chỉ giao hàng:</strong> ${address}</p>
+//             <p><strong>Phương thức thanh toán:</strong> ${paymentMethod}</p>
+//           </div>
+
+//           <h3>🛒 Chi tiết đơn hàng</h3>
+//           <table class="order-table">
+//             <thead>
+//               <tr>
+//                 <th>Sản phẩm</th>
+//                 <th style="text-align: center;">Số lượng</th>
+//                 <th style="text-align: right;">Thành tiền</th>
+//               </tr>
+//             </thead>
+//             <tbody>
+//               ${itemsHtml}
+//               <tr class="total-row">
+//                 <td colspan="2" style="padding: 15px; text-align: right;">
+//                   <strong>Tổng cộng:</strong>
+//                 </td>
+//                 <td style="padding: 15px; text-align: right;">
+//                   <strong>${formatPrice(total)}</strong>
+//                 </td>
+//               </tr>
+//             </tbody>
+//           </table>
+
+//           <p>Đơn hàng của bạn sẽ được giao trong vòng 30-60 phút.</p>
+//           <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ hotline: <strong>1900-xxxx</strong></p>
+//         </div>
+
+//         <div class="footer">
+//           <p>© 2026 HG Coffee. All rights reserved.</p>
+//           <p>Email này được gửi tự động, vui lòng không trả lời.</p>
+//         </div>
+//       </div>
+//     </body>
+//     </html>
+//   `;
+
+//   const mailOptions = {
+//     from: `"HG Coffee" <${process.env.EMAIL_USER}>`,
+//     to: toEmail,
+//     subject: `✅ Xác nhận đơn hàng #${orderId} - HG Coffee`,
+//     html: htmlContent,
+//   };
+
+//   const result = await transporter.sendMail(mailOptions);
+//   console.log("📧 Email sent:", result.messageId);
+//   return result;
+// }
+
+// export default { sendOrderConfirmationEmail };
+
+import nodemailer from "nodemailer";
+import dotenv from "dotenv";
 dotenv.config();
 
 class EmailService {
-    constructor() {
-        this.transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-            }
-        });
-    }
+  constructor() {
+    this.transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+  }
 
-    async sendOrderConfirmation(userEmail, orderData) {
-        const { order, user, orderDetails } = orderData;
-        //Calculate total items
-        const totalitems = orderDetails.reduce(
-            (sum, item) => sum + item.quantity,
-            0
-        );
+  async sendOrderConfirmation(userEmail, orderData) {
+    const { order, user, orderDetails } = orderData;
+    //Calculate total items
+    const totalitems = orderDetails.reduce(
+      (sum, item) => sum + item.quantity,
+      0,
+    );
 
-        // Firebase logo URL
-        const logoUrl =
-            'https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f';
-        const orderItemsHtml = orderDetails
-            .map((item) => {
-                const productName = item.product_details?.name || 'Sản phẩm';
-                const quantity = item.quantity || 0;
-                const price = item.price || 0;
+    // Firebase logo URL
+    const logoUrl =
+      "https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f";
+    const orderItemsHtml = orderDetails
+      .map((item) => {
+        const productName = item.product_details?.name || "Sản phẩm";
+        const quantity = item.quantity || 0;
+        const price = item.price || 0;
 
-                return `
+        return `
                 <tr>
                     <td style="padding: 20px 16px; border-bottom: 1px solid #2a2a2a; background-color: #1a1a1a; color: #e8e8e8;">
                         <div style="font-weight: 500; font-size: 15px;">${productName}</div>
@@ -45,10 +174,10 @@ class EmailService {
                         ${this.formatCurrency(quantity * price)}
                     </td>
                 </tr>`;
-            })
-            .join('');
+      })
+      .join("");
 
-        const emailTemplate = `<!DOCTYPE html>
+    const emailTemplate = `<!DOCTYPE html>
         <html>
         <head>
             <meta charset="utf-8">
@@ -110,7 +239,7 @@ class EmailService {
                     </h2>
                     <p style="margin: 0 0 16px 0; font-size: 16px; color: #e8e8e8;">
                         Xin chào <strong style="color: #d4af37; font-weight: 600;">${
-                            user.name
+                          user.name
                         }</strong>,
                     </p>
                     <p style="margin: 0; font-size: 16px; color: #c0c0c0; line-height: 1.7;">
@@ -140,7 +269,7 @@ class EmailService {
                                 </div>
                                 <div style="flex: 1; color: #e8e8e8; text-align: right;">
                                     ${new Date(order.createdAt).toLocaleString(
-                                        'vi-VN'
+                                      "vi-VN",
                                     )}
                                 </div>
                             </div>
@@ -188,9 +317,7 @@ class EmailService {
                             </div>
                         </div>
                         <div style="display: flex; padding: 20px; ${
-                            order.note
-                                ? 'border-bottom: 1px solid #2a2a2a;'
-                                : ''
+                          order.note ? "border-bottom: 1px solid #2a2a2a;" : ""
                         }">
                             <div style="flex: 1; color: #c0c0c0; font-weight: 500;">
                                 <span style="color: #b8860b;">🏠</span> Địa chỉ:
@@ -200,8 +327,8 @@ class EmailService {
                             </div>
                         </div>
                         ${
-                            order.note
-                                ? `
+                          order.note
+                            ? `
                         <div style="display: flex; padding: 20px;">
                             <div style="flex: 1; color: #c0c0c0; font-weight: 500;">
                                 <span style="color: #b8860b;">📝</span> Ghi chú:
@@ -211,7 +338,7 @@ class EmailService {
                             </div>
                         </div>
                         `
-                                : ''
+                            : ""
                         }
                     </div>
                 </div>
@@ -290,28 +417,28 @@ class EmailService {
         </body>
         </html>`;
 
-        const mailOptions = {
-            from: process.env.EMAIL_USER,
-            to: userEmail,
-            subject: `Xác nhận đơn hàng #${order.id} - Cảm ơn bạn đã đặt hàng!`,
-            html: emailTemplate
-        };
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: userEmail,
+      subject: `Xác nhận đơn hàng #${order.id} - Cảm ơn bạn đã đặt hàng!`,
+      html: emailTemplate,
+    };
 
-        try {
-            await this.transporter.sendMail(mailOptions);
-            console.log(`Order confirmation email sent to ${userEmail}`);
-            return true;
-        } catch (error) {
-            console.error('Error sending email', error);
-            return false;
-        }
+    try {
+      await this.transporter.sendMail(mailOptions);
+      console.log(`Order confirmation email sent to ${userEmail}`);
+      return true;
+    } catch (error) {
+      console.error("Error sending email", error);
+      return false;
     }
+  }
 
-    formatCurrency(amount) {
-        return new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(amount);
-    }
+  formatCurrency(amount) {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  }
 }
 export default new EmailService();

@@ -5,8 +5,10 @@ import SizeService from "@services/size.service.js";
 import CartService from "@services/cart.service.js";
 import ProdetailService from "@services/prodetail.service.js";
 import "@styles/pages/_productdetail.scss";
+import BestSellerGrid from "@components/common/BestSellerGrid";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
-//Đang bị lỗi cart không tải được khách vãng lai
+import { navigation } from "@utils/editorHelpers";
+
 export default function ProductDetailPage({
   user,
   onLogout,
@@ -15,8 +17,21 @@ export default function ProductDetailPage({
   onLogin,
   onRegister,
 }) {
-  const navigateToHash = (hash) => {
-    window.location.hash = hash;
+  const getCategoryName = (categoryId) => {
+    const categoryMap = {
+      1: "☕ Cà phê",
+      2: "🍵 Trà",
+      3: "🥖 Bánh mì",
+      4: "🧊 Đá xay",
+      8: "☕ Latte",
+      10: "🧋 Trà sữa",
+    };
+
+    return categoryMap[categoryId] || "Thức uống";
+  };
+
+  const handleViewOtherProduct = (id) => {
+    navigation(`product/${id}`);
   };
 
   //State
@@ -67,11 +82,11 @@ export default function ProductDetailPage({
         }
 
         const availableSizeIds = new Set(
-          productDetailsData.map((detail) => detail.size_id)
+          productDetailsData.map((detail) => detail.size_id),
         );
 
         const filteredSizes = allSizesData.filter((size) =>
-          availableSizeIds.has(size.id)
+          availableSizeIds.has(size.id),
         );
 
         const enrichedProductDetails = productDetailsData.map((detail) => {
@@ -98,7 +113,7 @@ export default function ProductDetailPage({
         // Step 5: Auto-select first available size
         if (enrichedProductDetails.length > 0) {
           const firstAvailable = enrichedProductDetails.find(
-            (detail) => detail.quantity > 0
+            (detail) => detail.quantity > 0,
           );
           const firstDetail = firstAvailable || enrichedProductDetails[0];
 
@@ -122,7 +137,7 @@ export default function ProductDetailPage({
   useEffect(() => {
     if (selectedSize && productDetails.length > 0) {
       const detail = productDetails.find(
-        (d) => d.size_id?.toString() === selectedSize
+        (d) => d.size_id?.toString() === selectedSize,
       );
       setSelectedProductDetail(detail || null);
     }
@@ -152,7 +167,7 @@ export default function ProductDetailPage({
 
       if (quantity > selectedProductDetail.quantity) {
         setMessage(
-          `❌ Không đủ hàng. Chỉ còn ${selectedProductDetail.quantity} sản phẩm`
+          `❌ Không đủ hàng. Chỉ còn ${selectedProductDetail.quantity} sản phẩm`,
         );
         return;
       }
@@ -169,8 +184,8 @@ export default function ProductDetailPage({
       const guestText = isGuest ? " (khách vãng lai)" : "";
       setMessage(
         `✅ Đã thêm ${quantity} ${product.name} (${getSizeName(
-          selectedSize
-        )}) vào giỏ hàng${guestText}`
+          selectedSize,
+        )}) vào giỏ hàng${guestText}`,
       );
       triggerCartRefresh();
       // Reset quantity
@@ -206,7 +221,7 @@ export default function ProductDetailPage({
     return Math.round(
       ((selectedProductDetail.oldprice - selectedProductDetail.price) /
         selectedProductDetail.oldprice) *
-        100
+        100,
     );
   };
 
@@ -263,26 +278,14 @@ export default function ProductDetailPage({
       onRegister={onRegister}
     >
       <div className="product-detail-container">
-        <div className="breadcrumb">
-          <span onClick={handleGoHome} className="breadcrumb-link">
-            🏠 Trang chủ
-          </span>
-          <span className="breadcrumb-separator">›</span>
-          <span onClick={handleGoMenu} className="breadcrumb-link">
-            📱 Menu
-          </span>
-          <span className="breadcrumb-separator">›</span>
-          <span className="breadcrumb-current">{product.name}</span>
-        </div>
-
         {message && (
           <div
             className={`message ${
               message.includes("✅")
                 ? "success"
                 : message.includes("❌")
-                ? "error"
-                : "warning"
+                  ? "error"
+                  : "warning"
             }`}
           >
             {message}
@@ -352,7 +355,7 @@ export default function ProductDetailPage({
                   {sizes.map((size) => {
                     // Tìm detail tương ứng với size
                     const detail = productDetails.find(
-                      (d) => d.size_id === size.id
+                      (d) => d.size_id === size.id,
                     );
 
                     if (!detail) {
@@ -476,6 +479,17 @@ export default function ProductDetailPage({
             </div>
           </div>
         </div>
+
+        <BestSellerGrid
+          limit={8}
+          onProductClick={handleViewOtherProduct}
+          onViewMore={() => (window.location.hash = "menu?sort=bestseller")}
+          formatPrice={formatPrice}
+          getCategoryName={getCategoryName}
+          title="BEST SELLERS"
+          itemsPerView={4}
+          autoScrollInterval={3000}
+        />
       </div>
     </Layout>
   );

@@ -352,7 +352,7 @@ export async function checkoutCart(req, res) {
     // ===== 4. TẠO ĐƠN HÀNG MỚI =====
     const calculatedTotal = cart.cart_items.reduce(
       (acc, item) => acc + item.quantity * item.product_details.price,
-      0
+      0,
     );
 
     const newOrder = await db.Order.create(
@@ -367,7 +367,7 @@ export async function checkoutCart(req, res) {
       },
       {
         transaction: transaction,
-      }
+      },
     );
 
     console.log(`✅ Created Order ID: ${newOrder.id}`);
@@ -386,7 +386,7 @@ export async function checkoutCart(req, res) {
         },
         {
           transaction: transaction,
-        }
+        },
       );
 
       // ✅ CẬP NHẬT QUANTITY (TRỪ) VÀ BUYTURN (CỘNG)
@@ -405,7 +405,7 @@ export async function checkoutCart(req, res) {
         {
           where: { id: item.product_detail_id },
           transaction: transaction,
-        }
+        },
       );
 
       console.log(`✅ Updated ProDetail ID ${item.product_detail_id}:`, {
@@ -441,11 +441,8 @@ export async function checkoutCart(req, res) {
 
     await cart.destroy({ transaction: transaction });
 
-    console.log(`✅ Deleted Cart ID: ${cart.id}`);
-
     // ===== 7. COMMIT TRANSACTION =====
     await transaction.commit();
-    console.log("✅ Transaction committed successfully");
 
     // ===== 8. GỬI EMAIL XÁC NHẬN =====
     EmailService.sendOrderConfirmation(user.email, {
@@ -458,7 +455,7 @@ export async function checkoutCart(req, res) {
 
     // ===== 9. TRẢ VỀ RESPONSE =====
     return res.status(201).json({
-      message: "✅ Thanh toán giỏ hàng thành công",
+      message: "Thanh toán giỏ hàng thành công",
       data: {
         order: newOrder,
         orderDetails: orderDetails,

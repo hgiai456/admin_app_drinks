@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ProductService from "@services/product.service.js";
 import CategoryService from "@services/category.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_homepage.scss";
+import { formatPrice, scrollToTop } from "@utils/editorHelpers.js";
 
 export default function ProductPage({
   user,
@@ -17,14 +18,14 @@ export default function ProductPage({
   const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  const [totalProducts, setTotalProducts] = useState(0);
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [pageSize, setPageSize] = useState(4);
   const [showPageSizeDropdown, setShowPageSizeDropdown] = useState(false);
 
   const pageSizeOptions = [
-    { value: 4, label: " 4 sản phẩm" },
+    { value: 4, label: "4 sản phẩm" },
     { value: 8, label: "8 sản phẩm" },
     { value: 12, label: "12 sản phẩm" },
   ];
@@ -35,7 +36,6 @@ export default function ProductPage({
         const response = await CategoryService.getAll();
         console.log("📦 Categories API response:", response);
 
-        // ✅ Xử lý response structure
         let categoriesData = [];
         if (response && response.data && Array.isArray(response.data)) {
           categoriesData = response.data;
@@ -59,67 +59,67 @@ export default function ProductPage({
     };
     fetchCategories();
   }, []);
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setProductsLoading(true);
+        setError("");
+
         let response;
+
+        console.log("🔄 Fetching products:", {
+          selectedCategory,
+          page,
+          pageSize,
+          search,
+        });
+
         if (selectedCategory === "all") {
           response = await ProductService.getCustomizePage({
-            page: page || 1,
-            search: search || "",
-            pageSize: pageSize || 4,
+            page: page,
+            search: search,
+            pageSize: pageSize,
           });
         } else {
           response = await ProductService.getByCategory(selectedCategory, {
-            page: page || 1,
-            search: search || "",
-            limit: pageSize || 4,
+            page: page,
+            search: search,
+            limit: pageSize,
           });
         }
 
         console.log("📦 Raw API response:", response);
 
-        if (!response || !response.data) {
+        // ✅ VALIDATE response
+        if (!response) {
+          console.error("❌ Response is null/undefined");
           setProducts([]);
           setTotalPage(1);
-          setTotalItems(0);
+          setTotalProducts(0);
           return;
         }
 
         const productsData = response.data || [];
         const pagination = response.pagination || {};
 
+        console.log("📊 Pagination from API:", pagination);
+
         const transformedProducts = productsData.map((product) => {
           let price = 0;
 
           if (
             product.product_details &&
-            Array.isArray(product.product_details)
+            Array.isArray(product.product_details) &&
+            product.product_details.length > 0
           ) {
-            if (product.product_details.length > 0) {
-              const firstDetail = product.product_details[0];
-              if (firstDetail && typeof firstDetail.price === "number") {
-                price = firstDetail.price;
-              } else {
-                console.warn(
-                  `⚠️ Product ${product.id} (${product.name}): product_details[0].price không hợp lệ`,
-                  firstDetail
-                );
-              }
-            } else {
-              console.warn(
-                `⚠️ Product ${product.id} (${product.name}): product_details là array rỗng`
-              );
+            const firstDetail = product.product_details[0];
+            if (firstDetail && typeof firstDetail.price === "number") {
+              price = firstDetail.price;
             }
-          } else {
-            console.warn(
-              `⚠️ Product ${product.id} (${product.name}): product_details không phải array hoặc không tồn tại`,
-              product.product_details
-            );
           }
 
-          const transformed = {
+          return {
             id: product.id,
             name: product.name,
             description: product.description,
@@ -130,35 +130,42 @@ export default function ProductPage({
             createdAt: product.createdAt,
             updatedAt: product.updatedAt,
           };
-
-          console.log(`✅ Transformed product ${product.id}:`, {
-            name: transformed.name,
-            price: transformed.price,
-            hasDetails: !!product.product_details,
-            detailsLength: product.product_details?.length || 0,
-          });
-
-          return transformed;
         });
 
         setProducts(transformedProducts);
-        setTotalPage(pagination.totalPage || 1);
-        setTotalItems(pagination.totalItems || 0);
-        setPage(pagination.currentPage || page);
+        setTotalPage(pagination.totalPage);
+        setTotalProducts(
+          pagination.totalProducts || transformedProducts.length,
+        );
+
+        if (pagination.currentPage && pagination.currentPage !== page) {
+          setPage(pagination.currentPage);
+        }
+
+        console.log("✅ Products loaded:", {
+          count: transformedProducts.length,
+          totalPage: pagination.totalPage,
+          totalProducts: pagination.totalProducts,
+          currentPage: pagination.currentPage,
+        });
       } catch (error) {
-        console.error("❌ Error fetching products:", error);
-        setError("Không thể tải sản phẩm");
+        setError("Không thể tải sản phẩm: " + error.message);
         setProducts([]);
+        setTotalPage(1);
+        setTotalProducts(0);
       } finally {
-        setProductsLoading(false); // ✅ QUAN TRỌNG: Thêm finally block
+        setProductsLoading(false);
       }
     };
+
     fetchProducts();
   }, [page, search, selectedCategory, pageSize]);
 
   const handlePageSizeChange = (newPageSize) => {
+    console.log("📏 Changing page size to:", newPageSize);
     setPageSize(newPageSize);
-    setPage(1);
+    setPage(1); // Reset về trang 1
+    setShowPageSizeDropdown(false);
   };
 
   const handlePageChange = (newPage) => {
@@ -176,25 +183,21 @@ export default function ProductPage({
     e.preventDefault();
     const formData = new FormData(e.target);
     const searchTerm = formData.get("search") || "";
+    console.log("🔍 Searching:", searchTerm);
     setSearch(searchTerm);
-    setPage(1); // Reset về trang 1 khi search
+    setPage(1);
   };
 
   const handleCategoryFilter = (categoryId) => {
+    console.log("🏷️ Filtering by category:", categoryId);
     setSelectedCategory(categoryId);
     setPage(1);
     setSearch("");
   };
+
   const handleViewProduct = (product) => {
     window.location.hash = `product/${product.id}`;
-  };
-
-  const formatPrice = (price) => {
-    if (!price || price === 0) return "Liên hệ";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
+    scrollToTop();
   };
 
   const getCategoryName = (categoryId) => {
@@ -203,7 +206,6 @@ export default function ProductPage({
       return `${getCategoryIcon(categoryId)} ${category.name}`;
     }
 
-    // Fallback với icon
     const categoryMap = {
       1: "☕ Cà phê",
       2: "🍵 Trà",
@@ -217,15 +219,26 @@ export default function ProductPage({
 
   const getCategoryIcon = (categoryId) => {
     const iconMap = {
-      1: "☕", // Cà phê
-      2: "🍵", // Trà
-      3: "🥖", // Bánh mì
-      4: "🧊", // Đá xay
-      8: "☕", // Latte
-      10: "🧋", // Trà sữa
+      1: "☕",
+      2: "🍵",
+      3: "🥖",
+      4: "🧊",
+      8: "☕",
+      10: "🧋",
     };
     return iconMap[categoryId] || "🍽️";
   };
+
+  useEffect(() => {
+    console.log("📊 State updated:", {
+      products: products.length,
+      page,
+      totalPage,
+      totalProducts,
+      selectedCategory,
+      pageSize,
+    });
+  }, [products, page, totalPage, totalProducts, selectedCategory, pageSize]);
 
   return (
     <Layout
@@ -237,17 +250,12 @@ export default function ProductPage({
       onRegister={onRegister}
     >
       {error && (
-        <div
-          className="error-message"
-          style={{
-            background: "#fee",
-            color: "#c33",
-            padding: "1rem",
-            textAlign: "center",
-            borderBottom: "1px solid #fcc",
-          }}
-        >
-          {error}
+        <div className="error-banner">
+          <span className="error-icon">⚠️</span>
+          <span className="error-text">{error}</span>
+          <button className="error-close" onClick={() => setError("")}>
+            ✖️
+          </button>
         </div>
       )}
 
@@ -259,11 +267,12 @@ export default function ProductPage({
               Khám phá toàn bộ bộ sưu tập thức uống đặc biệt tại HG Coffee
             </p>
 
+            {/* SEARCH BAR */}
             <div className="search-bar">
               <div className="search-info">
                 {selectedCategory === "all" ? (
                   <>
-                    Tổng <strong>{totalItems}</strong> sản phẩm - Trang{" "}
+                    Tổng <strong>{totalProducts}</strong> sản phẩm - Trang{" "}
                     <strong>{page}</strong>/{totalPage}
                   </>
                 ) : (
@@ -272,10 +281,10 @@ export default function ProductPage({
                     <strong>
                       {getCategoryName(parseInt(selectedCategory)).replace(
                         /^[^\s]+\s/,
-                        ""
+                        "",
                       )}
                     </strong>
-                    :<strong> {totalItems}</strong> sản phẩm
+                    : <strong>{totalProducts}</strong> sản phẩm
                     {totalPage > 1 && (
                       <>
                         {" "}
@@ -314,12 +323,14 @@ export default function ProductPage({
               </form>
             </div>
 
+            {/* PAGE SIZE DROPDOWN */}
             <div className="page-size-dropdown-container">
               <span className="selector-label">📄 Số sản phẩm mỗi trang:</span>
               <div className="page-size-dropdown">
                 <button
                   className="page-size-dropdown-trigger"
                   onClick={() => setShowPageSizeDropdown(!showPageSizeDropdown)}
+                  type="button"
                 >
                   <span className="current-size">
                     {pageSize} sản phẩm/trang
@@ -341,10 +352,7 @@ export default function ProductPage({
                         className={`dropdown-item ${
                           pageSize === option.value ? "active" : ""
                         }`}
-                        onClick={() => {
-                          handlePageSizeChange(option.value);
-                          setShowPageSizeDropdown(false);
-                        }}
+                        onClick={() => handlePageSizeChange(option.value)}
                       >
                         <span className="item-text">{option.label}</span>
                         {pageSize === option.value && (
@@ -357,6 +365,7 @@ export default function ProductPage({
               </div>
             </div>
 
+            {/* CATEGORY FILTERS */}
             <div className="section-actions">
               <button
                 className={`filter-btn ${
@@ -382,6 +391,7 @@ export default function ProductPage({
               ))}
             </div>
 
+            {/* FILTER STATUS */}
             {selectedCategory !== "all" && (
               <div className="filter-status">
                 <span className="filter-indicator">
@@ -399,6 +409,7 @@ export default function ProductPage({
             )}
           </div>
 
+          {/* PRODUCTS GRID */}
           {productsLoading ? (
             <div className="products-loading">
               <div className="loading-spinner">☕</div>
@@ -408,121 +419,178 @@ export default function ProductPage({
             <div className="no-products">
               <div className="no-products-icon">📭</div>
               <h3>Không tìm thấy sản phẩm</h3>
-              <p>Không có sản phẩm nào khớp với tiêu chí tìm kiếm.</p>
+              <p>
+                {search
+                  ? `Không có sản phẩm nào khớp với từ khóa "${search}"`
+                  : selectedCategory !== "all"
+                    ? `Không có sản phẩm nào trong danh mục này`
+                    : "Không có sản phẩm nào"}
+              </p>
+              {(search || selectedCategory !== "all") && (
+                <button
+                  className="reset-filter-btn"
+                  onClick={() => {
+                    setSearch("");
+                    setSelectedCategory("all");
+                    setPage(1);
+                  }}
+                >
+                  ↺ Xem tất cả sản phẩm
+                </button>
+              )}
             </div>
           ) : (
-            <div
-              className={`products-grid ${
-                products.length <= 3 ? "few-products" : ""
-              }`}
-            >
-              {products.map((product) => (
-                <div
-                  key={product.id}
-                  className="product-card"
-                  onClick={() => handleViewProduct(product)}
-                >
-                  <div className="product-image">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      onError={(e) => {
-                        e.target.src =
-                          "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&q=80&fit=crop";
-                      }}
-                    />
-                    <div className="product-overlay">
-                      <button
-                        className="quick-view-btn"
-                        onClick={() => handleViewProduct(product)}
-                        title="Xem chi tiết"
-                      >
-                        👁️
-                      </button>
-                    </div>
-                    <div className="product-badge">
-                      <span>🔥 Hot</span>
-                    </div>
-                  </div>
-
-                  <div className="product-info">
-                    <div className="product-category">
-                      {getCategoryName(product.category_id)}
-                    </div>
-                    <h3 className="product-name">{product.name}</h3>
-
-                    <div className="product-footer">
-                      <div className="product-price">
-                        <span className="current-price">
-                          {formatPrice(product.price)}
-                        </span>
+            <>
+              <div
+                className={`products-grid ${
+                  products.length <= 3 ? "few-products" : ""
+                }`}
+              >
+                {products.map((product) => (
+                  <div
+                    key={product.id}
+                    className="product-card"
+                    onClick={() => handleViewProduct(product)}
+                  >
+                    <div className="product-image">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        onError={(e) => {
+                          e.target.src =
+                            "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&q=80&fit=crop";
+                        }}
+                      />
+                      <div className="product-overlay">
+                        <button
+                          className="quick-view-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewProduct(product);
+                          }}
+                          title="Xem chi tiết"
+                        >
+                          👁️
+                        </button>
                       </div>
-                      <button className="add-to-cart-btn">
-                        <span className="btn-icon">🛒</span>
-                        <span>Thêm</span>
-                      </button>
+                      <div className="product-badge">
+                        <span>🔥 Hot</span>
+                      </div>
+                    </div>
+
+                    <div className="product-info">
+                      <div className="product-category">
+                        {getCategoryName(product.category_id)}
+                      </div>
+                      <h3 className="product-name">{product.name}</h3>
+
+                      <div className="product-footer">
+                        <div className="product-price">
+                          <span className="current-price">
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                        <button
+                          className="add-to-cart-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewProduct(product);
+                          }}
+                        >
+                          <span className="btn-icon">🛒</span>
+                          <span>Thêm</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* ✅ PAGINATION - LUÔN HIỂN THỊ */}
+              <div className="pagination">
+                <div className="pagination-info">
+                  <span>
+                    Hiển thị{" "}
+                    <strong>
+                      {Math.min((page - 1) * pageSize + 1, totalProducts)}-
+                      {Math.min(page * pageSize, totalProducts)}
+                    </strong>{" "}
+                    / <strong>{totalProducts}</strong> sản phẩm
+                  </span>
+                  {totalPage > 1 && (
+                    <span>
+                      {" "}
+                      • Trang <strong>{page}</strong> /{" "}
+                      <strong>{totalPage}</strong>
+                    </span>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
 
-          {!productsLoading && products.length > 0 && totalPage > 1 && (
-            <div className="pagination">
-              <div className="pagination-info">
-                Trang {page} / {totalPage} - Tổng {totalItems} sản phẩm | Hiển
-                thị {pageSize} sản phẩm/trang
-              </div>
-              <div className="pagination-controls">
-                <button
-                  className="btn-nav"
-                  onClick={() => handlePageChange(1)}
-                  disabled={page === 1 || productsLoading}
-                >
-                  ⏪ Đầu
-                </button>
-                <button
-                  className="btn-nav"
-                  onClick={() => handlePageChange(page - 1)}
-                  disabled={page === 1 || productsLoading}
-                >
-                  ⬅️ Trước
-                </button>
-
-                {Array.from({ length: Math.min(5, totalPage) }, (_, i) => {
-                  const startPage = Math.max(1, page - 2);
-                  const pageNum = startPage + i;
-                  if (pageNum > totalPage) return null;
-
-                  return (
+                {totalPage > 1 && (
+                  <div className="pagination-controls">
                     <button
-                      key={pageNum}
-                      className={`btn-page ${page === pageNum ? "active" : ""}`}
-                      onClick={() => handlePageChange(pageNum)}
-                      disabled={productsLoading}
+                      className="btn-nav"
+                      onClick={() => handlePageChange(1)}
+                      disabled={page === 1 || productsLoading}
+                      title="Trang đầu"
                     >
-                      {pageNum}
+                      ⏪ Đầu
                     </button>
-                  );
-                })}
+                    <button
+                      className="btn-nav"
+                      onClick={() => handlePageChange(page - 1)}
+                      disabled={page === 1 || productsLoading}
+                      title="Trang trước"
+                    >
+                      ⬅️ Trước
+                    </button>
 
-                <button
-                  className="btn-nav"
-                  onClick={() => handlePageChange(page + 1)}
-                  disabled={page === totalPage || productsLoading}
-                >
-                  Tiếp ➡️
-                </button>
-                <button
-                  className="btn-nav"
-                  onClick={() => handlePageChange(totalPage)}
-                  disabled={page === totalPage || productsLoading}
-                >
-                  Cuối ⏩
-                </button>
+                    {/* Page numbers */}
+                    <div className="page-numbers">
+                      {Array.from(
+                        { length: Math.min(5, totalPage) },
+                        (_, i) => {
+                          let startPage = Math.max(1, page - 2);
+                          if (page > totalPage - 2) {
+                            startPage = Math.max(1, totalPage - 4);
+                          }
+                          const pageNum = startPage + i;
+                          if (pageNum > totalPage) return null;
+
+                          return (
+                            <button
+                              key={pageNum}
+                              className={`btn-page ${page === pageNum ? "active" : ""}`}
+                              onClick={() => handlePageChange(pageNum)}
+                              disabled={productsLoading}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        },
+                      )}
+                    </div>
+
+                    <button
+                      className="btn-nav"
+                      onClick={() => handlePageChange(page + 1)}
+                      disabled={page >= totalPage || productsLoading}
+                      title="Trang sau"
+                    >
+                      Tiếp ➡️
+                    </button>
+                    <button
+                      className="btn-nav"
+                      onClick={() => handlePageChange(totalPage)}
+                      disabled={page >= totalPage || productsLoading}
+                      title="Trang cuối"
+                    >
+                      Cuối ⏩
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
+            </>
           )}
         </div>
       </section>

@@ -3,6 +3,7 @@ import NewsService from "@services/news.service.js";
 import NewsCard from "@components/customer/NewsCard.jsx";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_newspage.scss";
+import { scrollToTop } from "@utils/editorHelpers.js";
 
 function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
   const [newsList, setNewsList] = useState([]);
@@ -14,7 +15,6 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
 
   const observerTarget = useRef(null);
 
-  // ===== FETCH NEWS =====
   const fetchNews = async (pageNumber = 1, append = false) => {
     if (loading) return;
 
@@ -40,26 +40,23 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
       });
 
       if (append) {
-        // ✅ APPEND: Thêm vào cuối danh sách (loại bỏ duplicate)
         setNewsList((prev) => {
           const existingIds = new Set(prev.map((item) => item.id));
           const newItems = newsData.filter((item) => !existingIds.has(item.id));
           console.log(
             `✅ Appending ${newItems.length} new items (filtered ${
               newsData.length - newItems.length
-            } duplicates)`
+            } duplicates)`,
           );
           return [...prev, ...newItems];
         });
       } else {
-        // ✅ REPLACE: Thay thế toàn bộ danh sách
         setNewsList(newsData);
-        console.log(`✅ Replaced with ${newsData.length} items`);
+        console.log(`Replaced with ${newsData.length} items`);
       }
 
       setTotalPage(pagination.totalPage || 1);
 
-      // ✅ Check if has more pages
       if (pageNumber >= (pagination.totalPage || 1)) {
         setHasMore(false);
         console.log("🏁 No more pages to load");
@@ -74,12 +71,10 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
     }
   };
 
-  // ===== INITIAL LOAD =====
   useEffect(() => {
     fetchNews(1, false);
   }, []);
 
-  // ===== INFINITE SCROLL OBSERVER =====
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -94,7 +89,7 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
         root: null,
         rootMargin: "100px",
         threshold: 0.1,
-      }
+      },
     );
 
     if (observerTarget.current) {
@@ -110,13 +105,8 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
 
   // ===== HANDLE NEWS CLICK =====
   const handleNewsClick = (news) => {
-    console.log("📰 Clicked news:", news);
     window.location.hash = `news/${news.id}`;
-  };
-
-  // ===== SCROLL TO TOP =====
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollToTop();
   };
 
   return (
@@ -171,7 +161,6 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
                   ))}
                 </div>
 
-                {/* Loading Indicator */}
                 {loading && (
                   <div className="loading-more">
                     <div className="spinner"></div>
@@ -179,16 +168,14 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
                   </div>
                 )}
 
-                {/* Intersection Observer Target */}
                 {hasMore && !loading && (
                   <div ref={observerTarget} className="observer-target" />
                 )}
 
-                {/* End Message */}
                 {!hasMore && newsList.length > 0 && (
                   <div className="end-message">
                     <span>🎉 Bạn đã xem hết tất cả tin tức!</span>
-                    <button className="btn-scroll-top" onClick={scrollToTop}>
+                    <button className="btn-scroll-top" onClick={scrollToTop()}>
                       ⬆️ Lên đầu trang
                     </button>
                   </div>

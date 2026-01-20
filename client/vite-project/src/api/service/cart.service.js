@@ -58,7 +58,7 @@ class CartService extends BaseService {
         console.log("⚠️ Cart already exists (409), fetching existing cart...");
         console.log(
           "🔄 Using:",
-          userId ? `user_id: ${userId}` : `session_id: ${sessionId}`
+          userId ? `user_id: ${userId}` : `session_id: ${sessionId}`,
         );
 
         if (userId) {
@@ -192,7 +192,7 @@ class CartService extends BaseService {
 
         const cartItems = await this.getCartItems(cartId);
         const existingItem = cartItems.find(
-          (item) => item.product_detail_id === productDetailId
+          (item) => item.product_detail_id === productDetailId,
         );
 
         if (existingItem) {
@@ -230,7 +230,7 @@ class CartService extends BaseService {
       console.log("🗑️ Removing from cart:", cartItemId);
 
       const response = await api.delete(
-        ENDPOINTS.CARTS.ITEMS.BY_ID(cartItemId)
+        ENDPOINTS.CARTS.ITEMS.BY_ID(cartItemId),
       );
       const data = response.data;
 

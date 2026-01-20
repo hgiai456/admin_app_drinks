@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import Layout from "@components/common/Layout.jsx";
-import CartAPI from "@services/cart.service.js";
+import CartService from "@services/cart.service.js";
 import CheckoutService from "@services/checkout.service.js";
+import PaymentService from "@services/payment.service.js";
 import "@styles/pages/_checkout.scss";
 import AddressAutocomplete from "@components/common/AddressAutocomplete.jsx";
+import SePayQRModal from "@components/common/SePayQRModal.jsx";
 
 export default function CheckoutPage({
   user,
@@ -17,6 +19,8 @@ export default function CheckoutPage({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState(null);
 
   const [formData, setFormData] = useState({
     phone: user?.phone || "",
@@ -42,10 +46,10 @@ export default function CheckoutPage({
       description: "Thanh toán qua VNPAY (ATM/Visa/MasterCard)",
     },
     {
-      id: "payos",
-      name: "PayOS",
+      id: "sepay",
+      name: "SePay",
       icon: "📱",
-      description: "Thanh toán qua PayOS (QR Code/Chuyển khoản)",
+      description: "Thanh toán qua SePay (QR Code/Chuyển khoản)",
     },
   ];
 
@@ -70,9 +74,9 @@ export default function CheckoutPage({
         return;
       }
 
-      const cartData = await CartAPI.getOrCreateCart(user.id); //Lay cart theo user_id
+      const cartData = await CartService.getOrCreateCart(user.id); //Lay cart theo user_id
       setCart(cartData);
-      const itemsData = await CartAPI.getCartItems(cartData.id);
+      const itemsData = await CartService.getCartItems(cartData.id);
 
       const transformedItems = Array.isArray(itemsData)
         ? itemsData.map((item) => ({
@@ -88,8 +92,8 @@ export default function CheckoutPage({
               (item.product_details?.size_id === 1
                 ? "S"
                 : item.product_details?.size_id === 2
-                ? "M"
-                : "L")
+                  ? "M"
+                  : "L")
             }`,
             price: item.product_details?.price,
             oldprice: item.product_details?.oldprice,
@@ -100,7 +104,7 @@ export default function CheckoutPage({
       setCartItems(transformedItems);
       if (transformedItems.length === 0) {
         setError(
-          "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán."
+          "Giỏ hàng trống. Vui lòng thêm sản phẩm trước khi thanh toán.",
         );
       }
     } catch (error) {
@@ -184,7 +188,7 @@ export default function CheckoutPage({
         cart_id: cart.id,
         user_id: user.id,
         phone: formData.phone.trim(),
-        address: formData.address.trim(),
+        address: formData.address.trim(), 
         payment_method: formData.payment_method,
         note: formData.note.trim() || null,
         total_amount: calculateCartTotal(),
@@ -225,23 +229,30 @@ export default function CheckoutPage({
         return;
       } else if (
         formData.payment_method === "vnpay" ||
-        formData.payment_method === "payos"
+        formData.payment_method === "sepay"
       ) {
-        const response = await fetch(
-          "http://localhost:3003/api/payments/create",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("admin_token")}`,
-            },
-            body: JSON.stringify(checkoutData),
+        const response = await PaymentService.createPayment(checkoutData);
+
+        if (!response.success) {
+          throw new Error(response.message || "Lỗi khi tạo thanh toán");
+        }
+
+        if (formData.payment_method === "sepay") {
+          const qrCode = response.data?.qr_code;
+          const sepayInfo = response.data?.sepay_info;
+
+          if (qrCode && sepayInfo) {
+            showSePayModal(
+              qrCode,
+              sepayInfo,
+              response.data.order_id,
+              response.data.total_amount,
+            );
+            return;
           }
-        );
+        }
 
-        const result = await response.json();
-
-        const paymentUrl = result.data?.payment_url;
+        const paymentUrl = response.data?.payment_url;
         console.log(" Payment URL received:", paymentUrl);
         if (paymentUrl) {
           setSuccess(" Chuyển hướng đến trang thanh toán...");
@@ -259,6 +270,32 @@ export default function CheckoutPage({
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const showSePayModal = (qrCode, sepayInfo, orderId, amount) => {
+    setModalData({
+      qrCode,
+      sepayInfo,
+      orderId,
+      amount,
+    });
+
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setModalData(null);
+  };
+
+  const handlePaymentSuccess = (paymentData) => {
+    setSuccess(" Thanh toán thành công! Cảm ơn bạn đã mua hàng.");
+    setCartItems([]); // Xóa giỏ hàng local
+
+    // Redirect sau 1 giây
+    setTimeout(() => {
+      window.location.hash = `#payment-result?status=success&orderId=${paymentData.order_id}&amount=${paymentData.amount}`;
+    }, 1000);
   };
 
   const formatPrice = (price) => {
@@ -597,6 +634,18 @@ export default function CheckoutPage({
           </div>
         </div>
       </div>
+
+      {showModal && modalData && (
+        <SePayQRModal
+          isOpen={showModal}
+          qrCode={modalData.qrCode}
+          sepayInfo={modalData.sepayInfo}
+          orderId={modalData.orderId}
+          amount={modalData.amount}
+          onClose={closeModal}
+          onPaymentSuccess={handlePaymentSuccess}
+        />
+      )}
     </Layout>
   );
 }

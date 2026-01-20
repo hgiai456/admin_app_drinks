@@ -53,7 +53,7 @@ const PAYMENT_STATUS_CONFIG = {
 const PAYMENT_METHOD_CONFIG = {
   cod: { icon: "💵", label: "COD" },
   vnpay: { icon: "🏦", label: "VNPAY" },
-  payos: { icon: "📱", label: "PayOS" },
+  sepay: { icon: "📱", label: "SePay" },
 };
 
 export default function OrderManagement() {

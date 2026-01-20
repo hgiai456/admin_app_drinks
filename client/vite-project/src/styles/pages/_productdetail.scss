@@ -105,7 +105,7 @@
 }
 
 // =============================================
-// ✅ PRODUCT DETAIL CONTENT
+//  PRODUCT DETAIL CONTENT
 // =============================================
 .product-detail-content {
     display: grid;
@@ -116,6 +116,7 @@
     padding: $spacing-xxl;
     border-radius: $border-radius-xl;
     box-shadow: $box-shadow-lg;
+    margin-bottom: $spacing-xl;
 
     @media (max-width: $tablet) {
         grid-template-columns: 1fr;
@@ -124,22 +125,23 @@
     }
 }
 
-// =============================================
-// ✅ PRODUCT IMAGES
-// =============================================
 .product-images {
     .main-image {
         position: relative;
         border-radius: $border-radius-xl;
         overflow: hidden;
-        background: $brown-bg;
+        background: white;
         border: 1px solid $brown-border;
         box-shadow: $box-shadow-md;
+        align-items: center;
+        justify-content: center;
+        display: flex;
 
         img {
             width: 100%;
             height: 450px;
             object-fit: cover;
+            object-position: center;
             transition: $transition-normal;
 
             @media (max-width: $tablet) {
@@ -163,6 +165,7 @@
             font-size: $font-size-md;
             box-shadow: 0 4px 12px rgba($red-color, 0.4);
             animation: pulse 2s infinite;
+            z-index: 2;
         }
     }
 }
@@ -568,8 +571,13 @@
 // ✅ ANIMATIONS
 // =============================================
 @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes slideDown {
@@ -577,6 +585,7 @@
         opacity: 0;
         transform: translateY(-20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -584,9 +593,12 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }

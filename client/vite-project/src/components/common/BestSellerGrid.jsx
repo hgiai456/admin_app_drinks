@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import ProductService from "@services/product.service.js";
 import "@styles/components/_product-grid.scss";
+import { navigation } from "@utils/editorHelpers";
 
 /**
  * Component hiển thị sản phẩm bán chạy (Best Sellers)
@@ -12,7 +13,7 @@ export default function BestSellerGrid({
   onViewMore,
   formatPrice,
   getCategoryName,
-  title = "🏆 SẢN PHẨM BÁN CHẠY",
+  title = "BEST SELLERS",
   itemsPerView = 4,
   autoScrollInterval = 2000,
 }) {
@@ -32,7 +33,6 @@ export default function BestSellerGrid({
     return () => window.removeEventListener("resize", handleResize);
   }, [limit]);
 
-  // ✅ RESPONSIVE: Điều chỉnh số item theo màn hình
   const handleResize = () => {
     const width = window.innerWidth;
     if (width < 576) {
@@ -61,17 +61,14 @@ export default function BestSellerGrid({
     }
   }, [products, currentIndex, visibleItems, autoScrollInterval]);
 
-  // ✅ FIX: Fetch Best Sellers - Dùng đúng total_buyturn
   const fetchBestSellers = async () => {
     try {
       setLoading(true);
       setError("");
 
       const response = await ProductService.getAllProducts();
-      console.log("📦 Best Sellers raw response:", response);
 
       if (!response || !Array.isArray(response)) {
-        console.warn("⚠️ Response không phải array:", response);
         setProducts([]);
         return;
       }
@@ -97,12 +94,8 @@ export default function BestSellerGrid({
         .filter((p) => p.total_buyturn > 0)
         .sort((a, b) => b.total_buyturn - a.total_buyturn);
 
-      console.log("🏆 Best Sellers processed:", productsWithBuyturns);
-      console.log("📊 Products with buyturn > 0:", productsWithBuyturns.length);
-
       setProducts(productsWithBuyturns);
     } catch (error) {
-      console.error("❌ Error fetching best sellers:", error);
       setError("Không thể tải sản phẩm bán chạy");
       setProducts([]);
     } finally {
@@ -111,14 +104,9 @@ export default function BestSellerGrid({
   };
 
   const handleViewMore = () => {
-    if (onViewMore) {
-      onViewMore();
-    } else {
-      window.location.hash = "menu?sort=bestseller";
-    }
+    navigation("menu");
   };
 
-  // ✅ CAROUSEL NAVIGATION
   const maxIndex = Math.max(0, products.length - visibleItems);
 
   const handlePrev = () => {
@@ -192,13 +180,11 @@ export default function BestSellerGrid({
           </p>
         </div>
 
-        {/* ✅ CAROUSEL WRAPPER */}
         <div
           className="bestseller-carousel-wrapper"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          {/* LEFT ARROW */}
           {products.length > visibleItems && (
             <button
               className="carousel-arrow prev"

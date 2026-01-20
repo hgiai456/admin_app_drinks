@@ -1,10 +1,6 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as m;
 
-// ============================================
-// 📦 PRODUCT GRID COMPONENT
-// ============================================
-
 .products-grid {
     background: white;
     display: grid;
@@ -142,13 +138,12 @@
             font-size: $font-size-lg;
             font-weight: $font-weight-bold;
             color: $text-primary;
-            margin: 0 0 $spacing-sm 0;
             line-height: 1.4;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
-            min-height: 2.8em;
+            min-height: 1.5em;
         }
 
         .product-footer {
@@ -199,9 +194,7 @@
     }
 }
 
-// ============================================
-// 🏆 BEST SELLER SECTION - 4 PRODUCTS/LINE
-// ============================================
+//BEST SELLER SECTION - 4 PRODUCTS/LINE
 
 .best-sellers-section {
     padding: $spacing-xxxl 0;
@@ -298,7 +291,6 @@
         }
     }
 
-    // ✅ BESTSELLER CARD
     .bestseller-card {
         background: white;
         border-radius: $border-radius-xl;
@@ -376,7 +368,6 @@
                 }
             }
 
-            // ✅ TOP BADGE
             .bestseller-badge {
                 position: absolute;
                 top: $spacing-md;
@@ -391,7 +382,6 @@
                 z-index: 2;
             }
 
-            // ✅ BUYTURNS BADGE
             .buyturns-badge {
                 position: absolute;
                 bottom: $spacing-md;
@@ -576,9 +566,6 @@
     }
 }
 
-// ============================================
-// 📦 LOADING & EMPTY STATES
-// ============================================
 
 .products-loading,
 .no-products {

@@ -24,20 +24,17 @@ function BannerManagement() {
       setError(null);
       setMessage("");
 
-      // ✅ Gọi instance method từ BaseService
       const result = await BannerService.getAll();
 
       if (result.success) {
         setBanners(result.data || []);
-        console.log("✅ Banners loaded:", result.data);
       } else {
         setError(result.message || "Lỗi không xác định");
       }
     } catch (err) {
-      console.error("❌ Fetch Error:", err);
       setError(`Lỗi khi tải dữ liệu: ${err.message || "Unknown error"}`);
     } finally {
-      setLoading(false); //  QUAN TRỌNG
+      setLoading(false);
     }
   };
 

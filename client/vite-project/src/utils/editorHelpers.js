@@ -12,7 +12,7 @@ export function sanitizeHtml(html) {
   // Remove script tags
   sanitized = sanitized.replace(
     /<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi,
-    ""
+    "",
   );
 
   // Remove event handlers (onclick, onerror, etc)
@@ -23,6 +23,18 @@ export function sanitizeHtml(html) {
 
   return sanitized;
 }
+
+/**
+ * Scroll lên đầu trang với smooth animation
+ * @param {number} duration - Thời gian scroll (ms), mặc định 300ms
+ */
+export const scrollToTop = (duration = 300) => {
+  window.scrollTo({
+    top: 0,
+    left: 0,
+    behavior: "smooth",
+  });
+};
 
 /**
  * Get excerpt from HTML content
@@ -99,3 +111,16 @@ export function formatDate(date) {
     minute: "2-digit",
   });
 }
+
+export function formatPrice(price) {
+  if (!price || price === 0) return "Liên hệ";
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
+}
+
+export const navigation = (hash) => {
+  window.location.hash = hash;
+  scrollToTop();
+};

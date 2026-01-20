@@ -14,23 +14,16 @@ class CategoryService extends BaseService {
     try {
       console.log("🔗 Đang gọi API Categories getAll:", this.baseUrl);
 
-      const res = await api.get(this.ENDPOINTS.CATEGORIES.ALL);
+      const res = await api.get(ENDPOINTS.CATEGORIES.ALL);
+      const data = res.data;
 
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("❌ Lỗi Categories getAll:", errorText);
-        throw new Error(`HTTP ${res.status}: ${errorText}`);
-      }
-
-      const data = await res.json();
       console.log("✅ Dữ liệu Categories getAll:", data);
 
-      // Xử lý response data
       const categories = data.data || data.categories || data || [];
 
       return Array.isArray(categories)
         ? categories.map((item) =>
-            Category?.fromApiResponse ? Category.fromApiResponse(item) : item
+            Category?.fromApiResponse ? Category.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
@@ -51,7 +44,7 @@ class CategoryService extends BaseService {
 
       return Array.isArray(categories)
         ? categories.map((item) =>
-            Category?.fromApiResponse ? Category.fromApiResponse(item) : item
+            Category?.fromApiResponse ? Category.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
@@ -63,16 +56,16 @@ class CategoryService extends BaseService {
   async getPaging({ page = 1, search = "" } = {}) {
     try {
       console.log(
-        `🔗 Gọi API Categories getPaging - page: ${page}, search: "${search}"`
+        `🔗 Gọi API Categories getPaging - page: ${page}, search: "${search}"`,
       );
 
       const params = { page, search };
       const response = await api.get(this.endpoint, { params });
 
-      console.log("📊 Response getPaging:", response.status);
+      console.log(" Response getPaging:", response.status);
 
       const data = response.data;
-      console.log("✅ Raw Categories Paging Data:", data);
+      console.log(" Raw Categories Paging Data:", data);
 
       return {
         data: data.data || [],

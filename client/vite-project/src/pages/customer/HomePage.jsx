@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import BannerService from "@services/banner.service.js";
-import ProductService from "@services/product.service.js"; // Import đúng
+import ProductService from "@services/product.service.js";
 import "@styles/pages/_homepage.scss";
 import CategoryService from "@services/category.service.js";
-import CartService from "@services/cart.service.js"; // Import CartAPI
+import CartService from "@services/cart.service.js";
 import Footer from "@components/common/Footer.jsx";
 import Header from "@components/common/Header.jsx";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
+import { scrollToTop } from "@utils/editorHelpers";
 
 export default function HomePage({
   user,
@@ -45,7 +46,6 @@ export default function HomePage({
         const response = await CategoryService.getAll();
         console.log("📦 Categories API response:", response);
 
-        // ✅ Xử lý response structure
         let categoriesData = [];
         if (response && response.data && Array.isArray(response.data)) {
           categoriesData = response.data;
@@ -74,10 +74,10 @@ export default function HomePage({
         const response = await NewsService.getPaging({
           page: 1,
           search: "",
-          pageSize: 3, // ← Lấy 3 tin tức mới nhất
+          pageSize: 3,
         });
 
-        console.log("📰 News API response:", response);
+        console.log("News API response:", response);
 
         const newsData = response.data || [];
         setNews(newsData);
@@ -111,10 +111,12 @@ export default function HomePage({
 
   const handleNewsClick = (newsItem) => {
     window.location.hash = `news/${newsItem.id}`;
+    scrollToTop();
   };
 
   const handleViewAllNews = () => {
     window.location.hash = "news";
+    scrollToTop();
   };
 
   useEffect(() => {
@@ -122,7 +124,7 @@ export default function HomePage({
       try {
         setProductsLoading(true);
         console.log(
-          `🔄 Fetching products - page: ${page}, search: "${search}"`
+          `🔄 Fetching products - page: ${page}, search: "${search}"`,
         );
         let response;
         if (selectedCategory === "all") {
@@ -184,7 +186,7 @@ export default function HomePage({
             image:
               "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&q=80&fit=crop",
             category_id: 1,
-            brand_id: null, // ✅ Brand có thể null
+            brand_id: null,
             price: 25000,
           },
           {
@@ -227,7 +229,6 @@ export default function HomePage({
 
         console.log("📦 Banner API response:", response);
 
-        // ✅ XỬ LÝ RESPONSE STRUCTURE
         let bannersData = [];
 
         if (response && response.success && Array.isArray(response.data)) {
@@ -243,13 +244,11 @@ export default function HomePage({
 
         console.log("✅ Banners data:", bannersData);
 
-        // ✅ ĐẢM BẢO LÀ ARRAY
         setBanners(Array.isArray(bannersData) ? bannersData : []);
         setError("");
       } catch (error) {
         console.error("❌ Error fetching banners:", error);
         setError("Không thể tải banner");
-        // ✅ Fallback banners
         setBanners([
           {
             id: 1,
@@ -278,7 +277,6 @@ export default function HomePage({
     return () => clearInterval(interval);
   }, [banners.length]);
 
-  // ✅ EVENT HANDLERS
   const goToSlide = (index) => setCurrentSlide(index);
   const nextSlide = () =>
     setCurrentSlide((prev) => (prev + 1) % banners.length);
@@ -286,17 +284,12 @@ export default function HomePage({
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
 
   const handleAddToCart = async (product) => {
-    // ✅ KIỂM TRA GUEST MODE
-
     try {
       setAddingToCart((prev) => ({ ...prev, [product.id]: true }));
       setMessage("");
       const userId = user?.id || null;
 
-      // ✅ Lấy hoặc tạo giỏ hàng
       const cart = await CartService.getOrCreateCart(userId);
-
-      // ✅ Tìm sản phẩm chi tiết đầu tiên có số lượng > 0
       const productDetails = await ProductService.getById(product.id);
 
       if (
@@ -310,7 +303,7 @@ export default function HomePage({
 
       // ✅ Lấy size đầu tiên có quantity > 0
       const availableSize = productDetails.sizes.find(
-        (size) => size.quantity > 0
+        (size) => size.quantity > 0,
       );
 
       if (!availableSize) {
@@ -326,7 +319,7 @@ export default function HomePage({
       // ✅ THÔNG BÁO KHÁC NHAU CHO USER VÀ GUEST
       if (isGuest) {
         setMessage(
-          `✅ Đã thêm "${product.name}" vào giỏ hàng (khách vãng lai)`
+          `✅ Đã thêm "${product.name}" vào giỏ hàng (khách vãng lai)`,
         );
       } else {
         setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
@@ -364,7 +357,6 @@ export default function HomePage({
     setPage(1); // Reset về trang 1 khi search
   };
 
-  // ✅ FILTER HANDLERS
   const handleCategoryFilter = (categoryId) => {
     setSelectedCategory(categoryId);
     setPage(1);
@@ -560,7 +552,7 @@ export default function HomePage({
                     <strong>
                       {getCategoryName(parseInt(selectedCategory)).replace(
                         /^[^\s]+\s/,
-                        ""
+                        "",
                       )}
                     </strong>
                     :<strong> {totalItems}</strong> sản phẩm
@@ -581,7 +573,7 @@ export default function HomePage({
                     selectedCategory === "all"
                       ? "Tìm kiếm sản phẩm..."
                       : `Tìm trong ${getCategoryName(
-                          parseInt(selectedCategory)
+                          parseInt(selectedCategory),
                         ).replace(/^[^\s]+\s/, "")}...`
                   }
                   defaultValue={search}
@@ -661,7 +653,7 @@ export default function HomePage({
                 {selectedCategory === "all"
                   ? "Không có sản phẩm nào khớp với từ khóa tìm kiếm của bạn."
                   : `Không có sản phẩm nào trong danh mục "${getCategoryName(
-                      parseInt(selectedCategory)
+                      parseInt(selectedCategory),
                     ).replace(/^[^\s]+\s/, "")}".`}
               </p>
               {selectedCategory !== "all" && (
@@ -728,8 +720,8 @@ export default function HomePage({
                           {addingToCart[product.id]
                             ? "Đang thêm..."
                             : isGuest
-                            ? "Xem chi tiết"
-                            : "Xem chi tiết"}
+                              ? "Xem chi tiết"
+                              : "Xem chi tiết"}
                         </span>
                       </button>
                     </div>
@@ -749,7 +741,7 @@ export default function HomePage({
                     (danh mục:{" "}
                     {getCategoryName(parseInt(selectedCategory)).replace(
                       /^[^\s]+\s/,
-                      ""
+                      "",
                     )}
                     )
                   </span>
@@ -814,7 +806,7 @@ export default function HomePage({
         onViewMore={() => (window.location.hash = "menu?sort=bestseller")}
         formatPrice={formatPrice}
         getCategoryName={getCategoryName}
-        title="🏆 SẢN PHẨM BÁN CHẠY"
+        title="BEST SELLERS"
       />
 
       <section className="news-section-home">

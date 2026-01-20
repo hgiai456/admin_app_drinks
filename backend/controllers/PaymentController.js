@@ -1,5 +1,7 @@
 import PayOSService from "../services/PayOSService.js";
 import VNPayService from "../services/VNPayService.js";
+import SePayService from "../services/SePayService.js";
+import { sendOrderConfirmationEmail } from "../services/EmailService.js";
 import db from "../models/index.js";
 import dotenv from "dotenv";
 
@@ -17,7 +19,7 @@ export async function createPayment(req, res) {
       address,
       note,
       total_amount,
-      payment_method = "payos",
+      payment_method = "sepay",
     } = req.body;
 
     if (!cart_id || !phone || !address) {
@@ -27,8 +29,17 @@ export async function createPayment(req, res) {
       });
     }
 
+    const validPaymentMethods = ["cod", "vnpay", "sepay"];
+    if (!validPaymentMethods.includes(payment_method)) {
+      return res.status(400).json({
+        success: false,
+        message: `Phương thức thanh toán không hợp lệ Chỉ chấp nhận: ${validPaymentMethods.join(
+          ", ",
+        )}`,
+      });
+    }
+
     const cart = await db.Cart.findByPk(cart_id, {
-      //
       include: [
         {
           model: db.CartItem,
@@ -148,7 +159,7 @@ export async function createPayment(req, res) {
         payment_method: payment_method,
         payment_status: "pending",
       },
-      { transaction }
+      { transaction },
     );
 
     for (const item of cart.cart_items) {
@@ -159,7 +170,7 @@ export async function createPayment(req, res) {
           quantity: item.quantity,
           price: item.product_details.price,
         },
-        { transaction }
+        { transaction },
       );
 
       const currentQuantity = item.product_details.quantity;
@@ -177,7 +188,7 @@ export async function createPayment(req, res) {
         {
           where: { id: item.product_detail_id },
           transaction: transaction,
-        }
+        },
       );
 
       console.log(`✅ Updated ProDetail ID ${item.product_detail_id}:`, {
@@ -190,30 +201,24 @@ export async function createPayment(req, res) {
     let paymentUrl = null;
     let qrCode = null;
 
-    if (payment_method === "payos") {
+    if (payment_method === "sepay") {
       const paymentData = {
         orderId: order.id,
         amount: finalTotal,
         description: `Thanh toán đơn hàng #${order.id} - HG Coffee`,
-        buyerName: "Khách hàng",
-        buyerPhone: phone,
-        buyerAddress: address,
-        items: paymentItems,
       };
-
-      paymentResult = await PayOSService.createPaymentLink(paymentData);
+      paymentResult = await SePayService.createPaymentQRCode(paymentData);
 
       if (!paymentResult.success) {
         await transaction.rollback();
         return res.status(500).json({
           success: false,
-          message: "Không thể tạo liên kết thanh toán PayOS",
+          message: "Không thể tạo tạo mã qr thanh toán SePay",
           error: paymentResult.error,
         });
       }
-
-      paymentUrl = paymentResult.paymentUrl;
       qrCode = paymentResult.qrCode;
+      paymentUrl = null;
     } else if (payment_method === "vnpay") {
       const ipAddr =
         req.headers["x-forwarded-for"] ||
@@ -255,30 +260,39 @@ export async function createPayment(req, res) {
         payment_method: payment_method,
         amount: finalTotal,
         status: payment_method === "cod" ? "pending" : "pending",
-        transaction_id:
-          paymentResult.orderCode?.toString() || order.id.toString(),
+        transaction_id: order.id.toString(),
         payment_url: paymentUrl,
-        payos_order_code:
-          payment_method === "payos" ? paymentResult.orderCode : null,
-        callback_data: JSON.stringify(paymentResult),
+        callback_data: JSON.stringify(paymentResult || {}),
       },
-      { transaction }
+      { transaction },
     );
 
     await transaction.commit();
 
+    const responseData = {
+      order_id: order.id,
+      payment_id: payment.id,
+      payment_method: payment_method,
+      payment_url: paymentUrl,
+      qr_code: qrCode,
+      order_code: order.id,
+      total_amount: finalTotal,
+    };
+
+    if (payment_method === "sepay" && paymentResult.accountInfo) {
+      responseData.sepay_info = {
+        account_number: paymentResult.accountInfo.accountNumber,
+        account_name: paymentResult.accountInfo.accountName,
+        bank_name: paymentResult.accountInfo.bankName,
+        bank_code: paymentResult.accountInfo.bankCode,
+        transfer_content: paymentResult.transferContent,
+      };
+    }
+
     res.status(200).json({
       success: true,
       message: "Tạo thanh toán thành công",
-      data: {
-        order_id: order.id,
-        payment_id: payment.id,
-        payment_method: payment_method,
-        payment_url: paymentUrl,
-        qr_code: qrCode,
-        order_code: paymentResult.orderCode || order.id,
-        total_amount: finalTotal,
-      },
+      data: responseData,
     });
   } catch (error) {
     await transaction.rollback();
@@ -291,19 +305,311 @@ export async function createPayment(req, res) {
   }
 }
 
+export async function checkSePayPayment(req, res) {
+  try {
+    const { orderId } = req.body;
+
+    console.log("🔍 checkSePayPayment called with orderId:", orderId);
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu orderId",
+      });
+    }
+
+    const payment = await db.Payment.findOne({
+      where: { order_id: orderId },
+      include: [
+        {
+          model: db.Order,
+          as: "order",
+        },
+      ],
+    });
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy thông tin thanh toán",
+      });
+    }
+
+    console.log("📦 Current payment status in DB:", payment.status);
+
+    if (payment.status === "completed") {
+      console.log("✅ Payment already completed in DB!");
+      return res.status(200).json({
+        success: true,
+        message: "Thanh toán thành công!",
+        data: {
+          status: "completed",
+          order_id: orderId,
+          payment_id: payment.id,
+          amount: payment.amount,
+        },
+      });
+    }
+
+    // BƯỚC 3: NẾU CHƯA COMPLETED → THỬ GỌI SEPAY API (optional)
+    // Nếu API lỗi thì vẫn trả về pending, không block user
+    try {
+      const checkResult = await SePayService.checkTransaction(
+        orderId,
+        parseFloat(payment.amount),
+      );
+
+      console.log("📦 SePay API check result:", checkResult);
+
+      // Nếu tìm thấy giao dịch qua API → Update DB
+      if (checkResult.found && checkResult.transaction) {
+        const transaction = await db.sequelize.transaction();
+
+        try {
+          await payment.update(
+            {
+              status: "completed",
+              transaction_id:
+                checkResult.transaction.reference || orderId.toString(),
+              callback_data: JSON.stringify(checkResult.transaction),
+            },
+            { transaction },
+          );
+
+          await payment.order.update({ status: 2 }, { transaction });
+
+          // Xóa giỏ hàng
+          if (payment.order.user_id) {
+            const cart = await db.Cart.findOne({
+              where: { user_id: payment.order.user_id },
+            });
+            if (cart) {
+              await db.CartItem.destroy({
+                where: { cart_id: cart.id },
+                transaction,
+              });
+            }
+          }
+
+          await transaction.commit();
+
+          console.log("✅ Payment updated via API check!");
+
+          return res.status(200).json({
+            success: true,
+            message: "Thanh toán thành công!",
+            data: {
+              status: "completed",
+              order_id: orderId,
+              payment_id: payment.id,
+              amount: payment.amount,
+            },
+          });
+        } catch (dbError) {
+          await transaction.rollback();
+          throw dbError;
+        }
+      }
+    } catch (apiError) {
+      // API lỗi → Bỏ qua, tiếp tục check DB lần nữa
+      console.log("⚠️ SePay API error (ignored):", apiError.message);
+    }
+
+    // ✅ BƯỚC 4: CHECK DB LẦN CUỐI (có thể webhook đã update trong lúc gọi API)
+    const refreshedPayment = await db.Payment.findOne({
+      where: { order_id: orderId },
+    });
+
+    if (refreshedPayment?.status === "completed") {
+      console.log("✅ Payment completed (detected on refresh)!");
+      return res.status(200).json({
+        success: true,
+        message: "Thanh toán thành công!",
+        data: {
+          status: "completed",
+          order_id: orderId,
+          payment_id: refreshedPayment.id,
+          amount: refreshedPayment.amount,
+        },
+      });
+    }
+
+    // ✅ BƯỚC 5: VẪN PENDING → Trả về pending
+    console.log("⏳ Payment still pending");
+    return res.status(200).json({
+      success: true,
+      message: "Đang chờ xác nhận thanh toán...",
+      data: {
+        status: "pending",
+        order_id: orderId,
+        hint: "Sau khi chuyển tiền, hệ thống sẽ tự động xác nhận trong 1-2 phút.",
+      },
+    });
+  } catch (error) {
+    console.error("❌ Check SePay payment error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi server khi kiểm tra thanh toán",
+      error: error.message,
+    });
+  }
+}
+
+//SePay WebHook Handler
+export async function sepayWebhook(req, res) {
+  try {
+    const webhookData = req.body;
+    console.log("Received SePay webhook:", webhookData);
+
+    if (!SePayService.verifyWebhook(webhookData)) {
+      console.error("❌ Invalid webhook - wrong account");
+      return res.status(400).json({
+        success: false,
+        message: "Invalid account",
+      });
+    }
+
+    const parsed = SePayService.parseWebhookData(webhookData);
+
+    if (!parsed.isValid || !parsed.orderId) {
+      console.log(
+        "⚠️ Cannot parse orderId from webhook content:",
+        webhookData.content,
+      );
+      // Vẫn trả về 200 để SePay không retry
+      return res.status(200).json({
+        success: true,
+        message: "Webhook received but no matching order",
+      });
+    }
+
+    const { orderId, amount, transactionId, content } = parsed;
+
+    //Tim payment theo order id
+    const payment = await db.Payment.findOne({
+      where: { order_id: orderId },
+      include: [{ model: db.Order, as: "order" }],
+    });
+
+    if (!payment) {
+      console.error(" Payment not found for order:", orderId);
+      return res.status(404).json({
+        success: false,
+        message: "Payment not found",
+      });
+    }
+
+    if (Math.abs(payment.amount - amount) > 1) {
+      console.error("Amount mismatch:", {
+        expected: payment.amount,
+        received: amount,
+      });
+      return res.status(400).json({
+        success: false,
+        message: "Amount mismatch",
+      });
+    }
+
+    if (payment.status === "completed") {
+      console.log("⚠️ Payment already completed");
+      return res.status(200).json({
+        success: true,
+        message: "Already completed",
+      });
+    }
+
+    const transaction = await db.sequelize.transaction();
+
+    try {
+      await payment.update(
+        {
+          status: "completed",
+          transaction_id: transactionId || orderId.toString(),
+          callback_data: JSON.stringify(webhookData),
+        },
+        { transaction },
+      );
+
+      await payment.order.update(
+        {
+          status: 2, // Đã thanh toán
+        },
+        { transaction },
+      );
+
+      if (payment.order.user_id) {
+        const cart = await db.Cart.findOne({
+          where: { user_id: payment.order.user_id },
+        });
+
+        if (cart) {
+          await db.CartItem.destroy({
+            where: { cart_id: cart.id },
+            transaction,
+          });
+          console.log(`Cleared cart for user ${payment.order.user_id}`);
+        }
+      }
+
+      await transaction.commit();
+
+      console.log("Payment completed via webhook:", {
+        orderId,
+        amount,
+        transactionId,
+      });
+
+      try {
+        const user = await db.User.findByPk(payment.order.user_id);
+        if (user?.email) {
+          await sendOrderConfirmationEmail(user.email, {
+            orderId: orderId,
+            customerName: user.name,
+            total: payment.amount,
+            paymentMethod: "SePay (Chuyển khoản)",
+          });
+          console.log("📧 Email sent to:", user.email);
+        }
+      } catch (emailError) {
+        console.error("❌ Email error:", emailError.message);
+      }
+
+      res.status(200).json({
+        success: true,
+        message: "Webhook processed successfully",
+        data: {
+          orderId: parseInt(orderId),
+          status: payment.status,
+          transactionId: payment.transaction_id,
+        },
+      });
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+  } catch (error) {
+    console.error("SePay webhook processing error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Webhook processing failed",
+      error: error.message,
+    });
+  }
+}
+
 export async function vnpayReturn(req, res) {
   try {
     const vnpayData = req.query;
     const orderId = vnpayData.vnp_TxnRef;
     const responseCode = vnpayData.vnp_ResponseCode;
     const transactionNo = vnpayData.vnp_TransactionNo;
-    const amount = parseInt(vnpayData.vnp_Amount) / 100; //VNPAY gửi amount nhân 100
+    const amount = parseInt(vnpayData.vnp_Amount) / 100;
 
     //Verify the signature
     const verification = VNPayService.verifyIpnCall(vnpayData);
 
     if (!verification.isValid) {
-      console.error("❌ Invalid signature");
+      console.error(" Invalid signature");
       const redirectUrl = `${
         process.env.CLIENT_URL || "http://localhost:5173"
       }/#payment-result?status=error&message=Invalid+signature&orderId=${orderId}`;
@@ -358,7 +664,7 @@ export async function vnpayReturn(req, res) {
           transaction_id: transactionNo || orderId.toString(),
           callback_data: JSON.stringify(vnpayData),
         },
-        { transaction }
+        { transaction },
       );
 
       if (payment.order) {
@@ -366,7 +672,7 @@ export async function vnpayReturn(req, res) {
           {
             status: orderStatus,
           },
-          { transaction }
+          { transaction },
         );
       }
 
@@ -380,7 +686,7 @@ export async function vnpayReturn(req, res) {
             {
               where: { cart_id: cart.id },
             },
-            { transaction }
+            { transaction },
           );
         }
       }
@@ -402,7 +708,7 @@ export async function vnpayReturn(req, res) {
   } catch (error) {
     console.error("❌ VNPAY return error:", error);
     return res.redirect(
-      `${process.env.CLIENT_URL}/payment-result?status=error&message=${error.message}`
+      `${process.env.CLIENT_URL}/payment-result?status=error&message=${error.message}`,
     );
   }
 }
@@ -478,7 +784,7 @@ export async function vnpayIPN(req, res) {
           transaction_id: transactionNo || orderId.toString(),
           callback_data: JSON.stringify(vnpayData),
         },
-        { transaction }
+        { transaction },
       );
 
       await payment.order.update(
@@ -486,7 +792,7 @@ export async function vnpayIPN(req, res) {
           status: orderStatus,
           payment_status: paymentStatus,
         },
-        { transaction }
+        { transaction },
       );
 
       await transaction.commit();
@@ -568,13 +874,13 @@ export async function paymentWebhook(req, res) {
           status: paymentStatus,
           callback_data: JSON.stringify(webhookData),
         },
-        { transaction }
+        { transaction },
       );
       await payment.order.update(
         {
           status: orderStatus,
         },
-        { transaction }
+        { transaction },
       );
       //Nếu thanh toán thành công, xóa cart
       if (paymentStatus === "completed") {
@@ -587,7 +893,7 @@ export async function paymentWebhook(req, res) {
             {
               where: { cart_id: cart.id },
             },
-            { transaction }
+            { transaction },
           );
         }
       }
@@ -630,7 +936,7 @@ export async function getPaymentStatus(req, res) {
               include: [
                 {
                   model: db.ProDetail,
-                  as: "product_detail",
+                  as: "product_details",
                   include: [
                     {
                       model: db.Product,
@@ -682,20 +988,12 @@ export async function getPaymentStatus(req, res) {
 
 export async function verifyPayment(req, res) {
   try {
-    const { orderCode, status } = req.query;
+    const { orderCode, payment_method } = req.query;
 
     if (!orderCode) {
       return res.status(400).json({
         success: false,
         message: "Thiếu orderCode",
-      });
-    }
-    const payosResult = await PayOSService.getPaymentLinkInformation(orderCode);
-
-    if (!payosResult.success) {
-      return res.status(400).json({
-        success: false,
-        message: "Không thể xác thực thanh toán",
       });
     }
 
@@ -716,18 +1014,21 @@ export async function verifyPayment(req, res) {
       });
     }
 
-    const payosData = payosResult.data;
-    let finalStatus = "pending";
+    let finalStatus = payment.status;
 
-    //Xac dinh trang thai cuoi cung
-    // ✅ Xác định trạng thái cuối cùng
-    if (payosData.status === "PAID") {
-      finalStatus = "success";
-    } else if (payosData.status === "CANCELLED") {
-      finalStatus = "cancelled";
-    } else if (payosData.status === "EXPIRED") {
-      finalStatus = "failed";
+    if (payment_method === "sepay") {
+      finalStatus = payment.status;
     }
+
+    // //Xac dinh trang thai cuoi cung
+    // // ✅ Xác định trạng thái cuối cùng
+    // if (payosData.status === "PAID") {
+    //   finalStatus = "success";
+    // } else if (payosData.status === "CANCELLED") {
+    //   finalStatus = "cancelled";
+    // } else if (payosData.status === "EXPIRED") {
+    //   finalStatus = "failed";
+    // }
 
     res.status(200).json({
       success: true,
@@ -735,14 +1036,225 @@ export async function verifyPayment(req, res) {
       data: {
         status: finalStatus,
         order: payment.order,
-        payment_info: payosData,
+        payment_info: {
+          amount: payment.amount,
+          payment_method: payment.payment_method,
+          transaction_id: payment.transaction_id,
+        },
       },
     });
   } catch (error) {
-    console.error("❌ Verify payment error:", error);
+    console.error("Verify payment error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi xác thực thanh toán",
+      error: error.message,
+    });
+  }
+}
+
+export async function confirmPaymentManual(req, res) {
+  const transaction = await db.sequelize.transaction();
+
+  try {
+    const { orderId, transactionId, adminNote } = req.body;
+
+    if (!orderId) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu orderId",
+      });
+    }
+
+    console.log("🔧 Manual payment confirmation for order:", orderId);
+
+    const payment = await db.Payment.findOne({
+      where: { order_id: orderId },
+      include: [
+        {
+          model: db.Order,
+          as: "order",
+          include: [
+            {
+              model: db.OrderDetail,
+              as: "order_details",
+              include: [
+                {
+                  model: db.ProDetail,
+                  as: "product_details",
+                  include: [
+                    { model: db.Product, as: "product" },
+                    { model: db.Size, as: "sizes" },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    });
+
+    if (!payment) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy thông tin thanh toán",
+      });
+    }
+
+    if (payment.status === "completed") {
+      await transaction.rollback();
+      return res.status(200).json({
+        success: true,
+        message: "Thanh toán đã được xác nhận trước đó",
+        data: {
+          status: "completed",
+          order_id: orderId,
+        },
+      });
+    }
+
+    // Cập nhật payment
+    await payment.update(
+      {
+        status: "completed",
+        transaction_id: transactionId || `MANUAL-${orderId}-${Date.now()}`,
+        callback_data: JSON.stringify({
+          type: "manual_confirmation",
+          adminNote: adminNote || "",
+          confirmedAt: new Date().toISOString(),
+        }),
+      },
+      { transaction },
+    );
+
+    // Cập nhật order status
+    await payment.order.update(
+      {
+        status: 2, // Đã thanh toán
+      },
+      { transaction },
+    );
+
+    // Xóa giỏ hàng
+    if (payment.order.user_id) {
+      const cart = await db.Cart.findOne({
+        where: { user_id: payment.order.user_id },
+      });
+      if (cart) {
+        await db.CartItem.destroy({
+          where: { cart_id: cart.id },
+          transaction,
+        });
+        console.log(`🗑️ Cleared cart for user ${payment.order.user_id}`);
+      }
+    }
+
+    await transaction.commit();
+
+    // Gửi email xác nhận
+    try {
+      const user = await db.User.findByPk(payment.order.user_id);
+      if (user?.email) {
+        await sendOrderConfirmationEmail(user.email, {
+          orderId: orderId,
+          customerName: user.name,
+          phone: payment.order.phone,
+          address: payment.order.address,
+          total: payment.amount,
+          paymentMethod: "SePay (Chuyển khoản)",
+          items: payment.order.order_details.map((detail) => ({
+            name: detail.product_details?.product?.name || "Sản phẩm",
+            size: detail.product_details?.sizes?.name || "",
+            quantity: detail.quantity,
+            price: detail.price,
+          })),
+        });
+        console.log("📧 Confirmation email sent to:", user.email);
+      }
+    } catch (emailError) {
+      console.error("❌ Email error:", emailError.message);
+    }
+
+    console.log("✅ Payment manually confirmed:", orderId);
+
+    res.status(200).json({
+      success: true,
+      message: "Xác nhận thanh toán thành công!",
+      data: {
+        status: "completed",
+        order_id: orderId,
+        payment_id: payment.id,
+      },
+    });
+  } catch (error) {
+    await transaction.rollback();
+    console.error("❌ Manual confirmation error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi xác nhận thanh toán",
+      error: error.message,
+    });
+  }
+}
+
+/**
+ * ✅ API MỚI: User báo đã thanh toán (để Admin xác nhận)
+ * POST /api/payments/report-paid
+ */
+export async function reportPaid(req, res) {
+  try {
+    const { orderId, transferInfo } = req.body;
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu orderId",
+      });
+    }
+
+    const payment = await db.Payment.findOne({
+      where: { order_id: orderId },
+    });
+
+    if (!payment) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn hàng",
+      });
+    }
+
+    // Cập nhật callback_data để lưu thông tin user báo
+    const currentData = payment.callback_data
+      ? JSON.parse(payment.callback_data)
+      : {};
+
+    await payment.update({
+      callback_data: JSON.stringify({
+        ...currentData,
+        userReportedPaid: true,
+        reportedAt: new Date().toISOString(),
+        transferInfo: transferInfo || "",
+      }),
+    });
+
+    console.log("📝 User reported payment for order:", orderId);
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Đã ghi nhận thông tin thanh toán. Admin sẽ xác nhận trong giây lát.",
+      data: {
+        order_id: orderId,
+        status: "pending_confirmation",
+      },
+    });
+  } catch (error) {
+    console.error("❌ Report paid error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server",
       error: error.message,
     });
   }

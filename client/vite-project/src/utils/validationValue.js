@@ -1,10 +1,5 @@
-/**
- * 🔧 VALIDATION UTILITIES
- * Các hàm validation tái sử dụng cho toàn dự án
- */
-
 // ============================================
-// 📧 EMAIL VALIDATION
+// EMAIL VALIDATION
 // ============================================
 
 export const validateEmail = (email) => {
@@ -21,7 +16,7 @@ export const validateEmail = (email) => {
 };
 
 // ============================================
-// 📱 PHONE VALIDATION
+//  PHONE VALIDATION
 // ============================================
 
 export const validatePhone = (phone) => {
@@ -45,7 +40,7 @@ export const validatePhone = (phone) => {
 };
 
 // ============================================
-// 🔒 PASSWORD VALIDATION
+//  PASSWORD VALIDATION
 // ============================================
 
 export const validatePassword = (password, options = {}) => {
@@ -100,7 +95,7 @@ export const validatePassword = (password, options = {}) => {
 };
 
 // ============================================
-// ✅ CONFIRM PASSWORD
+// CONFIRM PASSWORD
 // ============================================
 
 export const validateConfirmPassword = (password, confirmPassword) => {
@@ -116,7 +111,7 @@ export const validateConfirmPassword = (password, confirmPassword) => {
 };
 
 // ============================================
-// 📝 TEXT VALIDATION
+//  TEXT VALIDATION
 // ============================================
 
 export const validateRequired = (value, fieldName = "Trường này") => {
@@ -158,7 +153,7 @@ export const validateMaxLength = (
 };
 
 // ============================================
-// 🔢 NUMBER VALIDATION
+//  NUMBER VALIDATION
 // ============================================
 
 export const validateNumber = (value, options = {}) => {
@@ -192,7 +187,7 @@ export const validateNumber = (value, options = {}) => {
 };
 
 // ============================================
-// 💰 PRICE VALIDATION
+//  PRICE VALIDATION
 // ============================================
 
 export const validatePrice = (price, oldPrice = null) => {
@@ -221,7 +216,7 @@ export const validatePrice = (price, oldPrice = null) => {
 };
 
 // ============================================
-// 🌐 URL VALIDATION
+//  URL VALIDATION
 // ============================================
 
 export const validateURL = (url, fieldName = "URL") => {
@@ -237,8 +232,15 @@ export const validateURL = (url, fieldName = "URL") => {
   }
 };
 
+export const formatPrice = (price) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
+};
+
 // ============================================
-// 🎯 VALIDATE FORM
+//  VALIDATE FORM
 // ============================================
 
 /**
@@ -342,7 +344,7 @@ export const validateForm = (formData, rules) => {
 };
 
 // ============================================
-// 📋 EXPORT ALL
+//  EXPORT ALL
 // ============================================
 
 export default {

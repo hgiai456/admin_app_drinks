@@ -121,6 +121,10 @@ export const ENDPOINTS = {
     PAYOS: {
       WEBHOOK: `${API_BASE_URL}/payments/payos/webhook`,
     },
+    SEPAY: {
+      WEBHOOK: `${API_BASE_URL}/payments/sepay/webhook`,
+      CHECK: `${API_BASE_URL}/payments/sepay/check`,
+    },
   },
 
   // ===== IMAGES =====

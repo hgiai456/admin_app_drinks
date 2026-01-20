@@ -114,20 +114,17 @@ export async function getAllProducts(req, res) {
 export async function getProductsCustomizeSizePage(req, res) {
   const { search = "", page = 1, pageSize = 4 } = req.query;
 
-  // ✅ DANH SÁCH CÁC GIÀY TRỊ CHO PHÉP (có thể mở rộng)
   const allowedPageSizes = [4, 8, 12, 16, 20, 24];
 
-  // ✅ VALIDATE PAGE SIZE
   let validatedPageSize = parseInt(pageSize, 10);
 
   if (isNaN(validatedPageSize) || validatedPageSize < 1) {
     validatedPageSize = 4; // Default
   } else if (!allowedPageSizes.includes(validatedPageSize)) {
-    // Tìm giá trị gần nhất trong allowedPageSizes
     validatedPageSize = allowedPageSizes.reduce((prev, curr) =>
       Math.abs(curr - validatedPageSize) < Math.abs(prev - validatedPageSize)
         ? curr
-        : prev
+        : prev,
     );
   }
 
@@ -196,31 +193,101 @@ export async function getProductsCustomizeSizePage(req, res) {
 }
 
 export async function getAllProductsByCategory(req, res) {
-  const { category_id } = req.query;
-  if (!category_id) {
-    return res.status(400).json({ message: "Thiếu category_id" });
-  }
+  try {
+    const { category_id, page = 1, limit = 12, search = "" } = req.query;
 
-  const whereClause = { category_id: category_id };
-  console.log("category_id:", category_id, "whereClause:", whereClause);
-  const products = await db.Product.findAll({
-    where: whereClause,
-    include: [
-      {
-        model: db.ProDetail,
-        as: "product_details",
-        attributes: ["price"],
-        limit: 1,
-        order: [["price", "ASC"]],
+    if (!category_id) {
+      return res.status(400).json({ message: "Thiếu category_id" });
+    }
+
+    const parsedCategoryId = parseInt(category_id, 10);
+
+    let validatedPage = parseInt(page, 10);
+    let validatedLimit = parseInt(limit, 10);
+    const offset = (validatedPage - 1) * validatedLimit;
+    if (isNaN(parsedCategoryId)) {
+      // Kiểm tra nếu không phải số
+
+      return res
+        .status(400)
+        .json({ message: "category_id không phải là số. " });
+    }
+    if (isNaN(validatedPage) || validatedPage < 1) {
+      validatedPage = 1;
+    }
+
+    if (isNaN(validatedLimit) || validatedLimit < 1) {
+      validatedLimit = 12;
+    }
+
+    const whereClause = {
+      category_id: parsedCategoryId,
+    };
+
+    if (search && search.trim() !== "") {
+      whereClause[Op.or] = [
+        { name: { [Op.like]: `%${search.trim()}%` } },
+        { description: { [Op.like]: `%${search.trim()}%` } },
+      ];
+    }
+
+    const [products, totalProducts] = await Promise.all([
+      db.Product.findAll({
+        where: whereClause,
+        limit: validatedLimit,
+        offset: offset,
+        include: [
+          {
+            model: db.ProDetail,
+            as: "product_details",
+            attributes: ["price"],
+          },
+        ],
+        order: [["createdAt", "DESC"]],
+      }),
+      db.Product.count({
+        where: whereClause,
+      }),
+    ]);
+
+    const totalPages = Math.ceil(totalProducts / validatedLimit);
+
+    const wrongCategory = products.filter(
+      (p) => p.category_id !== parsedCategoryId,
+    );
+    if (wrongCategory.length > 0) {
+      console.error(
+        "WARNING: Có sản phẩm không đúng category!",
+        wrongCategory.map((p) => ({
+          id: p.id,
+          name: p.name,
+          category_id: p.category_id,
+        })),
+      );
+    }
+
+    res.status(200).json({
+      message: "Lấy toàn bộ sản phẩm theo danh mục thành công",
+      data: products,
+      totalProducts: totalProducts,
+      pagination: {
+        currentPage: validatedPage,
+        pageSize: validatedLimit,
+        totalPage: totalPages,
+        totalProducts: totalProducts,
+        hasNextPage: validatedPage < totalPages,
+        hasPrevPage: validatedPage > 1,
+        nextPage: validatedPage < totalPages ? validatedPage + 1 : null,
+        prevPage: validatedPage > 1 ? validatedPage - 1 : null,
       },
-    ],
-  });
-
-  res.status(200).json({
-    message: "Lấy toàn bộ sản phẩm theo danh mục thành công",
-    data: products,
-    totalProducts: products.length,
-  });
+    });
+  } catch (error) {
+    console.error("Error in getAllProductsByCategory:", error);
+    return res.status(500).json({
+      message: "Lỗi server khi lấy danh sách sản phẩm",
+      error: error.message,
+    });
+  }
 }
 
 export async function getProductsById(req, res) {

@@ -1,0 +1,343 @@
+@use '../abstracts/variables' as *;
+
+.sepay-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: $spacing-lg;
+}
+
+.sepay-modal {
+    background: white;
+    border-radius: $border-radius-xl;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.3s ease;
+
+    .modal-close {
+        position: absolute;
+        top: $spacing-md;
+        right: $spacing-md;
+        background: rgba($gray-500, 0.1);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+
+        &:hover {
+            background: rgba($red-color, 0.1);
+            color: $red-color;
+            transform: rotate(90deg);
+        }
+    }
+
+    .modal-header {
+        padding: $spacing-xl;
+        border-bottom: 1px solid $gray-200;
+        text-align: center;
+
+        h2 {
+            margin: 0 0 $spacing-md 0;
+            color: $brown-primary;
+            font-size: 1.5rem;
+        }
+
+        .countdown {
+            display: inline-flex;
+            align-items: center;
+            gap: $spacing-xs;
+            background: rgba($red-color, 0.1);
+            padding: $spacing-xs $spacing-md;
+            border-radius: $border-radius-lg;
+
+            .timer {
+                font-weight: $font-weight-bold;
+                color: $red-color;
+                font-size: 1.1rem;
+            }
+        }
+    }
+
+    .modal-body {
+        padding: $spacing-xl;
+
+        .qr-section {
+            text-align: center;
+            margin-bottom: $spacing-xl;
+
+            .qr-wrapper {
+                display: inline-block;
+                padding: $spacing-md;
+                background: white;
+                border: 2px solid $gray-200;
+                border-radius: $border-radius-lg;
+                box-shadow: $box-shadow-md;
+
+                img {
+                    width: 250px;
+                    height: 250px;
+                    display: block;
+                }
+            }
+
+            .qr-instruction {
+                margin-top: $spacing-md;
+                color: $text-secondary;
+                font-size: $font-size-sm;
+            }
+        }
+
+        .or-divider {
+            text-align: center;
+            position: relative;
+            margin: $spacing-xl 0;
+
+            &::before {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                right: 0;
+                height: 1px;
+                background: $gray-300;
+            }
+
+            span {
+                position: relative;
+                background: white;
+                padding: 0 $spacing-md;
+                color: $text-secondary;
+                font-weight: $font-weight-semibold;
+                font-size: $font-size-sm;
+            }
+        }
+
+        .transfer-info {
+            h3 {
+                margin: 0 0 $spacing-lg 0;
+                color: $brown-primary;
+                font-size: 1.1rem;
+            }
+
+            .info-row {
+                display: flex;
+                align-items: center;
+                padding: $spacing-md;
+                border-bottom: 1px solid $gray-200;
+
+                &:last-child {
+                    border-bottom: none;
+                }
+
+                &.highlight {
+                    background: rgba($brown-bg, 0.3);
+                    border-radius: $border-radius-md;
+                    margin: $spacing-sm 0;
+                    border-bottom: none;
+                }
+
+                label {
+                    min-width: 120px;
+                    font-weight: $font-weight-semibold;
+                    color: $text-secondary;
+                    font-size: $font-size-sm;
+                }
+
+                .info-value {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    gap: $spacing-sm;
+
+                    span {
+                        flex: 1;
+                        color: $text-primary;
+
+                        &.account-number,
+                        &.transfer-content {
+                            font-family: monospace;
+                            font-weight: $font-weight-bold;
+                            color: $brown-primary;
+                        }
+
+                        &.amount {
+                            font-size: 1.2rem;
+                            font-weight: $font-weight-bold;
+                            color: $red-color;
+                        }
+                    }
+
+                    .copy-btn {
+                        background: rgba($brown-primary, 0.1);
+                        border: 1px solid $brown-primary;
+                        color: $brown-primary;
+                        padding: 4px 8px;
+                        border-radius: $border-radius-sm;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        font-size: 0.9rem;
+
+                        &:hover {
+                            background: $brown-primary;
+                            color: white;
+                        }
+                    }
+                }
+            }
+
+            .warning-box {
+                margin-top: $spacing-lg;
+                padding: $spacing-md;
+                background: rgba($red-color, 0.05);
+                border-left: 4px solid $red-color;
+                border-radius: $border-radius-md;
+
+                p {
+                    margin: 0;
+                    color: $text-primary;
+                    font-size: $font-size-sm;
+                    line-height: 1.5;
+
+                    strong {
+                        color: $red-color;
+                    }
+                }
+            }
+        }
+    }
+
+    .modal-footer {
+        padding: $spacing-lg $spacing-xl;
+        border-top: 1px solid $gray-200;
+
+        .btn-check-status {
+            width: 100%;
+            padding: $spacing-md;
+            background: linear-gradient(135deg, $brown-primary, $brown-light);
+            color: white;
+            border: none;
+            border-radius: $border-radius-lg;
+            font-weight: $font-weight-semibold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: $box-shadow-lg;
+            }
+        }
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: $mobile) {
+    .sepay-modal {
+        .modal-body {
+            .qr-section .qr-wrapper img {
+                width: 200px;
+                height: 200px;
+            }
+
+            .transfer-info .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: $spacing-xs;
+
+                label {
+                    min-width: auto;
+                }
+
+                .info-value {
+                    width: 100%;
+                }
+            }
+        }
+    }
+}
+
+.auto-check-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 15px;
+    background: #e3f2fd;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    color: #1976d2;
+
+    .pulse-dot {
+        width: 10px;
+        height: 10px;
+        background: #1976d2;
+        border-radius: 50%;
+        animation: pulse 1.5s infinite;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.5;
+        transform: scale(1.2);
+    }
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.btn-check-payment {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+        background: linear-gradient(135deg, #45a049, #3d8b40);
+        transform: translateY(-2px);
+    }
+
+    &:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+}
