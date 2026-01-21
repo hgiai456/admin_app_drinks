@@ -1,5 +1,5 @@
 class CheckoutService {
-  static baseUrl = "http://localhost:3003/api";
+  static baseUrl = "https://api.hgcoffee.id.vn/api";
   static getAuthHeader() {
     const token =
       localStorage.getItem("token") || localStorage.getItem("admin_token");

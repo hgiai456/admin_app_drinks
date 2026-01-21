@@ -56,7 +56,7 @@ class PaymentService extends BaseService {
     try {
       const response = await api.post(
         `${this.endpoint}/payments/confirm-manual`,
-        { orderId, transactionId, adminNote }
+        { orderId, transactionId, adminNote },
       );
       return response.data;
     } catch (error) {

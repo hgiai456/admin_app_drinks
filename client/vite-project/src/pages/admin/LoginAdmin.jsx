@@ -77,14 +77,14 @@ export default function LoginAdmin({
       }
       let response;
       if (isEmail) {
-        const res = await fetch("http://localhost:3003/api/auth/login", {
+        const res = await fetch("https://api.hgcoffee.id.vn/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
         response = res;
       } else {
-        const res = await fetch("http://localhost:3003/api/auth/login", {
+        const res = await fetch("https://api.hgcoffee.id.vn/api/auth/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ phone, password }),

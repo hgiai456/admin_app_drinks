@@ -1,7 +1,7 @@
 import User from "@models/user";
 
 class UserService {
-  static baseUrl = "http://localhost:3003/api/users";
+  static baseUrl = "https://api.hgcoffee.id.vn/api/users";
 
   static getAuthHeader() {
     const token = localStorage.getItem("admin_token");

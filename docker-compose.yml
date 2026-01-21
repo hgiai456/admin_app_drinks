@@ -1,53 +1,77 @@
+version: '3.8'
+
 services:
-    mysql:
-        image: mysql:latest
-        container_name: mysql_container
-        ports:
-            - '3306:3306'
-        environment:
-            MYSQL_ROOT_PASSWORD: ''
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
-            MYSQL_DATABASE: 'db_hgstore'
-        restart: always
-        networks:
-            - appSdrinks-online
+  # ===== DATABASE =====
+  mysql:
+    image: mysql:8.0
+    container_name: hgcoffee-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - hgcoffee-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        container_name: phpmyadmin-container
-        restart: always
-        depends_on:
-            - mysql
-        ports:
-            - '90:80'
-        environment:
-            PMA_HOST: mysql
-            PMA_PORT: 3306
-            UPLOAD_LIMIT: 500M
-        volumes:
-            - ./db_data:/var/lib/mysql
-            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-        networks:
-            - appSdrinks-online
+  # ===== BACKEND =====
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hgcoffee-backend
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - CLIENT_URL=${CLIENT_URL}
+      - VNPAY_TMN_CODE=${VNPAY_TMN_CODE}
+      - VNPAY_HASH_SECRET=${VNPAY_HASH_SECRET}
+      - VNPAY_URL=${VNPAY_URL}
+      - VNPAY_RETURN_URL=${VNPAY_RETURN_URL}
+      - SEPAY_API_KEY=${SEPAY_API_KEY}
+      - SEPAY_WEBHOOK_URL=${SEPAY_WEBHOOK_URL}
+    ports:
+      - "3003:3003"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - hgcoffee-network
 
-    backend:
-        build:
-            context: ./backend # Đường dẫn tới thư mục backend
-        container_name: backend-container
-        ports:
-            - '3003:3003' # Backend sẽ chạy ở localhost:3000
-        environment:
-            DB_HOST: mysql
-            DB_USER: root
-            DB_PASSWORD: ''
-            DB_NAME: db_hgstore
-            PORT: 3003
-        depends_on:
-            - mysql
-        networks:
-            - appSdrinks-online
+  # ===== FRONTEND =====
+  frontend:
+    build:
+      context: ./client/vite-project
+      dockerfile: Dockerfile
+    container_name: hgcoffee-frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - hgcoffee-network
 
+# ===== VOLUMES =====
+volumes:
+  mysql_data:
+
+# ===== NETWORKS =====
 networks:
-    appSdrinks-online:
-        name: appSdrinks-online
-        driver: bridge
+  hgcoffee-network:
+    driver: bridge

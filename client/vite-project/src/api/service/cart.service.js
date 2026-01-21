@@ -36,7 +36,6 @@ class CartService extends BaseService {
     }
   }
 
-  // ===== GET OR CREATE CART =====
   async getOrCreateCart(userId = null) {
     const sessionId = CartService.getSessionId();
 
