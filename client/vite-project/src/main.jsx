@@ -43,7 +43,7 @@ import NewsManagement from "./pages/admin/NewsManagement";
 import NewsPage from "@pages/customer/NewsPage.jsx";
 import NewsDetailPage from "@pages/customer/NewsDetailPage.jsx"; // ← THÊM
 import { navigation } from "@utils/editorHelpers";
-import Dashboard from "@pages/admin/Dashboard.jsx";
+import Dashboard from "@pages/admin/DashBoard.jsx";
 
 // THÊM STYLED COMPONENT WRAPPER
 function StyledComponentWrapper({ children, title, description }) {
