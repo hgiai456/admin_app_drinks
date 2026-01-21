@@ -1,5 +1,3 @@
-import { duration } from "@mui/material";
-
 const STORAGE_KEY = "loginAttempts";
 const MAX_ATTEMPTS = 5;
 
