@@ -5,7 +5,7 @@ import Modal from "@components/admin/ModelComponent.jsx";
 import ImagePicker from "@components/admin/ImagePicker";
 import ImageComponent from "@components/common/Image.jsx";
 import Button from "@components/common/Button.jsx";
-import { Image } from "lucide-react";
+import { FolderTree, Image } from "lucide-react";
 
 import "@styles/pages/_admin.scss";
 
@@ -59,7 +59,7 @@ function CategoryManagement() {
     setLoading(true);
     try {
       console.log(
-        `🔄 fetchCategories called with: page=${pageNum}, search="${searchTerm}"`
+        `🔄 fetchCategories called with: page=${pageNum}, search="${searchTerm}"`,
       );
 
       // Try to use getPaging if available, otherwise use getAll
@@ -87,7 +87,7 @@ function CategoryManagement() {
         // Filter by search term if provided
         const filteredCategories = searchTerm
           ? allCategories.filter((cat) =>
-              cat.name?.toLowerCase().includes(searchTerm.toLowerCase())
+              cat.name?.toLowerCase().includes(searchTerm.toLowerCase()),
             )
           : allCategories;
 
@@ -133,7 +133,7 @@ function CategoryManagement() {
       setTotalItems(totalItemsCount);
 
       console.log(
-        `✅ State updated: ${categoriesData.length} categories loaded`
+        `✅ State updated: ${categoriesData.length} categories loaded`,
       );
     } catch (error) {
       console.error("❌ Error in fetchCategories:", error);
@@ -323,7 +323,10 @@ function CategoryManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>📁 Quản lý danh mục</h2>
+        <div className="header-title">
+          <FolderTree size={30} className="header-icon" />
+          <h2>Quản lý danh mục</h2>
+        </div>
         <button
           className="btn btn-success"
           onClick={openCreateModal}
@@ -593,8 +596,8 @@ function CategoryManagement() {
               {loading
                 ? "⏳ Đang xử lý..."
                 : modalMode === "edit"
-                ? "💾 Cập nhật"
-                : "➕ Thêm mới"}
+                  ? "💾 Cập nhật"
+                  : "➕ Thêm mới"}
             </button>
           </div>
         </form>

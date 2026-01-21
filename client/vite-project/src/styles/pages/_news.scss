@@ -7,12 +7,22 @@
 // =============================================
 
 .news-container {
+
   // Header
   .header {
     @include m.flex-between;
     margin-bottom: $spacing-xl;
     padding-bottom: $spacing-lg;
     border-bottom: 2px solid $admin-border;
+
+    .header-title {
+      display: flex;
+      align-items: start;
+
+      .header-icon {
+        margin: $spacing-sm;
+      }
+    }
 
     h2 {
       color: $admin-text;
@@ -604,6 +614,7 @@
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -750,8 +761,14 @@
 
 .news-detail-modal {
   .news-content {
+
     // Render HTML content properly
-    h1, h2, h3, h4, h5, h6 {
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
       color: $brown-dark;
       font-weight: $font-weight-semibold;
       margin: $spacing-lg 0 $spacing-md 0;
@@ -770,7 +787,8 @@
       line-height: 1.8;
     }
 
-    ul, ol {
+    ul,
+    ol {
       padding-left: $spacing-xl;
       margin: $spacing-md 0;
 
@@ -808,4 +826,3 @@
     }
   }
 }
-

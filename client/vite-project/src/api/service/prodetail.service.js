@@ -17,13 +17,13 @@ class ProDetailService extends BaseService {
 
       return Array.isArray(prodetails)
         ? prodetails.map((item) =>
-            ProDetail?.fromApiResponse ? ProDetail.fromApiResponse(item) : item
+            ProDetail?.fromApiResponse ? ProDetail.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
       console.error("❌ Lỗi ProDetails getAll:", error);
       throw new Error(
-        "Lỗi khi tải danh sách chi tiết sản phẩm: " + error.message
+        "Lỗi khi tải danh sách chi tiết sản phẩm: " + error.message,
       );
     }
   }
@@ -31,7 +31,7 @@ class ProDetailService extends BaseService {
   async getPaging({ page = 1, search = "", limit = 10 } = {}) {
     try {
       console.log(
-        `🔗 ProDetails getPaging - page: ${page}, search: "${search}"`
+        `🔗 ProDetails getPaging - page: ${page}, search: "${search}"`,
       );
 
       const params = { page, search, limit };
@@ -50,7 +50,7 @@ class ProDetailService extends BaseService {
     } catch (error) {
       console.error("❌ Lỗi ProDetails getPaging:", error);
       throw new Error(
-        "Lỗi khi tải chi tiết sản phẩm phân trang: " + error.message
+        "Lỗi khi tải chi tiết sản phẩm phân trang: " + error.message,
       );
     }
   }
@@ -64,7 +64,7 @@ class ProDetailService extends BaseService {
       });
 
       const response = await api.get(
-        `${ENDPOINTS.PRODETAILS.FIND}?product_id=${productId}&size_id=${sizeId}`
+        `${ENDPOINTS.PRODETAILS.FIND}?product_id=${productId}&size_id=${sizeId}`,
       );
       const data = response.data;
 
@@ -78,43 +78,39 @@ class ProDetailService extends BaseService {
     } catch (error) {
       console.error(
         "❌ Lỗi ProDetails getProductDetailBySizeAndProduct:",
-        error
+        error,
       );
       throw new Error(
-        "Lỗi khi tải chi tiết sản phẩm theo size và product: " + error.message
+        "Lỗi khi tải chi tiết sản phẩm theo size và product: " + error.message,
       );
     }
   }
 
   async getProductDetailsByProductId(productId) {
     try {
-      console.log("🔗 ProDetails getProductDetailsByProductId:", productId);
-
       const response = await api.get(
-        `${this.endpoint}/by-product?product_id=${productId}`
+        `${this.endpoint}/by-product?product_id=${productId}`,
       );
       const data = response.data;
-
-      console.log("✅ ProDetails by ProductId response:", data);
 
       const prodetails = data.data || data.prodetails || data || [];
 
       return Array.isArray(prodetails)
         ? prodetails.map((item) =>
-            ProDetail?.fromApiResponse ? ProDetail.fromApiResponse(item) : item
+            ProDetail?.fromApiResponse ? ProDetail.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
       console.error("❌ Lỗi ProDetails getProductDetailsByProductId:", error);
       throw new Error(
-        "Lỗi khi tải chi tiết sản phẩm theo product_id: " + error.message
+        "Lỗi khi tải chi tiết sản phẩm theo product_id: " + error.message,
       );
     }
   }
   async getAllProductDetails(productId) {
     try {
       const res = await api.get(
-        `${ENDPOINTS.PRODETAILS.BASE}?product_id=${productId}`
+        `${ENDPOINTS.PRODETAILS.BASE}?product_id=${productId}`,
       );
 
       const data = res.data;

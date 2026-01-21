@@ -30,10 +30,6 @@ export default function ProductDetailPage({
     return categoryMap[categoryId] || "Thức uống";
   };
 
-  const handleViewOtherProduct = (id) => {
-    navigation(`product/${id}`);
-  };
-
   //State
   const [product, setProduct] = useState(null);
   const [sizes, setSizes] = useState([]);
@@ -52,13 +48,23 @@ export default function ProductDetailPage({
       try {
         setLoading(true);
         setError("");
-
+        const id = parseInt(productId);
+        if (isNaN(id) || id <= 0) {
+          if (productId === undefined || productId === null) {
+            console.error("❌ productId is undefined or null");
+            setError("ID sản phẩm không được để trống");
+            return;
+          }
+          console.error("❌ Invalid productId:", productId);
+          setError("ID sản phẩm không hợp lệ");
+          return;
+        }
         // ===== LOAD DATA =====
         const [productData, allSizesData, productDetailsData] =
           await Promise.all([
-            ProductService.getById(productId),
+            ProductService.getById(id),
             SizeService.getAll(),
-            ProdetailService.getProductDetailsByProductId(productId),
+            ProdetailService.getProductDetailsByProductId(id),
           ]);
 
         setProduct(productData);
@@ -241,6 +247,10 @@ export default function ProductDetailPage({
     window.location.hash = "cart";
   };
 
+  const handleViewOtherProduct = (product) => {
+    const id = parseInt(product.id);
+    navigation(`product/${id}`);
+  };
   if (loading) {
     return (
       <Layout user={user} onLogout={onLogout} currentPage="product-detail">
@@ -487,8 +497,6 @@ export default function ProductDetailPage({
           formatPrice={formatPrice}
           getCategoryName={getCategoryName}
           title="BEST SELLERS"
-          itemsPerView={4}
-          autoScrollInterval={3000}
         />
       </div>
     </Layout>

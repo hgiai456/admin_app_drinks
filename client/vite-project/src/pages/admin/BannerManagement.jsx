@@ -1,531 +1,445 @@
 import { useEffect, useState } from "react";
 import BannerService from "@services/banner.service.js";
+import Modal from "@components/admin/ModelComponent.jsx";
+import "@styles/pages/_admin.scss";
+import ImagePicker from "@components/admin/ImagePicker";
+import ImageComponent from "@components/common/Image.jsx";
+import Button from "@components/common/Button.jsx";
+import { Image, ImageIcon } from "lucide-react";
 
 function BannerManagement() {
   const [banners, setBanners] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [modalMode, setModalMode] = useState("create");
+  const [editingId, setEditingId] = useState(null);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [errors, setErrors] = useState({});
+  const [page, setPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [search, setSearch] = useState("");
+  const [showImagePicker, setShowImagePicker] = useState(false);
+
   const [form, setForm] = useState({
-    title: "",
+    name: "",
     image: "",
     status: 1,
   });
-  const [message, setMessage] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [showDialog, setShowDialog] = useState(false);
+
+  const loadingInitialData = async () => {
+    setLoadingData(true);
+    try {
+      console.log("🔄 Đang tải dữ liệu ban đầu...");
+      await fetchBanners(1, "");
+    } catch (error) {
+      console.error("❌ Lỗi tải dữ liệu ban đầu:", error);
+      setMessage("❌ Lỗi tải dữ liệu: " + error.message);
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   useEffect(() => {
-    fetchBanners();
+    loadingInitialData();
   }, []);
 
-  const fetchBanners = async () => {
+  useEffect(() => {
+    if (!loadingData) {
+      fetchBanners(page, search);
+    }
+  }, [page, search, loadingData]);
+
+  const fetchBanners = async (pageNum = 1, searchTerm = "") => {
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      setMessage("");
+      console.log(
+        `🔄 fetchBanners called with: page=${pageNum}, search="${searchTerm}"`,
+      );
 
       const result = await BannerService.getAll();
 
-      if (result.success) {
-        setBanners(result.data || []);
-      } else {
-        setError(result.message || "Lỗi không xác định");
+      if (!result || !result.success) {
+        setBanners([]);
+        setTotalPage(1);
+        setTotalItems(0);
+        setPage(1);
+        return;
       }
-    } catch (err) {
-      setError(`Lỗi khi tải dữ liệu: ${err.message || "Unknown error"}`);
+
+      let bannersData = result.data || [];
+
+      // Filter by search term if provided
+      if (searchTerm) {
+        bannersData = bannersData.filter((banner) =>
+          banner.name?.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+      }
+
+      // Manual pagination
+      const itemsPerPage = 10;
+      const startIndex = (pageNum - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedData = bannersData.slice(startIndex, endIndex);
+
+      const currentPage = pageNum || 1;
+      const totalPageCount = Math.ceil(bannersData.length / itemsPerPage);
+      const totalItemsCount = bannersData.length;
+
+      setBanners(paginatedData);
+      setPage(currentPage);
+      setTotalPage(totalPageCount);
+      setTotalItems(totalItemsCount);
+
+      console.log(`✅ State updated: ${paginatedData.length} banners loaded`);
+    } catch (error) {
+      console.error("❌ Error in fetchBanners:", error);
+      setMessage(`❌ ${error.message}`);
+      setBanners([]);
+      setTotalPage(1);
+      setTotalItems(0);
     } finally {
       setLoading(false);
     }
+  };
+
+  const openCreateModal = () => {
+    setForm({
+      name: "",
+      image: "",
+      status: 1,
+    });
+    setModalMode("create");
+    setEditingId(null);
+    setErrors({});
+    setShowModal(true);
+  };
+
+  const openEditModal = (item) => {
+    setForm({
+      name: item.name || "",
+      image: item.image || "",
+      status: item.status || 1,
+    });
+    setModalMode("edit");
+    setEditingId(item.id);
+    setErrors({});
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setForm({
+      name: "",
+      image: "",
+      status: 1,
+    });
+    setEditingId(null);
+    setErrors({});
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [name]: name === "status" ? parseInt(value) : value,
-    });
+    }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
+
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!form.name.trim()) {
+      newErrors.name = "Tên banner là bắt buộc";
+    } else if (form.name.length > 255) {
+      newErrors.name = "Tên banner không được dài quá 255 ký tự";
+    }
+
+    if (form.image && !isValidUrl(form.image)) {
+      newErrors.image = "URL hình ảnh không hợp lệ";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const isValidUrl = (string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      setLoading(true);
-      setError(null);
-      setMessage("");
 
+    if (!validateForm()) {
+      setMessage("❌ Vui lòng kiểm tra lại thông tin");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
       const bannerData = {
-        name: form.title, // Backend expects 'name'
-        image: form.image || null,
+        name: form.name.trim(),
+        image: form.image.trim() || null,
         status: form.status,
       };
 
       let result;
-      if (editingId) {
+      if (modalMode === "edit") {
+        console.log("🔄 Đang cập nhật banner:", editingId);
         result = await BannerService.update(editingId, bannerData);
+        setMessage("✅ Cập nhật banner thành công!");
       } else {
+        console.log("🔄 Đang tạo banner mới");
         result = await BannerService.create(bannerData);
+        setMessage("✅ Thêm banner thành công!");
       }
 
-      if (result.success) {
-        setMessage(editingId ? "✅ Cập nhật thành công" : "✅ Thêm thành công");
-        setForm({ title: "", image: "", status: 1 });
-        setEditingId(null);
-        setShowDialog(false);
-        await fetchBanners();
-      } else {
-        setError(result.message || "Có lỗi xảy ra");
-      }
-    } catch (err) {
-      console.error("❌ Submit Error:", err);
-      setError(`Lỗi khi lưu: ${err.message || "Unknown error"}`);
+      console.log("✅ Kết quả:", result);
+
+      closeModal();
+      await fetchBanners(page, search);
+
+      setTimeout(() => setMessage(""), 3000);
+    } catch (error) {
+      console.error("❌ Lỗi submit form:", error);
+      setMessage("❌ " + error.message);
     } finally {
       setLoading(false);
     }
   };
+
   const handleDelete = async (id) => {
-    if (!window.confirm("Bạn có chắc muốn xóa banner này?")) return;
+    if (!confirm("Bạn có chắc chắn muốn xóa banner này không?")) {
+      return;
+    }
 
+    setLoading(true);
     try {
-      setLoading(true);
-      setError(null);
-      setMessage("");
+      console.log("🗑️ Đang xóa banner:", id);
 
-      const result = await BannerService.delete(id);
+      await BannerService.delete(id);
+      setMessage("✅ Xóa banner thành công!");
 
-      if (result.success) {
-        setMessage("✅ Xóa thành công");
-        await fetchBanners();
-      } else {
-        setError(result.message || "Không thể xóa banner");
-      }
-    } catch (err) {
-      console.error("❌ Delete Error:", err);
-      setError(`Lỗi khi xóa: ${err.message || "Unknown error"}`);
+      await fetchBanners(page, search);
+
+      setTimeout(() => setMessage(""), 3000);
+    } catch (error) {
+      console.error("❌ Lỗi xóa banner:", error);
+      setMessage("❌ Lỗi xóa banner: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = (banner) => {
-    setForm({
-      title: banner.name || "",
-      image: banner.image || "",
-      status: banner.status || 1,
-    });
-    setEditingId(banner.id);
-    setShowDialog(true);
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const searchTerm = formData.get("search") || "";
+    setSearch(searchTerm);
+    setPage(1);
   };
 
-  const handleAddNew = () => {
-    setForm({ title: "", image: "", status: 1 });
-    setEditingId(null);
-    setShowDialog(true);
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPage && newPage !== page && !loading) {
+      setPage(newPage);
+    }
   };
 
-  const handleCancel = () => {
-    setForm({ title: "", image: "", status: 1 });
-    setEditingId(null);
-    setShowDialog(false);
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    return new Date(dateString).toLocaleDateString("vi-VN");
+  };
+
+  const handleImageSelect = (imagePath) => {
+    setForm((prev) => ({ ...prev, image: imagePath }));
+    setShowImagePicker(false);
   };
 
   const getStatusText = (status) => {
     return status === 1 ? "Hoạt động" : "Không hoạt động";
   };
 
-  const getStatusColor = (status) => {
-    return status === 1 ? "#4CAF50" : "#f44336";
+  const getStatusClass = (status) => {
+    return status === 1 ? "active" : "inactive";
   };
 
-  // Dialog styles
-  const dialogOverlayStyle = {
-    position: "fixed",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    display: showDialog ? "flex" : "none",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 1000,
-  };
-
-  const dialogStyle = {
-    backgroundColor: "white",
-    padding: "30px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
-    maxWidth: "400px",
-    width: "90%",
-  };
-
-  const inputStyle = {
-    width: "100%",
-    padding: "10px",
-    border: "1px solid #ddd",
-    borderRadius: "4px",
-    fontSize: "14px",
-    marginBottom: "15px",
-  };
-
-  const buttonGroupStyle = {
-    display: "flex",
-    gap: "10px",
-    justifyContent: "flex-end",
-    marginTop: "10px",
-  };
-
-  const buttonStyle = {
-    padding: "10px 20px",
-    border: "none",
-    borderRadius: "4px",
-    cursor: "pointer",
-    fontSize: "14px",
-  };
-
-  const primaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#007bff",
-    color: "white",
-  };
-
-  const secondaryButtonStyle = {
-    ...buttonStyle,
-    backgroundColor: "#6c757d",
-    color: "white",
-  };
-
-  if (loading && banners.length === 0) {
+  if (loadingData) {
     return (
-      <div style={{ textAlign: "center", padding: "20px" }}>Đang tải...</div>
+      <div className="loading-state">
+        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
+      </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 1000, margin: "0 auto", padding: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: 20,
-        }}
-      >
-        <h2>Quản lý Banner</h2>
-        <button
-          onClick={handleAddNew}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#28a745",
-            color: "white",
-            border: "none",
-            borderRadius: "4px",
-            cursor: "pointer",
-            fontSize: "14px",
-          }}
-        >
-          + Thêm banner mới
-        </button>
-      </div>
-
-      {error && (
+    <div className="prodetail-container">
+      {/* Message Alert */}
+      {message && (
         <div
-          style={{
-            color: "red",
-            backgroundColor: "#ffebee",
-            padding: "10px",
-            borderRadius: "4px",
-            marginBottom: "20px",
-            border: "1px solid #f44336",
-          }}
+          className={`message ${message.includes("✅") ? "success" : "error"}`}
         >
-          {error}
+          {message}
+          <button onClick={() => setMessage("")}>×</button>
         </div>
       )}
 
-      {/* Dialog */}
-      <div style={dialogOverlayStyle} onClick={handleCancel}>
-        <div style={dialogStyle} onClick={(e) => e.stopPropagation()}>
-          <h3 style={{ marginTop: 0, marginBottom: 20 }}>
-            {editingId ? "Cập nhật banner" : "Thêm banner mới"}
-          </h3>
-          <form onSubmit={handleSubmit}>
-            <input
-              name="title"
-              placeholder="Tên Banner"
-              value={form.title}
-              onChange={handleChange}
-              required
-              style={inputStyle}
-            />
-            <input
-              name="image"
-              placeholder="Link ảnh"
-              value={form.image}
-              onChange={handleChange}
-              style={inputStyle}
-            />
-            <select
-              name="status"
-              value={form.status}
-              onChange={handleChange}
-              style={inputStyle}
-            >
-              <option value={1}>Hoạt động</option>
-              <option value={0}>Không hoạt động</option>
-            </select>
-            <div style={buttonGroupStyle}>
-              <button
-                type="button"
-                onClick={handleCancel}
-                style={secondaryButtonStyle}
-              >
-                Hủy
-              </button>
-              <button type="submit" style={primaryButtonStyle}>
-                {editingId ? "Cập nhật" : "Thêm mới"}
-              </button>
-            </div>
-          </form>
+      {/* Header */}
+      <div className="header">
+        <div className="header-title">
+          <ImageIcon size={30} className="header-icon" />
+          <h2> Quản lý Banner</h2>
         </div>
+        <button
+          className="btn btn-success"
+          onClick={openCreateModal}
+          disabled={loading}
+        >
+          ➕ Thêm banner
+        </button>
       </div>
 
-      <div
-        style={{
-          backgroundColor: "white",
-          borderRadius: "8px",
-          overflow: "hidden",
-          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        }}
-      >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      {/* Search Bar */}
+      <div className="search-bar">
+        <div className="search-info">
+          Tổng <strong>{totalItems}</strong> banner
+        </div>
+        <form className="search-form" onSubmit={handleSearchSubmit}>
+          <input
+            name="search"
+            className="search-input"
+            placeholder="Tìm kiếm banner..."
+            defaultValue={search}
+          />
+          <button type="submit" className="btn-search">
+            🔍 Tìm kiếm
+          </button>
+        </form>
+      </div>
+
+      {/* Banners Table */}
+      <div className="table-container">
+        <table className="data-table">
           <thead>
-            <tr style={{ backgroundColor: "#f8f9fa" }}>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  borderBottom: "2px solid #dee2e6",
-                  fontWeight: "bold",
-                }}
-              >
-                ID
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  borderBottom: "2px solid #dee2e6",
-                  fontWeight: "bold",
-                }}
-              >
-                Tên Banner
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  borderBottom: "2px solid #dee2e6",
-                  fontWeight: "bold",
-                }}
-              >
-                Ảnh
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  borderBottom: "2px solid #dee2e6",
-                  fontWeight: "bold",
-                }}
-              >
-                URL Ảnh
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "left",
-                  borderBottom: "2px solid #dee2e6",
-                  fontWeight: "bold",
-                }}
-              >
-                Trạng thái
-              </th>
-              <th
-                style={{
-                  padding: "12px",
-                  textAlign: "center",
-                  borderBottom: "2px solid #dee2e6",
-                  fontWeight: "bold",
-                }}
-              >
-                Hành động
-              </th>
+            <tr>
+              <th>ID</th>
+              <th>Tên banner</th>
+              <th>Hình ảnh</th>
+              <th>Trạng thái</th>
+              <th>Ngày tạo</th>
+              <th>Ngày cập nhật</th>
+              <th>Hành động</th>
             </tr>
           </thead>
           <tbody>
-            {banners.length === 0 ? (
+            {loading ? (
               <tr>
                 <td
-                  colSpan="6"
+                  colSpan="7"
                   style={{
                     textAlign: "center",
                     padding: "40px",
-                    color: "#666",
                   }}
                 >
-                  Chưa có banner nào
+                  🔄 Đang tải...
+                </td>
+              </tr>
+            ) : banners.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="7"
+                  style={{
+                    textAlign: "center",
+                    padding: "40px",
+                    color: "#999",
+                  }}
+                >
+                  🎨 Không có dữ liệu
                 </td>
               </tr>
             ) : (
-              banners.map((banner, index) => (
-                <tr
-                  key={banner.id}
-                  style={{
-                    backgroundColor: index % 2 === 0 ? "#fff" : "#f8f9fa",
-                  }}
-                >
-                  <td
-                    style={{
-                      padding: "12px",
-                      borderBottom: "1px solid #dee2e6",
-                    }}
-                  >
-                    {banner.id}
+              banners.map((item) => (
+                <tr key={item.id}>
+                  <td className="table-id">{item.id}</td>
+                  <td className="banner-name">
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                      }}
+                    >
+                      {item.name || "-"}
+                    </div>
                   </td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      borderBottom: "1px solid #dee2e6",
-                    }}
-                  >
-                    {banner.name}
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      borderBottom: "1px solid #dee2e6",
-                    }}
-                  >
-                    {banner.image ? (
+                  <td className="banner-image">
+                    {item.image ? (
                       <img
-                        src={banner.image}
-                        alt={banner.name}
+                        src={item.image}
+                        alt={item.name}
                         style={{
-                          width: "80px",
-                          height: "50px",
+                          width: "100px",
+                          height: "60px",
                           objectFit: "cover",
                           borderRadius: "4px",
                           border: "1px solid #ddd",
                         }}
                         onError={(e) => {
                           e.target.style.display = "none";
-                          e.target.nextSibling.style.display = "block";
+                          e.target.nextElementSibling.style.display = "flex";
                         }}
                       />
-                    ) : (
-                      <div
-                        style={{
-                          width: "80px",
-                          height: "50px",
-                          backgroundColor: "#f0f0f0",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          border: "1px solid #ddd",
-                          borderRadius: "4px",
-                          color: "#666",
-                          fontSize: "12px",
-                        }}
-                      >
-                        Không có ảnh
-                      </div>
-                    )}
+                    ) : null}
                     <div
                       style={{
-                        display: "none",
-                        color: "#666",
-                        fontSize: "12px",
+                        width: "100px",
+                        height: "60px",
+                        backgroundColor: "#f0f0f0",
+                        display: item.image ? "none" : "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderRadius: "4px",
+                        fontSize: "24px",
                       }}
                     >
-                      Không thể tải ảnh
+                      🎨
                     </div>
                   </td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      borderBottom: "1px solid #dee2e6",
-                    }}
-                  >
-                    <div
-                      style={{
-                        maxWidth: "200px",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                        fontSize: "13px",
-                        color: "#666",
-                      }}
-                    >
-                      {banner.image || "Chưa có ảnh"}
-                    </div>
-                  </td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      borderBottom: "1px solid #dee2e6",
-                    }}
-                  >
+                  <td className="status">
                     <span
-                      style={{
-                        padding: "4px 8px",
-                        borderRadius: "12px",
-                        fontSize: "12px",
-                        fontWeight: "bold",
-                        color: "white",
-                        backgroundColor: getStatusColor(banner.status),
-                      }}
+                      className={`status-badge ${getStatusClass(item.status)}`}
                     >
-                      {getStatusText(banner.status)}
+                      {getStatusText(item.status)}
                     </span>
                   </td>
-                  <td
-                    style={{
-                      padding: "12px",
-                      borderBottom: "1px solid #dee2e6",
-                      textAlign: "center",
-                    }}
-                  >
-                    <button
-                      onClick={() => handleEdit(banner)}
-                      disabled={loading}
-                      style={{
-                        backgroundColor: "#FF9800",
-                        color: "white",
-                        padding: "6px 12px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: loading ? "not-allowed" : "pointer",
-                        marginRight: "5px",
-                        fontSize: "12px",
-                      }}
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      onClick={() => handleDelete(banner.id)}
-                      disabled={loading}
-                      style={{
-                        backgroundColor: "#f44336",
-                        color: "white",
-                        padding: "6px 12px",
-                        border: "none",
-                        borderRadius: "4px",
-                        cursor: loading ? "not-allowed" : "pointer",
-                        fontSize: "12px",
-                      }}
-                    >
-                      Xóa
-                    </button>
+                  <td className="date">{formatDate(item.createdAt)}</td>
+                  <td className="date">{formatDate(item.updatedAt)}</td>
+                  <td className="actions">
+                    <div className="action-buttons">
+                      <button
+                        className="btn-edit"
+                        onClick={() => openEditModal(item)}
+                        disabled={loading}
+                      >
+                        ✏️ Sửa
+                      </button>
+                      <button
+                        className="btn-delete"
+                        onClick={() => handleDelete(item.id)}
+                        disabled={loading}
+                      >
+                        🗑️ Xóa
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -533,6 +447,172 @@ function BannerManagement() {
           </tbody>
         </table>
       </div>
+
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <div className="pagination">
+          <div className="pagination-info">
+            Trang {page} / {totalPage} - Tổng {totalItems} banner
+          </div>
+          <div className="pagination-controls">
+            <button
+              className="btn-nav"
+              onClick={() => handlePageChange(1)}
+              disabled={page === 1 || loading}
+            >
+              ⏪ Đầu
+            </button>
+            <button
+              className="btn-nav"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1 || loading}
+            >
+              ⬅️ Trước
+            </button>
+
+            {Array.from({ length: Math.min(5, totalPage) }, (_, i) => {
+              const startPage = Math.max(1, page - 2);
+              const pageNum = startPage + i;
+              if (pageNum > totalPage) return null;
+
+              return (
+                <button
+                  key={pageNum}
+                  className={`btn-page ${page === pageNum ? "active" : ""}`}
+                  onClick={() => handlePageChange(pageNum)}
+                  disabled={loading}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            <button
+              className="btn-nav"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPage || loading}
+            >
+              Tiếp ➡️
+            </button>
+            <button
+              className="btn-nav"
+              onClick={() => handlePageChange(totalPage)}
+              disabled={page === totalPage || loading}
+            >
+              Cuối ⏩
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Form */}
+      <Modal
+        show={showModal}
+        onClose={closeModal}
+        title={
+          modalMode === "create"
+            ? "➕ Thêm banner mới"
+            : `✏️ Chỉnh sửa banner #${editingId}`
+        }
+        size="lg"
+      >
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label className="form-label">🎨 Tên banner *</label>
+            <input
+              name="name"
+              value={form.name}
+              onChange={handleChange}
+              className={`form-input ${errors.name ? "error" : ""}`}
+              placeholder="Nhập tên banner..."
+              required
+            />
+            {errors.name && <span className="form-error">{errors.name}</span>}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">🖼️ Hình ảnh</label>
+            <div className="image-row">
+              <input
+                name="image"
+                value={form.image}
+                onChange={handleChange}
+                className="form-input"
+                placeholder="URL hình ảnh..."
+                type="url"
+              />
+
+              <Button
+                type="button"
+                variant="primary"
+                size="md"
+                icon={<Image size={18} />}
+                onClick={() => setShowImagePicker(true)}
+              >
+                Chọn từ thư viện
+              </Button>
+            </div>
+
+            {form.image && (
+              <div style={{ marginTop: "12px" }}>
+                <ImageComponent
+                  src={form.image}
+                  alt={form.name}
+                  width={300}
+                  height={180}
+                  style={{ borderRadius: "8px" }}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">📊 Trạng thái *</label>
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="form-input"
+              required
+            >
+              <option value={1}>Hoạt động</option>
+              <option value={0}>Không hoạt động</option>
+            </select>
+          </div>
+
+          {/* Form Buttons */}
+          <div className="form-buttons">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={closeModal}
+              disabled={loading}
+            >
+              ❌ Hủy
+            </button>
+            <button
+              type="submit"
+              className="btn btn-success"
+              disabled={loading}
+            >
+              {loading
+                ? "⏳ Đang xử lý..."
+                : modalMode === "edit"
+                  ? "💾 Cập nhật"
+                  : "➕ Thêm mới"}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <ImagePicker
+        show={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImageSelect}
+        currentImage={form.image}
+      />
     </div>
   );
 }

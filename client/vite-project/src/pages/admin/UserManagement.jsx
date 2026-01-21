@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import UserService from "@services/user.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
+import { Users, Users2 } from "lucide-react";
 
 function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -28,7 +29,6 @@ function UserManagement() {
     address: "",
   });
 
-  // ✅ USEEFFECTS
   useEffect(() => {
     setLoadingData(false);
   }, []);
@@ -43,7 +43,7 @@ function UserManagement() {
     setLoading(true);
     try {
       console.log(
-        `🔄 fetchUsers called with: page=${pageNum}, search="${searchTerm}"`
+        `🔄 fetchUsers called with: page=${pageNum}, search="${searchTerm}"`,
       );
 
       const response = await UserService.getPaging({
@@ -118,7 +118,6 @@ function UserManagement() {
     setErrors({});
   };
 
-  // ✅ MODAL CHI TIẾT NGƯỜI DÙNG
   const openDetailModal = (user) => {
     setSelectedUser(user);
     setShowDetailModal(true);
@@ -129,7 +128,6 @@ function UserManagement() {
     setSelectedUser(null);
   };
 
-  // ✅ FORM HANDLERS - CHỈ CHO CREATE
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -220,7 +218,6 @@ function UserManagement() {
     }
   };
 
-  // ✅ HELPER FUNCTIONS
   const getRoleText = (role) => {
     const roles = {
       1: "Khách hàng",
@@ -253,13 +250,12 @@ function UserManagement() {
     const cleaned = phone.replace(/\D/g, "");
     if (cleaned.length === 10) {
       return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(
-        7
+        7,
       )}`;
     }
     return phone;
   };
 
-  // ✅ LOADING STATE
   if (loadingData) {
     return (
       <div className="loading-state">
@@ -283,7 +279,11 @@ function UserManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>👥 Quản lý người dùng</h2>
+        <div className="header-title">
+          <Users size={30} className="header-icon" />
+          <h2>Quản lý người dùng</h2>
+        </div>
+
         <button
           className="btn btn-success"
           onClick={openCreateModal}
@@ -358,36 +358,16 @@ function UserManagement() {
                   <td className="table-id">{item.id}</td>
                   <td className="user-avatar">
                     {item.avatar ? (
-                      <img
+                      <Image
                         src={item.avatar}
                         alt={item.name}
-                        style={{
-                          width: "50px",
-                          height: "50px",
-                          objectFit: "cover",
-                          borderRadius: "50%",
-                          border: "2px solid #ddd",
-                        }}
-                        onError={(e) => {
-                          e.target.style.display = "none";
-                          e.target.nextElementSibling.style.display = "flex";
-                        }}
+                        height={50}
+                        width={50}
+                        borderRadius={180}
                       />
                     ) : null}
-                    <div
-                      style={{
-                        width: "50px",
-                        height: "50px",
-                        backgroundColor: "#f0f0f0",
-                        display: item.avatar ? "none" : "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderRadius: "50%",
-                        fontSize: "20px",
-                        color: "#666",
-                      }}
-                    >
-                      👤
+                    <div>
+                      <Users2 size={30} />
                     </div>
                   </td>
                   <td className="user-info">
@@ -423,10 +403,10 @@ function UserManagement() {
                           item.role === 3
                             ? "#dc3545"
                             : item.role === 2
-                            ? "#fd7e14"
-                            : item.role === 1
-                            ? "#20c997"
-                            : "#6c757d",
+                              ? "#fd7e14"
+                              : item.role === 1
+                                ? "#20c997"
+                                : "#6c757d",
                         color: "white",
                       }}
                     >
@@ -777,7 +757,7 @@ function UserManagement() {
                 </label>
                 <span
                   className={`role-badge ${getRoleBadgeClass(
-                    selectedUser.role
+                    selectedUser.role,
                   )}`}
                   style={{
                     padding: "6px 16px",
@@ -788,10 +768,10 @@ function UserManagement() {
                       selectedUser.role === 3
                         ? "#dc3545"
                         : selectedUser.role === 2
-                        ? "#fd7e14"
-                        : selectedUser.role === 1
-                        ? "#20c997"
-                        : "#6c757d",
+                          ? "#fd7e14"
+                          : selectedUser.role === 1
+                            ? "#20c997"
+                            : "#6c757d",
                     color: "white",
                     display: "inline-block",
                   }}

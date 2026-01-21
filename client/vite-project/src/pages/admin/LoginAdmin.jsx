@@ -1,5 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "@styles/pages/_login.scss";
+import {
+  isLocked,
+  recordFailedAttempt,
+  resetAttempts,
+  getRemainingAttempts,
+  formatLockoutTime,
+  getLockoutLevelInfo,
+} from "@utils/loginRateLimit";
 
 export default function LoginAdmin({
   onLogin,
@@ -12,9 +20,49 @@ export default function LoginAdmin({
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lockoutInfo, setLockoutInfo] = useState({
+    locked: false,
+    remainingTime: 0,
+  });
+  const [remainingAttempts, setRemainingAttempts] = useState(5);
+
+  useEffect(() => {
+    checkLockoutStatus();
+    const interval = setInterval(checkLockoutStatus, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (!error) return;
+
+    const timer = setTimeout(() => {
+      setError("");
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [error]);
+
+  const checkLockoutStatus = () => {
+    const lockStatus = isLocked();
+    setLockoutInfo(lockStatus);
+
+    if (!lockStatus.locked) {
+      setRemainingAttempts(getRemainingAttempts());
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const lockStatus = isLocked();
+    if (lockStatus.locked) {
+      const levelInfo = getLockoutLevelInfo(lockStatus.lockoutLevel - 1);
+      setError(
+        `🔒 Tài khoản bị khóa do nhập sai quá nhiều lần!\n${levelInfo.message}\nVui lòng thử lại sau ${formatLockoutTime(lockStatus.remainingTime)}`,
+      );
+      return;
+    }
+
     setError("");
     setLoading(true);
     try {
@@ -46,25 +94,74 @@ export default function LoginAdmin({
 
       const data = await response.json();
       if (response.ok) {
-        if (
-          (response.ok && data.data?.user?.role === 2) ||
-          data.data?.user?.role === 1
-        ) {
-          localStorage.setItem("admin_token", data.data.token);
-          onLogin(data.data.user);
+        const user = data.data?.user;
+        const token = data.data?.token;
+
+        resetAttempts();
+        setRemainingAttempts(5);
+
+        if (user.role === 2 || user.role === 1) {
+          localStorage.setItem("admin_token", token);
+          onLogin(user);
         } else {
-          console.log("Not admin role:", data.data?.user?.role);
-          setError("Sai tài khoản hoặc mật khẩu.");
+          const attemptResult = recordFailedAttempt();
+          if (attemptResult.locked) {
+            const levelInfo = getLockoutLevelInfo(
+              attemptResult.lockoutLevel - 1,
+            );
+            setError(
+              `🔒 Bạn đã nhập sai ${5} lần!\n${levelInfo.message}\nTài khoản bị khóa trong ${formatLockoutTime(attemptResult.lockoutDuration)}`,
+            );
+
+            setLockoutInfo({
+              locked: true,
+              remainingTime: attemptResult.lockoutDuration,
+              lockoutLevel: attemptResult.lockoutLevel,
+            });
+          } else {
+            setRemainingAttempts(attemptResult.remainingAttempts);
+            setError(
+              `❌ Tài khoản không có quyền truy cập!\nCòn ${attemptResult.remainingAttempts} lần thử`,
+            );
+          }
         }
       } else {
-        if (response.status === 401) {
-          setError("Sai tài khoản hoặc mật khẩu!");
-        } else if (response.status === 404) {
-          setError("Tài khoản không tồn tại!");
-        } else if (response.status === 400) {
-          setError("Thông tin đăng nhập không hợp lệ!");
+        const attemptResult = recordFailedAttempt();
+
+        if (attemptResult.locked) {
+          const levelInfo = getLockoutLevelInfo(attemptResult.lockoutLevel - 1);
+          setError(
+            `🔒 Bạn đã nhập sai ${5} lần!\n${levelInfo.message}\n, chức năng đăng nhập tạm thời bị khóa trong ${formatLockoutTime(attemptResult.lockoutDuration)}`,
+          );
+          setLockoutInfo({
+            locked: true,
+            remainingTime: attemptResult.lockoutDuration,
+            lockoutLevel: attemptResult.lockoutLevel,
+          });
         } else {
-          setError(data.message || "Đăng nhập thất bại!");
+          setRemainingAttempts(attemptResult.remainingAttempts);
+
+          if (response.status === 401) {
+            setError(
+              `Sai mật khẩu!\nCòn ${attemptResult.remainingAttempts} lần thử`,
+            );
+          } else if (response.status === 404) {
+            setError(
+              `Tài khoản không tồn tại!\nCòn ${attemptResult.remainingAttempts} lần thử`,
+            );
+          } else if (response.status === 400) {
+            setError(
+              <>
+                Thông tin đăng nhập không hợp lệ!
+                <br />
+                Còn {attemptResult.remainingAttempts} lần thử
+              </>,
+            );
+          } else {
+            setError(
+              `${data.message || "Đăng nhập thất bại!"}\nCòn ${attemptResult.remainingAttempts} lần thử`,
+            );
+          }
         }
       }
     } catch (err) {
@@ -172,18 +269,23 @@ export default function LoginAdmin({
 
           <button
             type="submit"
-            disabled={loading}
-            className={`submit-btn ${loading ? "loading" : ""}`}
+            disabled={loading || lockoutInfo.locked}
+            className={`submit-btn ${loading ? "loading" : ""} ${lockoutInfo.locked ? "disabled" : ""}`}
           >
             <span className="btn-content">
-              {loading ? (
+              {lockoutInfo.locked ? (
                 <>
-                  <span className="btn-spinner">⏳</span>
+                  <span className="btn-icon">🔒</span>
+                  <span className="btn-text">
+                    Đăng nhập bị khóa. Vui lòng thử lại sau.
+                  </span>
+                </>
+              ) : loading ? (
+                <>
                   <span className="btn-text">Đang đăng nhập...</span>
                 </>
               ) : (
                 <>
-                  <span className="btn-icon"></span>
                   <span className="btn-text">Đăng nhập</span>
                 </>
               )}

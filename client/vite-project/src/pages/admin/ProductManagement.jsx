@@ -6,7 +6,7 @@ import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
 import ImagePicker from "../../components/admin/ImagePicker";
 import ImageComponent from "../../components/common/Image.jsx";
-import { Image } from "lucide-react";
+import { Image, Package } from "lucide-react";
 import Button from "@components/common/Button.jsx";
 
 function ProductManagement() {
@@ -312,7 +312,11 @@ function ProductManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>🛍️ Quản lý sản phẩm</h2>
+        <div className="header-title">
+          <Package size={30} className="header-icon" />
+          <h2>Quản lý sản phẩm</h2>
+        </div>
+        <h2>Quản lý sản phẩm</h2>
         <button
           className="btn btn-success"
           onClick={openCreateModal}
@@ -669,8 +673,8 @@ function ProductManagement() {
               {loading
                 ? "⏳ Đang xử lý..."
                 : modalMode === "edit"
-                ? "💾 Cập nhật"
-                : "➕ Thêm mới"}
+                  ? "💾 Cập nhật"
+                  : "➕ Thêm mới"}
             </button>
           </div>
         </form>

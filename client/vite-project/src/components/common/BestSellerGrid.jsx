@@ -45,8 +45,19 @@ export default function BestSellerGrid({
       setVisibleItems(itemsPerView);
     }
   };
+  const handleProductClick = (product) => {
+    console.log("🔍 BestSellerGrid - Product clicked:", product);
 
-  // ✅ AUTO SLIDE EVERY 2 SECONDS
+    if (onProductClick) {
+      onProductClick(product);
+    } else {
+      scrollToTop();
+      setTimeout(() => {
+        navigation(`product/${product.id}`);
+      }, 100);
+    }
+  };
+
   useEffect(() => {
     if (products.length > visibleItems) {
       autoSlideRef.current = setInterval(() => {
@@ -209,7 +220,7 @@ export default function BestSellerGrid({
                   key={product.id}
                   className="carousel-item"
                   style={{ width: `${slideWidth}%` }}
-                  onClick={() => onProductClick && onProductClick(product)}
+                  onClick={() => handleProductClick(product)}
                 >
                   <div className="product-card bestseller-card">
                     <div className="product-image">

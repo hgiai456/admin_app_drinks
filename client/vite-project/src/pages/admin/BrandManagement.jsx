@@ -5,7 +5,7 @@ import "@styles/pages/_admin.scss";
 import ImagePicker from "@components/admin/ImagePicker";
 import ImageComponent from "@components/common/Image.jsx";
 import Button from "@components/common/Button.jsx";
-import { Image } from "lucide-react";
+import { Image, Tag } from "lucide-react";
 
 function BrandManagement() {
   const [brands, setBrands] = useState([]);
@@ -54,7 +54,7 @@ function BrandManagement() {
     setLoading(true);
     try {
       console.log(
-        `🔄 fetchBrands called with: page=${pageNum}, search="${searchTerm}"`
+        `🔄 fetchBrands called with: page=${pageNum}, search="${searchTerm}"`,
       );
 
       // Try to use getPaging if available, otherwise use getAll
@@ -72,7 +72,7 @@ function BrandManagement() {
         // Filter by search term if provided
         const filteredBrands = searchTerm
           ? allBrands.filter((brand) =>
-              brand.name?.toLowerCase().includes(searchTerm.toLowerCase())
+              brand.name?.toLowerCase().includes(searchTerm.toLowerCase()),
             )
           : allBrands;
 
@@ -307,7 +307,10 @@ function BrandManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>🏷️ Quản lý thương hiệu</h2>
+        <div className="header-title">
+          <Tag size={30} className="header-icon" />
+          <h2> Quản lý thương hiệu</h2>
+        </div>
         <button
           className="btn btn-success"
           onClick={openCreateModal}
@@ -585,8 +588,8 @@ function BrandManagement() {
               {loading
                 ? "⏳ Đang xử lý..."
                 : modalMode === "edit"
-                ? "💾 Cập nhật"
-                : "➕ Thêm mới"}
+                  ? "💾 Cập nhật"
+                  : "➕ Thêm mới"}
             </button>
           </div>
         </form>

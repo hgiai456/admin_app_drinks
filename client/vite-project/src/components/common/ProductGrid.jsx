@@ -1,7 +1,6 @@
 import React from "react";
 import "@styles/components/_product-grid.scss";
 
-
 /**
  * Component hiển thị danh sách sản phẩm dạng grid
  * @param {Array} products - Danh sách sản phẩm

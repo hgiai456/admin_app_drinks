@@ -7,6 +7,7 @@ import StoreService from "@services/store.service.js";
 import Prodetail from "@models/prodetail";
 import "@styles/pages/_admin.scss";
 import Modal from "@components/admin/ModelComponent.jsx";
+import { FileText } from "lucide-react";
 
 function ProdetailManagement() {
   const [prodetails, setProdetails] = useState([]);
@@ -83,7 +84,7 @@ function ProdetailManagement() {
     setLoading(true);
     try {
       console.log(
-        `🔍 Đang tải prodetails - Trang: ${pageNum}, Tìm kiếm: "${searchTerm}"`
+        `🔍 Đang tải prodetails - Trang: ${pageNum}, Tìm kiếm: "${searchTerm}"`,
       );
 
       const response = await ProdetailService.getPaging({
@@ -174,7 +175,7 @@ function ProdetailManagement() {
     // Tự động chuyển sang manual mode nếu giá không có trong options
     setPriceInputMode(priceInOptions ? "select" : "manual");
     setOldPriceInputMode(
-      oldPriceInOptions || !item.oldprice ? "select" : "manual"
+      oldPriceInOptions || !item.oldprice ? "select" : "manual",
     );
 
     setForm({
@@ -405,7 +406,10 @@ function ProdetailManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>🛍️ Quản lý sản phẩm chi tiết</h2>
+        <div className="header-title">
+          <FileText size={30} className="header-icon" />
+          <h2>Quản lý sản phẩm chi tiết</h2>
+        </div>
         <button
           className="btn btn-success"
           onClick={openCreateModal}
@@ -871,7 +875,7 @@ function ProdetailManagement() {
                     <span style={{ color: "#4CAF50", marginLeft: "8px" }}>
                       (Giảm{" "}
                       {Math.round(
-                        (1 - Number(form.price) / Number(form.oldprice)) * 100
+                        (1 - Number(form.price) / Number(form.oldprice)) * 100,
                       )}
                       %)
                     </span>
@@ -983,8 +987,8 @@ function ProdetailManagement() {
               {loading
                 ? "⏳ Đang xử lý..."
                 : modalMode === "edit"
-                ? "💾 Cập nhật"
-                : "➕ Thêm mới"}
+                  ? "💾 Cập nhật"
+                  : "➕ Thêm mới"}
             </button>
           </div>
         </form>

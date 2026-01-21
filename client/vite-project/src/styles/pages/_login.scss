@@ -2,7 +2,6 @@
 @use '../abstracts/mixins' as m;
 @use 'sass:color';
 
-// ✅ LOGIN CONTAINER
 .login-container {
     min-height: 100vh;
     @include m.flex-center;
@@ -11,7 +10,6 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI',
         sans-serif;
 
-    // ✅ BACK TO HOME BUTTON
     .back-to-home-btn {
         position: absolute;
         top: 1.5rem;
@@ -67,7 +65,7 @@
             }
         }
     }
-    // ✅ GUEST STYLES FOR LOGIN FORM
+
     .guest-section {
         margin-top: 1.5rem;
         text-align: center;
@@ -135,12 +133,10 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(
-        135deg,
-        $admin-primary 0%,
-        $admin-secondary 50%,
-        $admin-light 100%
-    );
+    background: linear-gradient(135deg,
+            $admin-primary 0%,
+            $admin-secondary 50%,
+            $admin-light 100%);
     z-index: 1;
 
     .bg-shapes {
@@ -192,15 +188,18 @@
 
 // ✅ SMOOTH FLOATING ANIMATION
 @keyframes floatSmooth {
+
     0%,
     100% {
         transform: translateY(0px) translateX(0px) scale(1);
         opacity: 0.6;
     }
+
     33% {
         transform: translateY(-15px) translateX(10px) scale(1.05);
         opacity: 0.8;
     }
+
     66% {
         transform: translateY(10px) translateX(-8px) scale(0.95);
         opacity: 0.7;
@@ -236,12 +235,10 @@
         left: 0;
         right: 0;
         height: 4px;
-        background: linear-gradient(
-            90deg,
-            $admin-primary,
-            $admin-secondary,
-            $success-color
-        );
+        background: linear-gradient(90deg,
+                $admin-primary,
+                $admin-secondary,
+                $success-color );
         z-index: 1;
     }
 }
@@ -275,11 +272,9 @@
 
         .logo-fallback {
             font-size: 4rem;
-            background: linear-gradient(
-                135deg,
-                $admin-primary,
-                $admin-secondary
-            );
+            background: linear-gradient(135deg,
+                    $admin-primary,
+                    $admin-secondary );
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -334,6 +329,7 @@
         opacity: 0;
         transform: translateY(-10px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -341,13 +337,16 @@
 }
 
 @keyframes shake {
+
     0%,
     100% {
         transform: translateX(0);
     }
+
     25% {
         transform: translateX(-3px);
     }
+
     75% {
         transform: translateX(3px);
     }
@@ -410,7 +409,7 @@
                     }
 
                     // ✅ ANIMATE LABEL ICON
-                    + .input-border {
+                    +.input-border {
                         opacity: 0;
                     }
                 }
@@ -468,11 +467,9 @@
     &:hover:not(:disabled) {
         transform: translateY(-2px);
         box-shadow: 0 10px 30px rgba($admin-primary, 0.4);
-        background: linear-gradient(
-            135deg,
-            color.adjust($admin-primary, $lightness: 5%),
-            $admin-primary
-        );
+        background: linear-gradient(135deg,
+                color.adjust($admin-primary, $lightness: 5%),
+                $admin-primary );
     }
 
     &:active:not(:disabled) {
@@ -481,11 +478,9 @@
     }
 
     &:disabled {
-        background: linear-gradient(
-            135deg,
-            $admin-secondary,
-            rgba($admin-secondary, 0.8)
-        );
+        background: linear-gradient(135deg,
+                $admin-secondary,
+                rgba($admin-secondary, 0.8));
         cursor: not-allowed;
         transform: none;
         box-shadow: 0 4px 12px rgba($admin-secondary, 0.2);
@@ -546,9 +541,11 @@
     from {
         transform: rotate(0deg) scale(1);
     }
+
     50% {
         transform: rotate(180deg) scale(1.1);
     }
+
     to {
         transform: rotate(360deg) scale(1);
     }
@@ -584,11 +581,13 @@
 }
 
 @keyframes pulse {
+
     0%,
     100% {
         opacity: 1;
         transform: scale(1);
     }
+
     50% {
         opacity: 0.7;
         transform: scale(1.05);
@@ -691,6 +690,7 @@
         opacity: 0;
         transform: translateY(-10px) scale(0.95);
     }
+
     to {
         opacity: 1;
         transform: translateY(0) scale(1);
@@ -730,11 +730,9 @@
 // ✅ Dark mode support
 @media (prefers-color-scheme: dark) {
     .success-message {
-        background: linear-gradient(
-            135deg,
-            rgba(40, 167, 69, 0.2) 0%,
-            rgba(40, 167, 69, 0.1) 100%
-        );
+        background: linear-gradient(135deg,
+                rgba(40, 167, 69, 0.2) 0%,
+                rgba(40, 167, 69, 0.1) 100%);
         border-color: rgba(40, 167, 69, 0.3);
         color: #95d5a0;
 

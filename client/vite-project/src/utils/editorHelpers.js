@@ -28,12 +28,15 @@ export function sanitizeHtml(html) {
  * Scroll lên đầu trang với smooth animation
  * @param {number} duration - Thời gian scroll (ms), mặc định 300ms
  */
-export const scrollToTop = (duration = 300) => {
+export const scrollToTop = () => {
   window.scrollTo({
     top: 0,
     left: 0,
     behavior: "smooth",
   });
+
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 };
 
 /**

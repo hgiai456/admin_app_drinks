@@ -6,7 +6,7 @@ import "@styles/pages/_admin.scss";
 import ImagePicker from "@components/admin/ImagePicker";
 import ImageComponent from "@components/common/Image.jsx";
 import Button from "@components/common/Button.jsx";
-import { Image } from "lucide-react";
+import { Image, Store } from "lucide-react";
 
 function StoreManagement() {
   const [stores, setStores] = useState([]);
@@ -61,7 +61,7 @@ function StoreManagement() {
     setLoading(true);
     try {
       console.log(
-        `🔄 fetchStores called with: page=${pageNum}, search="${searchTerm}"`
+        `🔄 fetchStores called with: page=${pageNum}, search="${searchTerm}"`,
       );
 
       // Try to use getPaging if available, otherwise use getAll
@@ -83,7 +83,7 @@ function StoreManagement() {
                 store.storeName
                   ?.toLowerCase()
                   .includes(searchTerm.toLowerCase()) ||
-                store.address?.toLowerCase().includes(searchTerm.toLowerCase())
+                store.address?.toLowerCase().includes(searchTerm.toLowerCase()),
             )
           : allStores;
 
@@ -329,7 +329,7 @@ function StoreManagement() {
     const cleaned = phone.replace(/\D/g, "");
     if (cleaned.length === 10) {
       return `${cleaned.slice(0, 4)} ${cleaned.slice(4, 7)} ${cleaned.slice(
-        7
+        7,
       )}`;
     }
     return phone;
@@ -367,7 +367,11 @@ function StoreManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>🏪 Quản lý cửa hàng</h2>
+        <div className="header-title">
+          <Store size={30} className="header-icon" />
+          <h2>Quản lý cửa hàng</h2>
+        </div>
+
         <button
           className="btn btn-success"
           onClick={openCreateModal}
@@ -751,8 +755,8 @@ function StoreManagement() {
               {loading
                 ? "⏳ Đang xử lý..."
                 : modalMode === "edit"
-                ? "💾 Cập nhật"
-                : "➕ Thêm mới"}
+                  ? "💾 Cập nhật"
+                  : "➕ Thêm mới"}
             </button>
           </div>
         </form>

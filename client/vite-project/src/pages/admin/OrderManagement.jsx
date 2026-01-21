@@ -5,6 +5,7 @@ import Modal from "@components/admin/ModelComponent.jsx";
 import Button from "@components/common/Button.jsx";
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_order-manager.scss";
+import { ShoppingCart } from "lucide-react";
 
 const getAvailableStatuses = (currentStatus) => {
   const statusFlow = {
@@ -533,9 +534,9 @@ export default function OrderManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>📦 Quản lý đơn hàng</h2>
-        <div style={{ fontSize: "14px", color: "#666" }}>
-          📊 Tổng: <strong>{totalOrders}</strong> đơn hàng
+        <div className="header-title">
+          <ShoppingCart size={30} className="header-icon" />
+          <h2> Quản lý đơn hàng</h2>
         </div>
       </div>
 

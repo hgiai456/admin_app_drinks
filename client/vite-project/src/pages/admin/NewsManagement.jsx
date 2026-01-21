@@ -9,14 +9,13 @@ import Image from "@components/common/Image.jsx";
 
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_news.scss";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, Newspaper } from "lucide-react";
 import ImagePicker from "@components/admin/ImagePicker";
 import WysiwygEditor from "@components/admin/WysiwygEditor.jsx";
 import { useWysiwygEditor } from "@hooks/useWysiwygEditor.js";
 import {
   sanitizeHtml,
   getExcerpt as getHtmlExcerpt,
-  formatDate,
 } from "@utils/editorHelpers.js";
 
 function NewsManagement() {
@@ -96,11 +95,11 @@ function NewsManagement() {
           } catch (error) {
             console.error(
               `Error loading news-details for news ${news.id}:`,
-              error
+              error,
             );
             return { ...news, product_ids: [] };
           }
-        })
+        }),
       );
 
       setNewsList(newsWithProducts);
@@ -199,7 +198,7 @@ function NewsManagement() {
 
   const handleProductsChange = (e) => {
     const selectedOptions = Array.from(e.target.selectedOptions, (option) =>
-      parseInt(option.value)
+      parseInt(option.value),
     );
     setForm((prev) => ({ ...prev, product_ids: selectedOptions }));
   };
@@ -398,7 +397,11 @@ function NewsManagement() {
 
       {/* Header */}
       <div className="header">
-        <h2>📰 Quản lý tin tức</h2>
+        <div className="header-title">
+          <Newspaper size={30} className="header-icon" />
+          <h2>Quản lý tin tức</h2>
+        </div>
+
         <Button
           variant="success"
           size="md"
