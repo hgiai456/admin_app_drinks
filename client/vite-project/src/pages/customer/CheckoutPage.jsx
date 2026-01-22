@@ -4,7 +4,7 @@ import CartService from "@services/cart.service.js";
 import CheckoutService from "@services/checkout.service.js";
 import PaymentService from "@services/payment.service.js";
 import "@styles/pages/_checkout.scss";
-import AddressAutocomplete from "@components/common/AddressAutoComplete.jsx";
+import AddressAutoComplete from "@components/common/AddressAutoComplete.jsx";
 import SePayQRModal from "@components/common/SePayQRModal.jsx";
 
 export default function CheckoutPage({
@@ -475,7 +475,7 @@ export default function CheckoutPage({
                     Địa chỉ giao hàng <span className="required">*</span>
                   </label>
 
-                  <AddressAutocomplete
+                  <AddressAutoComplete
                     value={formData.address}
                     onChange={handleInputChange}
                     placeholder="Nhập địa chỉ chi tiết (bắt đầu gõ để tìm kiếm...)"
