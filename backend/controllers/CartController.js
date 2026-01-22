@@ -1,4 +1,4 @@
-import db from "../models";
+import db from '../models/index.js';
 import { Sequelize, where } from "sequelize";
 import { OrderStatus } from "../constants";
 import EmailService from "../services/EmailService";

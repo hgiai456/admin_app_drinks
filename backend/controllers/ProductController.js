@@ -1,5 +1,5 @@
 import { col, fn, Sequelize, literal } from "sequelize";
-import db from "../models";
+import db from "../models/index.js";
 const { Op } = Sequelize;
 
 export async function getProducts(req, res) {

@@ -1,5 +1,5 @@
 import { Sequelize, where } from "sequelize";
-import db from "../models";
+import db from "../models/index.js";
 import { OrderStatus } from "../constants";
 const { Op } = Sequelize;
 

@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize";
-import db from "../models";
+import db from "../models/index.js";
 const { Op } = Sequelize;
 import ResponseUser from "../dtos/responses/user/ReponseUser.js";
 import argon2 from "argon2";

@@ -1,5 +1,5 @@
 import { Sequelize } from "sequelize";
-import db from "../models";
+import db from "../models/index.js";
 const { Op } = Sequelize;
 
 // Lấy danh sách sản phẩm chi tiết

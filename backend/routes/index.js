@@ -36,5 +36,4 @@ route.use("/news", newsRoutes);
 route.use("/news-details", newsDetailRoutes);
 route.use("/media-library", mediaLibraryRoutes);
 
-
 export default route;
