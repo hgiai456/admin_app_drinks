@@ -7,11 +7,11 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { getStorage } from "firebase/storage";
-import config from "../config/firebaseConfig.js";
+import { firebaseApp } from "../config/firebaseConfig.js";
 import sizeOf from "image-size";
 // import upload from "../middlewares/imageGoogleUpload.js";
 
-const storage = getStorage(config);
+const storage = getStorage(firebaseApp);
 
 export async function getMedia(req, res) {
   try {

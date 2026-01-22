@@ -7,10 +7,10 @@ import {
   deleteObject,
 } from "firebase/storage";
 import { getStorage } from "firebase/storage";
-import config from "../config/firebaseConfig.js";
+import { firebaseApp } from "../config/firebaseConfig.js";
 import db from "../models/index.js";
 
-const storage = getStorage(config);
+const storage = getStorage(firebaseApp);
 
 export async function uploadImages(req, res) {
   if (req.files.length === 0) {
