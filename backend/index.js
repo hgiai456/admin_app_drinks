@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import { AppRoute } from "./AppRoute.js";
 dotenv.config();
-import db from "./models";
+import db from "./models/index.js";
 import os from "os";
 import cors from "cors";
 
@@ -30,15 +30,12 @@ const port = process?.env?.PORT ?? 3003;
 // Healthcheck API toàn diện
 app.get("/api/healthcheck", async (req, res) => {
   try {
-    // ✅ Kiểm tra kết nối cơ sở dữ liệu
     await db.sequelize.authenticate();
 
-    // ✅ Lấy thông tin tải CPU
     const cpuLoad = os.loadavg(); // [1m, 5m, 15m]
     const cpus = os.cpus();
     const cpuPercentage = (cpuLoad[0] / cpus.length) * 100;
 
-    // ✅ Lấy thông tin sử dụng bộ nhớ và chuyển đổi sang megabytes
     const memoryUsage = process.memoryUsage();
     const memoryUsageMB = {
       rss: (memoryUsage.rss / 1024 / 1024).toFixed(2) + " MB", // Resident Set Size
@@ -47,7 +44,6 @@ app.get("/api/healthcheck", async (req, res) => {
       external: (memoryUsage.external / 1024 / 1024).toFixed(2) + " MB",
     };
 
-    // ✅ Trả về kết quả
     res.status(200).json({
       status: "OK",
       database: "Connected",
