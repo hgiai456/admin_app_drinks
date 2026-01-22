@@ -26,14 +26,12 @@ export default function AddressAutoComplete({
   const formatDisplayName = (item) => {
     const addr = item.address || {};
 
-    // Lấy các thành phần địa chỉ
     const houseNumber = addr.house_number || "";
     const street = addr.road || addr.street || addr.pedestrian || "";
     const ward = addr.suburb || addr.quarter || addr.neighbourhood || "";
     const district = addr.county || addr.district || addr.city_district || "";
     const city = addr.city || addr.province || addr.state || "";
 
-    //  Build địa chỉ ĐÚNG FORMAT VIỆT NAM
     const parts = [];
 
     // Số nhà + Đường
@@ -53,7 +51,6 @@ export default function AddressAutoComplete({
       parts.push(district);
     }
 
-    // ✅ FIX: Luôn hiển thị "Thành phố Hồ Chí Minh" nếu có trong display_name
     const originalDisplay = item.display_name.toLowerCase();
     if (
       originalDisplay.includes("ho chi minh") ||
@@ -331,7 +328,7 @@ export default function AddressAutoComplete({
   );
 }
 
-AddressAutocomplete.propTypes = {
+AddressAutoComplete.propTypes = {
   value: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
