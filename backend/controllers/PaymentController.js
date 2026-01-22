@@ -1,14 +1,13 @@
 import PayOSService from "../services/PayOSService.js";
 import VNPayService from "../services/VNPayService.js";
 import SePayService from "../services/SePayService.js";
-import { sendOrderConfirmationEmail } from "../services/EmailService.js";
+// import EmailService from "../services/EmailService.js";
 import db from "../models/index.js";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 export async function createPayment(req, res) {
-  // Nguyên lý hoạt động
   const transaction = await db.sequelize.transaction();
 
   try {
@@ -559,20 +558,19 @@ export async function sepayWebhook(req, res) {
         transactionId,
       });
 
-      try {
-        const user = await db.User.findByPk(payment.order.user_id);
-        if (user?.email) {
-          await sendOrderConfirmationEmail(user.email, {
-            orderId: orderId,
-            customerName: user.name,
-            total: payment.amount,
-            paymentMethod: "SePay (Chuyển khoản)",
-          });
-          console.log("📧 Email sent to:", user.email);
-        }
-      } catch (emailError) {
-        console.error("❌ Email error:", emailError.message);
-      }
+      // try {
+      //   const user = await db.User.findByPk(payment.order.user_id);
+      //   if (user?.email) {
+      //     await EmailService.sendOrderConfirmation(user.email, {
+      //       order: orderId,
+      //       user: user.name,
+      //       total: payment.amount,
+      //     });
+      //     console.log("📧 Email sent to:", user.email);
+      //   }
+      // } catch (emailError) {
+      //   console.error("❌ Email error:", emailError.message);
+      // }
 
       res.status(200).json({
         success: true,

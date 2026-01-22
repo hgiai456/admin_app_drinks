@@ -1,7 +1,7 @@
 import db from "../models/index.js";
 import { Sequelize, where } from "sequelize";
 import { OrderStatus } from "../constants/index.js";
-import EmailService from "../services/EmailService";
+import EmailService from "../services/EmailService.js";
 const { Op } = Sequelize;
 
 export async function getCarts(req, res) {
