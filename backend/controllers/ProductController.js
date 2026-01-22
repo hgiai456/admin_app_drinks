@@ -1,4 +1,4 @@
-import { col, fn, Sequelize, literal } from "sequelize";
+import { Sequelize, literal } from "sequelize";
 import db from "../models/index.js";
 const { Op } = Sequelize;
 

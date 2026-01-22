@@ -1,4 +1,4 @@
-import { Sequelize, where } from "sequelize";
+import { Sequelize } from "sequelize";
 import db from "../models/index.js";
 const { Op } = Sequelize;
 import { BannerStatus } from "../constants/index.js";

@@ -1,4 +1,3 @@
-import PayOSService from "../services/PayOSService.js";
 import VNPayService from "../services/VNPayService.js";
 import SePayService from "../services/SePayService.js";
 // import EmailService from "../services/EmailService.js";
@@ -1017,16 +1016,6 @@ export async function verifyPayment(req, res) {
     if (payment_method === "sepay") {
       finalStatus = payment.status;
     }
-
-    // //Xac dinh trang thai cuoi cung
-    // // ✅ Xác định trạng thái cuối cùng
-    // if (payosData.status === "PAID") {
-    //   finalStatus = "success";
-    // } else if (payosData.status === "CANCELLED") {
-    //   finalStatus = "cancelled";
-    // } else if (payosData.status === "EXPIRED") {
-    //   finalStatus = "failed";
-    // }
 
     res.status(200).json({
       success: true,

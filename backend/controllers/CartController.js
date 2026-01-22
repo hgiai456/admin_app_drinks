@@ -1,5 +1,5 @@
 import db from "../models/index.js";
-import { Sequelize, where } from "sequelize";
+import { Sequelize } from "sequelize";
 import { OrderStatus } from "../constants/index.js";
 import EmailService from "../services/EmailService.js";
 const { Op } = Sequelize;
@@ -302,7 +302,6 @@ export async function checkoutCart(req, res) {
     for (let item of cart.cart_items) {
       const productDetail = item.product_details;
 
-      // ✅ FIX: Kiểm tra quantity thay vì stock
       if (!productDetail || productDetail.quantity <= 0) {
         outOfStockItems.push({
           product_name: productDetail?.product?.name || "Unknown",
@@ -389,7 +388,7 @@ export async function checkoutCart(req, res) {
         },
       );
 
-      // ✅ CẬP NHẬT QUANTITY (TRỪ) VÀ BUYTURN (CỘNG)
+      // CẬP NHẬT QUANTITY (TRỪ) VÀ BUYTURN (CỘNG)
       const currentQuantity = item.product_details.quantity;
       const currentBuyturn = item.product_details.buyturn || 0;
       const purchasedQuantity = item.quantity;
@@ -414,7 +413,6 @@ export async function checkoutCart(req, res) {
         rowsAffected: updatedRows,
       });
 
-      // ✅ VERIFY: Đọc lại giá trị sau khi update
       const verifyDetail = await db.ProDetail.findByPk(item.product_detail_id, {
         transaction,
       });

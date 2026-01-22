@@ -1,4 +1,4 @@
-import { Sequelize, where } from "sequelize";
+import { Sequelize } from "sequelize";
 import db from "../models/index.js";
 const { Op } = Sequelize;
 
@@ -129,7 +129,7 @@ export async function updateCategory(req, res) {
     },
     {
       where: { id },
-    }
+    },
   );
 
   if (updatedCategory) {
