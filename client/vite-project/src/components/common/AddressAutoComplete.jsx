@@ -9,7 +9,7 @@ export default function AddressAutoComplete({
   disabled = false,
   error = "",
   onPlaceSelected = null,
-  name = "address", // ✅ THÊM: Cho phép custom name
+  name = "address",
 }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
