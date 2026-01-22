@@ -1,4 +1,4 @@
-import ProDetail from "@models/Prodetail.js";
+import ProDetail from "@models/prodetail.js";
 import BaseService from "./base.service";
 import api from "../index.js";
 import { ENDPOINTS } from "../endpoints.js";
