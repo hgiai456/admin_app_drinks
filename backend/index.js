@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import { AppRoute } from "./AppRoute.js";
 dotenv.config();
 import db from "./models";
-const os = require("os");
+import os from "os";
 import cors from "cors";
 
 const app = express();
@@ -16,7 +16,7 @@ app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
+    "Origin, X-Requested-With, Content-Type, Accept",
   );
   next();
 });
