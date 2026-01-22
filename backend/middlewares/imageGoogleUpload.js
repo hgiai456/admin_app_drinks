@@ -1,23 +1,22 @@
-import path from 'path';
-import multer from 'multer';
-import config from '../config/firebaseConfig';
+import path from "path";
+import multer from "multer";
+import config from "../config/firebaseConfig.js";
 
 const fileFilter = (req, file, callback) => {
-    if (file.mimetype.startsWith('image')) {
-        callback(null, true);
-    } else {
-        callback(new Error('Chỉ được phép tải file ảnh!'), false);
-    }
+  if (file.mimetype.startsWith("image")) {
+    callback(null, true);
+  } else {
+    callback(new Error("Chỉ được phép tải file ảnh!"), false);
+  }
 };
 
 const upload = multer({
-    storage: multer.memoryStorage(),
-    fileFilter: fileFilter,
-    limits: {
-        fileSize: 1024 * 1024 * 5
-    }
+  storage: multer.memoryStorage(),
+  fileFilter: fileFilter,
+  limits: {
+    fileSize: 1024 * 1024 * 5,
+  },
 });
-
 
 /////
 

@@ -9,7 +9,7 @@ import {
 import { getStorage } from "firebase/storage";
 import config from "../config/firebaseConfig.js";
 import sizeOf from "image-size";
-import upload from "../middlewares/imageGoogleUpload.js";
+// import upload from "../middlewares/imageGoogleUpload.js";
 
 const storage = getStorage(config);
 
@@ -156,7 +156,7 @@ export async function updateMedia(req, res) {
 
     const [updated] = await db.MediaLibrary.update(
       { file_name, tags },
-      { where: { id } }
+      { where: { id } },
     );
 
     if (updated) {
