@@ -1,6 +1,6 @@
-"use strict";
-const { Model } = require("sequelize");
-module.exports = (sequelize, DataTypes) => {
+import { Model } from "sequelize";
+
+export default (sequelize, DataTypes) => {
   class NewsDetail extends Model {
     static associate(models) {
       if (models.Product) {
@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
       sequelize,
       modelName: "NewsDetail",
       tableName: "newsdetails", //Đảm bảo trùng với tên bảng trong database
-    }
+    },
   );
   return NewsDetail;
 };

@@ -1,7 +1,6 @@
-"use strict";
-const { Model } = require("sequelize");
+import { Model } from "sequelize";
 
-module.exports = (sequelize, DataTypes) => {
+export default (sequelize, DataTypes) => {
   class MediaLibrary extends Model {
     static associate(models) {
       MediaLibrary.belongsTo(models.User, {
@@ -76,7 +75,7 @@ module.exports = (sequelize, DataTypes) => {
       modelName: "MediaLibrary",
       tableName: "media_library",
       timestamps: true,
-    }
+    },
   );
 
   return MediaLibrary;
