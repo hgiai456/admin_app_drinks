@@ -3,7 +3,7 @@ import db from "../models/index.js";
 const { Op } = Sequelize;
 import ResponseUser from "../dtos/responses/user/ReponseUser.js";
 import argon2 from "argon2";
-import { UserRole } from "../constants"; //Hãy nhớ nếu export 1 const thì phải có ngoặc ví dụ {UserRole}
+import { UserRole } from "../constants/index.js"; //Hãy nhớ nếu export 1 const thì phải có ngoặc ví dụ {UserRole}
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();

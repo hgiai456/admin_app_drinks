@@ -114,7 +114,7 @@ export async function insertNewsArticle(req, res) {
       const validProductIds = validProducts.map((p) => p.id);
 
       const filteredProductIds = productIds.filter((id) =>
-        validProductIds.includes(id)
+        validProductIds.includes(id),
       );
 
       const NewsDetailPromises = filteredProductIds.map((product_id) =>
@@ -123,8 +123,8 @@ export async function insertNewsArticle(req, res) {
             news_id: newsArticle.id,
             product_id: product_id,
           },
-          { transaction }
-        )
+          { transaction },
+        ),
       );
 
       await Promise.all(NewsDetailPromises);
@@ -175,7 +175,7 @@ export async function updateNews(req, res) {
       image,
       content,
     },
-    { where: { id } }
+    { where: { id } },
   );
 
   if (updated) {

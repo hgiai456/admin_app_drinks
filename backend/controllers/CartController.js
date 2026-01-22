@@ -1,6 +1,6 @@
-import db from '../models/index.js';
+import db from "../models/index.js";
 import { Sequelize, where } from "sequelize";
-import { OrderStatus } from "../constants";
+import { OrderStatus } from "../constants/index.js";
 import EmailService from "../services/EmailService";
 const { Op } = Sequelize;
 

@@ -1,7 +1,7 @@
 import { Sequelize, where } from "sequelize";
 import db from "../models/index.js";
 const { Op } = Sequelize;
-import { BannerStatus } from "../constants";
+import { BannerStatus } from "../constants/index.js";
 
 // Lấy danh sách banner (phân trang + tìm kiếm)
 export async function getBanners(req, res) {
