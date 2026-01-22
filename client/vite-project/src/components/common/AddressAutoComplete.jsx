@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
 
-export default function AddressAutocomplete({
+export default function AddressAutoComplete({
   value,
   onChange,
   placeholder = "Nhập địa chỉ...",
@@ -93,7 +93,7 @@ export default function AddressAutocomplete({
           headers: {
             "User-Agent": "HG-Coffee-App/1.0",
           },
-        }
+        },
       );
 
       if (!response.ok) {
@@ -129,7 +129,7 @@ export default function AddressAutocomplete({
 
         //  Build secondary line (Phường, Quận, TP.HCM)
         const secondaryParts = [ward, district, "TP. Hồ Chí Minh"].filter(
-          Boolean
+          Boolean,
         );
         const secondaryLine = secondaryParts.join(", ");
 
