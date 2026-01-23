@@ -8,7 +8,6 @@ module.exports = {
   },
 
   async down(queryInterface, Sequelize) {
-    // Rollback: Thêm lại column
     await queryInterface.addColumn("payments", "payos_order_code", {
       type: Sequelize.BIGINT,
       allowNull: true,
