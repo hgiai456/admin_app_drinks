@@ -1,6 +1,6 @@
 import VNPayService from "../services/VNPayService.js";
 import SePayService from "../services/SePayService.js";
-// import EmailService from "../services/EmailService.js";
+import EmailService from "../services/EmailService.js";
 import db from "../models/index.js";
 import dotenv from "dotenv";
 
@@ -70,6 +70,15 @@ export async function createPayment(req, res) {
       return res.status(400).json({
         success: false,
         message: "Giỏ hàng trống hoặc không tồn tại",
+      });
+    }
+
+    const user = await db.User.findByPk(user_id); //Tìm xem user có tồn tai không
+    if (!user) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: "Người dùng không tồn tại",
       });
     }
 
@@ -413,7 +422,7 @@ export async function checkSePayPayment(req, res) {
       console.log("⚠️ SePay API error (ignored):", apiError.message);
     }
 
-    // ✅ BƯỚC 4: CHECK DB LẦN CUỐI (có thể webhook đã update trong lúc gọi API)
+    // CHECK DB LẦN CUỐI (có thể webhook đã update trong lúc gọi API)
     const refreshedPayment = await db.Payment.findOne({
       where: { order_id: orderId },
     });
@@ -432,7 +441,7 @@ export async function checkSePayPayment(req, res) {
       });
     }
 
-    // ✅ BƯỚC 5: VẪN PENDING → Trả về pending
+    // BƯỚC 5: VẪN PENDING → Trả về pending
     console.log("⏳ Payment still pending");
     return res.status(200).json({
       success: true,
@@ -557,19 +566,19 @@ export async function sepayWebhook(req, res) {
         transactionId,
       });
 
-      // try {
-      //   const user = await db.User.findByPk(payment.order.user_id);
-      //   if (user?.email) {
-      //     await EmailService.sendOrderConfirmation(user.email, {
-      //       order: orderId,
-      //       user: user.name,
-      //       total: payment.amount,
-      //     });
-      //     console.log("📧 Email sent to:", user.email);
-      //   }
-      // } catch (emailError) {
-      //   console.error("❌ Email error:", emailError.message);
-      // }
+      try {
+        const user = await db.User.findByPk(payment.order.user_id);
+        if (user?.email) {
+          await EmailService.sendOrderConfirmation(user.email, {
+            order: payment.order,
+            user: user,
+            OrderDetails: payment.order.order_details || [],
+          });
+          console.log("📧 Email sent to:", user.email);
+        }
+      } catch (emailError) {
+        console.error("❌ Email error:", emailError.message);
+      }
 
       res.status(200).json({
         success: true,
@@ -688,6 +697,21 @@ export async function vnpayReturn(req, res) {
         }
       }
       await transaction.commit();
+
+      try {
+        const user = await db.User.findByPk(payment.order.user_id);
+        if (user?.email) {
+          await EmailService.sendOrderConfirmation(user.email, {
+            order: payment.order,
+            user: user,
+            orderDetails: payment.order.order_details || [],
+          });
+          console.log("📧 Email sent to:", user.email);
+        }
+      } catch (emailError) {
+        console.error("❌ Email error:", emailError.message);
+      }
+
       const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
       const redirectUrl = `${clientUrl}/#payment-result?status=${redirectStatus}&orderId=${orderId}&amount=${amount}`;
 
