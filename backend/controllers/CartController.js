@@ -416,7 +416,7 @@ export async function checkoutCart(req, res) {
       const verifyDetail = await db.ProDetail.findByPk(item.product_detail_id, {
         transaction,
       });
-      console.log(`🔍 Verify ProDetail ID ${item.product_detail_id}:`, {
+      console.log(` Verify ProDetail ID ${item.product_detail_id}:`, {
         quantity: verifyDetail.quantity,
         buyturn: verifyDetail.buyturn,
       });
@@ -443,12 +443,12 @@ export async function checkoutCart(req, res) {
     await transaction.commit();
 
     // ===== 8. GỬI EMAIL XÁC NHẬN =====
-    EmailService.sendOrderConfirmation(user.email, {
+    await EmailService.sendOrderConfirmation(user.email, {
       order: newOrder,
       user: user,
       orderDetails: orderDetails,
     }).catch((error) => {
-      console.error("❌ Email sending failed:", error);
+      console.error(" Email sending failed:", error);
     });
 
     // ===== 9. TRẢ VỀ RESPONSE =====
@@ -463,7 +463,7 @@ export async function checkoutCart(req, res) {
     });
   } catch (error) {
     await transaction.rollback();
-    console.error("❌ Checkout error:", error);
+    console.error(" Checkout error:", error);
     return res.status(500).json({
       message: "Lỗi khi thanh toán giỏ hàng",
       error: error.message,
