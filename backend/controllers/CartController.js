@@ -456,7 +456,7 @@ export async function checkoutCart(req, res) {
     await transaction.commit();
 
     // ===== 8. GỬI EMAIL XÁC NHẬN =====
-    await EmailService.sendOrderConfirmation(user.email, {
+    EmailService.sendOrderConfirmation(user.email, {
       order: newOrder,
       user: user,
       orderDetails: orderDetails,

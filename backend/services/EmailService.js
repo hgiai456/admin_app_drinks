@@ -1,18 +1,9 @@
 import nodemailer from "nodemailer";
+import axios from "axios";
 import dotenv from "dotenv";
 dotenv.config();
 
 class EmailService {
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
-  }
-
   async sendOrderConfirmation(userEmail, orderData) {
     const { order, user, orderDetails } = orderData;
     //Calculate total items
@@ -27,7 +18,6 @@ class EmailService {
     const orderItemsHtml = orderDetails
       .map((item) => {
         const productName = item.product_details?.name || "Sản phẩm";
-        const sizeName = item.product_details?.size_name || "";
         const quantity = item.quantity || 0;
         const price = item.price || 0;
 
@@ -289,19 +279,45 @@ class EmailService {
         </body>
         </html>`;
 
-    const mailOptions = {
-      from: process.env.EMAIL_USER,
-      to: userEmail,
-      subject: `Xác nhận đơn hàng #${order.id} - Cảm ơn bạn đã đặt hàng!`,
-      html: emailTemplate,
+    const apiKey = process.env.BREVO_SMTP_KEY;
+    const sender = {
+      name: "HG Coffee",
+      email: "damhoagiai456@gmail.com",
     };
 
+    const to = [
+      {
+        email: userEmail,
+        name: user.name,
+      },
+    ];
+
+    const subject = `Xác nhận đơn hàng #${order.id} - Cảm ơn bạn đã đặt hàng!`;
+    const htmlContent = emailTemplate;
+
     try {
-      await this.transporter.sendMail(mailOptions);
+      await axios.post(
+        "https://api.brevo.com/v3/smtp/email",
+        {
+          sender,
+          to,
+          subject,
+          htmlContent,
+        },
+        {
+          headers: {
+            "api-key": apiKey,
+            "Content-Type": "application/json",
+          },
+        },
+      );
       console.log(`Order confirmation email sent to ${userEmail}`);
       return true;
     } catch (error) {
-      console.error("Error sending email", error);
+      console.error(
+        "Error sending email via Brevo API",
+        error.response?.data || error.message,
+      );
       return false;
     }
   }
@@ -314,43 +330,3 @@ class EmailService {
   }
 }
 export default new EmailService();
-
-// import axios from "axios";
-
-// class EmailService {
-//   async sendOrderConfirmation(userEmail, orderData) {
-//     const apiKey = process.env.BREVO_SMTP_KEY;
-//     const sender = { name: "HG Coffee", email: "no-reply@hgcoffee.id.vn" };
-//     const to = [{ email: userEmail, name: orderData.user?.name || "" }];
-//     const subject = `Xác nhận đơn hàng #${orderData.order.id} - Cảm ơn bạn đã đặt hàng!`;
-//     const htmlContent = /* tạo nội dung HTML như cũ */ "";
-
-//     try {
-//       await axios.post(
-//         "https://api.brevo.com/v3/smtp/email",
-//         {
-//           sender,
-//           to,
-//           subject,
-//           htmlContent,
-//         },
-//         {
-//           headers: {
-//             "api-key": apiKey,
-//             "Content-Type": "application/json",
-//           },
-//         },
-//       );
-//       console.log(`Order confirmation email sent to ${userEmail}`);
-//       return true;
-//     } catch (error) {
-//       console.error(
-//         "Error sending email via Brevo API",
-//         error.response?.data || error.message,
-//       );
-//       return false;
-//     }
-//   }
-// }
-
-// export default new EmailService();
