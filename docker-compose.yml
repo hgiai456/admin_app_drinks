@@ -66,6 +66,8 @@ services:
         condition: service_healthy
     networks:
       - hgcoffee-network
+    env_file:
+      - .env.production
 
 
   # ===== FRONTEND =====
