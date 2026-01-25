@@ -423,12 +423,25 @@ export async function checkoutCart(req, res) {
 
       orderDetails.push({
         ...orderDetail.toJSON(),
+        quantity: item.quantity,
+        price: item.product_details.price,
         product_details: {
-          ...item.product_details.toJSON(),
+          id: item.product_details.id,
+          name: item.product_details.product.name, // ← Lấy từ product
+          image: item.product_details.product.image,
+          size_name: item.product_details.sizes.name,
           quantity: newQuantity,
           buyturn: newBuyturn,
         },
       });
+      // orderDetails.push({
+      //   ...orderDetail.toJSON(),
+      //   product_details: {
+      //     ...item.product_details.toJSON(),
+      //     quantity: newQuantity,
+      //     buyturn: newBuyturn,
+      //   },
+      // });
     }
 
     // ===== 6. XÓA GIỎ HÀNG VÀ CART ITEMS =====
