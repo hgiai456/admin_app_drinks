@@ -58,8 +58,8 @@ services:
       - SEPAY_ACCOUNT_NUMBER=${SEPAY_ACCOUNT_NUMBER}
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
-      - BREVO_SMTP_USER=${BREVO_SMTP_USER}
       - BREVO_SMTP_KEY=${BREVO_SMTP_KEY}
+      - BREVO_SMTP_USER=${BREVO_SMTP_USER}
     expose:
       - "3003"
     depends_on:
