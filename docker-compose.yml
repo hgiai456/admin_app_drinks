@@ -58,7 +58,8 @@ services:
       - SEPAY_ACCOUNT_NUMBER=${SEPAY_ACCOUNT_NUMBER}
       - EMAIL_USER=${EMAIL_USER}
       - EMAIL_PASS=${EMAIL_PASS}
-
+      - BREVO_SMTP_USER=${BREVO_SMTP_USER}
+      - BREVO_SMTP_KEY=${BREVO_SMTP_KEY}
     expose:
       - "3003"
     depends_on:
@@ -66,8 +67,7 @@ services:
         condition: service_healthy
     networks:
       - hgcoffee-network
-    env_file:
-      - .env.production
+
 
 
   # ===== FRONTEND =====
