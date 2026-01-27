@@ -6,6 +6,7 @@ import Button from "@components/common/Button.jsx";
 import "@styles/pages/_admin.scss";
 import "@styles/pages/_order-manager.scss";
 import { ShoppingCart } from "lucide-react";
+import AlertMessage from "@components/common/AlertMessage.jsx";
 
 const getAvailableStatuses = (currentStatus) => {
   const statusFlow = {
@@ -68,6 +69,7 @@ export default function OrderManagement() {
   const [filterStatus, setFilterStatus] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [newStatus, setNewStatus] = useState(1);
+  const [messageType, setMessageType] = useState("info");
 
   // HELPER FUNCTIONS
   const formatDate = (dateString) => {
@@ -189,7 +191,7 @@ export default function OrderManagement() {
     try {
       setLoading(true);
       const response = await OrderService.getOrderById(order.id);
-      setSelectedOrder(response.data.data);
+      setSelectedOrder(response);
       setModalMode("detail");
       setEditingId(order.id);
       setShowModal(true);
@@ -221,12 +223,14 @@ export default function OrderManagement() {
     setLoading(true);
     try {
       await OrderService.updateOrderStatus(selectedOrder.id, newStatus);
-      setMessage("✅ Cập nhật trạng thái thành công!");
+      setMessage("Cập nhật trạng thái thành công!");
+      setMessageType("success");
       closeModal();
       await fetchOrders(page, search, filterStatus);
       setTimeout(() => setMessage(""), 3000);
     } catch (error) {
       setMessage("❌ Lỗi: " + error.message);
+      setMessageType("error");
     } finally {
       setLoading(false);
     }
@@ -261,7 +265,7 @@ export default function OrderManagement() {
     >
       {/* Order Info Section */}
       <div className="order-info-section">
-        <h4 className="section-title">📦 Thông tin đơn hàng</h4>
+        <h4 className="section-title">Thông tin đơn hàng</h4>
         <div className="info-grid">
           <div className="info-item">
             <div className="info-label">ID Đơn hàng</div>
@@ -401,7 +405,6 @@ export default function OrderManagement() {
 
     return (
       <div className="update-status-modal">
-        {/* Current Order Info */}
         <div className="current-order-info">
           <div className="info-row">
             <span className="order-id">📦 Đơn hàng #{selectedOrder?.id}</span>
@@ -412,7 +415,6 @@ export default function OrderManagement() {
             <StatusBadge status={currentStatus} />
           </div>
         </div>
-
         {/* Status Selection */}
         <div className="status-select-wrapper">
           <label className="status-label">
@@ -462,9 +464,8 @@ export default function OrderManagement() {
             })}
           </div>
         </div>
-
         {/* Status Flow Visualization */}
-        <div className="status-flow-guide">
+        {/* <div className="status-flow-guide">
           <div className="guide-title">📋 Luồng xử lý đơn hàng</div>
           <div className="flow-steps">
             <div className="flow-step">
@@ -491,8 +492,7 @@ export default function OrderManagement() {
             💡 <strong>Lưu ý:</strong> Có thể Hủy hoặc Thất bại từ bất kỳ trạng
             thái nào. Trạng thái Trả hàng chỉ áp dụng sau khi Đã hoàn tất.
           </div>
-        </div>
-
+        </div> */}
         {/* Action Buttons */}
         <div className="form-buttons">
           <Button
@@ -522,17 +522,12 @@ export default function OrderManagement() {
   //  MAIN RENDER
   return (
     <div className="prodetail-container">
-      {/* Message Alert */}
-      {message && (
-        <div
-          className={`message ${message.includes("✅") ? "success" : "error"}`}
-        >
-          {message}
-          <button onClick={() => setMessage("")}>×</button>
-        </div>
-      )}
+      <AlertMessage
+        message={message}
+        type={messageType}
+        onClose={() => setMessage("")}
+      />
 
-      {/* Header */}
       <div className="header">
         <div className="header-title">
           <ShoppingCart size={30} className="header-icon" />
@@ -540,7 +535,6 @@ export default function OrderManagement() {
         </div>
       </div>
 
-      {/* Search Bar */}
       <div className="search-bar">
         <div className="search-info">
           Hiển thị <strong>{orders.length}</strong> /{" "}
@@ -587,7 +581,6 @@ export default function OrderManagement() {
         </div>
       </div>
 
-      {/* Orders Table */}
       <div className="table-container">
         <table className="data-table">
           <thead>
@@ -675,7 +668,6 @@ export default function OrderManagement() {
         </table>
       </div>
 
-      {/* Pagination */}
       {totalOrders > 0 && (
         <div className="pagination">
           <div className="pagination-controls">

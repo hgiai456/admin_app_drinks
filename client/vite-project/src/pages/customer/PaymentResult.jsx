@@ -35,7 +35,6 @@ export default function PaymentResult({ user, onLogout }) {
     setOrderId(orderIdParam);
     setAmount(amountParam);
 
-    // ✅ Load order details nếu có orderId
     if (orderIdParam) {
       loadOrderDetails(orderIdParam);
     }
@@ -205,7 +204,7 @@ export default function PaymentResult({ user, onLogout }) {
                                 </span>
                               </div>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>

@@ -6,6 +6,7 @@ import PaymentService from "@services/payment.service.js";
 import "@styles/pages/_checkout.scss";
 import AddressAutoComplete from "@components/common/AddressAutoComplete.jsx";
 import SePayQRModal from "@components/common/SePayQRModal.jsx";
+import { scrollToTop } from "@utils/editorHelpers.js";
 
 export default function CheckoutPage({
   user,
@@ -131,7 +132,6 @@ export default function CheckoutPage({
   };
 
   const handlePlaceSelected = (placeData) => {
-    console.log("📍 Place data:", placeData);
     setAddressDetails(placeData);
   };
 
@@ -213,8 +213,12 @@ export default function CheckoutPage({
           throw new Error(res.message || "Lỗi khi đặt hàng");
         }
 
-        setSuccess(" Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
+        const orderId = res.data?.order.id || res.data?.id;
+        const totalAmount = res.data?.total_amount || calculateCartTotal();
+
+        setSuccess("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
         setCartItems([]);
+
         setFormData({
           phone: user?.phone || "",
           address: "",
@@ -223,9 +227,10 @@ export default function CheckoutPage({
         });
 
         setTimeout(() => {
-          window.location.hash = "orders";
-        }, 2000);
+          window.location.hash = `#payment-result?status=success&orderId=${orderId}&amount=${totalAmount}`;
+        }, 1000);
 
+        scrollToTop();
         return;
       } else if (
         formData.payment_method === "vnpay" ||
@@ -289,12 +294,12 @@ export default function CheckoutPage({
   };
 
   const handlePaymentSuccess = (paymentData) => {
-    setSuccess(" Thanh toán thành công! Cảm ơn bạn đã mua hàng.");
-    setCartItems([]); // Xóa giỏ hàng local
+    setSuccess(" Thanh toán thành công! Đang chuyển hướng ...");
+    setCartItems([]);
 
     // Redirect sau 1 giây
     setTimeout(() => {
-      window.location.hash = `#payment-result?status=success&orderId=${paymentData.order_id}&amount=${paymentData.amount}`;
+      window.location.hash = `#payment-result?status=success&orderId=${paymentData.order_id}&amount=${paymentData.amount}&method=sepay`;
     }, 1000);
   };
 
@@ -595,13 +600,6 @@ export default function CheckoutPage({
                       <li>NCB: 9704198526191432198</li>
                       <li>OTP: 123456</li>
                     </ul>
-                  </div>
-                )}
-
-                {formData.payment_method === "payos" && (
-                  <div className="payment-info-box payos">
-                    <h4>📱 PayOS</h4>
-                    <p>Quét QR hoặc chuyển khoản</p>
                   </div>
                 )}
               </div>

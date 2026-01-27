@@ -472,60 +472,20 @@ function App() {
 function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
   const [currentPage, setCurrentPage] = useState(() => {
     const hash = window.location.hash.replace("#", "");
-    if (hash.match(/^news\/\d+$/)) {
-      return "news-detail";
-    }
+    if (hash.match(/^news\/\d+$/)) return "news-detail";
+    if (hash.startsWith("product/")) return "product-detail";
     return hash.split("?")[0] || "home";
   });
-
-  const getHashRoute = () => {
-    const hash = window.location.hash.replace("#", "");
-    // Tách route và query params
-    const [route, queryString] = hash.split("?");
-    return route || "home";
-  };
 
   useEffect(() => {
     const onHashChange = () => {
       const hash = window.location.hash.replace("#", "");
-      setCurrentPage(hash.split("?")[0] || "home");
+      if (hash.match(/^news\/\d+$/)) setCurrentPage("news-detail");
+      else if (hash.startsWith("product/")) setCurrentPage("product-detail");
+      else setCurrentPage(hash.split("?")[0] || "home");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-  const [currentRoute, setCurrentRoute] = useState(getHashRoute());
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace("#", "") || "home";
-      console.log("🔄 Hash changed to:", hash);
-      if (hash.match(/^news\/\d+$/)) {
-        setCurrentPage("news-detail");
-        return;
-      }
-
-      if (hash.startsWith("product/")) {
-        setCurrentPage("product-detail");
-      } else {
-        setCurrentPage(hash);
-      }
-    };
-
-    window.addEventListener("hashchange", handleHashChange);
-    handleHashChange(); // Set initial page
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentRoute(getHashRoute());
-    };
-
-    window.addEventListener("hashchange", handleHashChange);
-    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   const handleLoginFromGuest = () => {
@@ -666,6 +626,7 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
       );
     case "payment-result":
       return <PaymentResult user={user} onLogout={onLogout} />;
+
     default:
       return (
         <HomePage

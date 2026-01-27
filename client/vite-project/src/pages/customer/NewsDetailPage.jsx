@@ -162,7 +162,7 @@ function NewsDetailPage({
         <div className="breadcrumb">
           <div className="container">
             <button className="breadcrumb-link" onClick={handleGoBack}>
-              📰 Tin tức
+              Tin tức
             </button>
             <span className="breadcrumb-separator">/</span>
             <span className="breadcrumb-current">{news.title}</span>
@@ -183,14 +183,10 @@ function NewsDetailPage({
                     {formatDate(news.createdAt)}
                   </span>
                 </div>
-                <div className="meta-item">
-                  <span className="meta-icon">👁️</span>
-                  <span className="meta-text">Xem thêm</span>
-                </div>
+                <div className="meta-item"></div>
               </div>
             </header>
 
-            {/* Featured Image */}
             {news.image && (
               <div className="news-featured-image">
                 <img
@@ -215,7 +211,7 @@ function NewsDetailPage({
             {/* Related Products */}
             {relatedProducts.length > 0 && (
               <section className="related-products">
-                <h2 className="section-title">🛍️ Sản phẩm liên quan</h2>
+                <h2 className="section-title">Sản phẩm liên quan</h2>
                 <div className="products-grid">
                   {relatedProducts.map((product) => (
                     <div
