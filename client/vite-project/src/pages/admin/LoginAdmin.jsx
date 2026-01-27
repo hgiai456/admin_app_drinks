@@ -9,6 +9,8 @@ import {
   getLockoutLevelInfo,
 } from "@utils/loginRateLimit";
 
+import { ArrowLeftCircle } from "lucide-react";
+
 export default function LoginAdmin({
   onLogin,
   onSwitchToRegister,
@@ -205,8 +207,10 @@ export default function LoginAdmin({
           disabled={loading}
           title="Trở về trang chủ"
         >
-          <span className="btn-icon">{"<<"}</span>
-          <span className="btn-text"> Trang chủ</span>
+          <span className="btn-icon">
+            <ArrowLeftCircle size={20} />
+          </span>
+          <span className="btn-text">Home</span>
         </button>
         <form className="login-form" onSubmit={handleSubmit}>
           {/* Header voi logo */}

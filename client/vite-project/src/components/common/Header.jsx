@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import CartService from "@services/cart.service.js";
 import CartButton from "@components/customer/CartButton";
+import { SignalIcon, User, UserPlus } from "lucide-react";
 import "@styles/pages/_header.scss";
 
 export default function Header({
@@ -209,14 +210,18 @@ export default function Header({
           ) : (
             <div className="auth-section">
               <button className="auth-btn login-btn" onClick={handleLoginClick}>
-                <span className="btn-icon">👤</span>
+                <span className="btn-icon">
+                  <User size={20} />
+                </span>
                 <span>Đăng nhập</span>
               </button>
               <button
                 className="auth-btn register-btn"
                 onClick={handleRegisterClick}
               >
-                <span className="btn-icon">📝</span>
+                <span className="btn-icon">
+                  <UserPlus size={20} />
+                </span>
                 <span>Đăng ký</span>
               </button>
             </div>

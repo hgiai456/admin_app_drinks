@@ -434,14 +434,6 @@ export async function checkoutCart(req, res) {
           buyturn: newBuyturn,
         },
       });
-      // orderDetails.push({
-      //   ...orderDetail.toJSON(),
-      //   product_details: {
-      //     ...item.product_details.toJSON(),
-      //     quantity: newQuantity,
-      //     buyturn: newBuyturn,
-      //   },
-      // });
     }
 
     // ===== 6. XÓA GIỎ HÀNG VÀ CART ITEMS =====
