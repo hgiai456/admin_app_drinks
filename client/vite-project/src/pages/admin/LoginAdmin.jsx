@@ -208,9 +208,8 @@ export default function LoginAdmin({
           title="Trở về trang chủ"
         >
           <span className="btn-icon">
-            <ArrowLeftCircle size={20} />
+            <ArrowLeftCircle size={30} />
           </span>
-          <span className="btn-text">Home</span>
         </button>
         <form className="login-form" onSubmit={handleSubmit}>
           {/* Header voi logo */}

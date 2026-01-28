@@ -1,5 +1,5 @@
 import db from "../models/index.js";
-import { Op} from "sequelize";
+import { Op } from "sequelize";
 import {
   ref,
   uploadBytesResumable,
@@ -9,6 +9,7 @@ import {
 import { getStorage } from "firebase/storage";
 import { firebaseApp } from "../config/firebaseConfig.js";
 import sizeOf from "image-size";
+import { bucket } from "../config/firebaseAdmin.js";
 // import upload from "../middlewares/imageGoogleUpload.js";
 
 const storage = getStorage(firebaseApp);
@@ -192,17 +193,26 @@ export async function uploadMultipleImages(req, res) {
     for (const file of req.files) {
       try {
         const newFileName = `${Date.now()}-${file.originalname}`;
-        const storageRef = ref(storage, `media-library/${newFileName}`);
-        const snapshot = await uploadBytesResumable(storageRef, file.buffer, {
-          contentType: file.mimetype,
+        const firebaseFile = bucket.file(`media-library/${newFileName}`);
+
+        await firebaseFile.save(file.buffer, {
+          metadata: { contentType: file.mimetype },
+          public: true,
+          validation: "md5",
         });
 
-        const downloadURL = await getDownloadURL(snapshot.ref);
+        // const storageRef = ref(storage, `media-library/${newFileName}`);
+        // const snapshot = await uploadBytesResumable(storageRef, file.buffer, {
+        //   contentType: file.mimetype,
+        //   storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
+        // });
+
+        const downloadURL = `https://storage.googleapis.com/${bucket.name}/media-library/${newFileName}`;
 
         //Lấy kích thước ảnh
         const dimensions = sizeOf(file.buffer);
 
-        const meda = await db.MediaLibrary.create({
+        const media = await db.MediaLibrary.create({
           file_name: file.originalname,
           file_url: downloadURL.trim(),
           file_size: file.size,
@@ -214,7 +224,7 @@ export async function uploadMultipleImages(req, res) {
           tags: "[]",
         });
 
-        uploadedMedia.push(meda);
+        uploadedMedia.push(media);
       } catch (error) {
         console.error(`Lỗi upload file ${file.originalname}:`, error);
         errors.push({
