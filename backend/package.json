@@ -24,6 +24,7 @@
         "crypto": "^1.0.1",
         "dotenv": "^16.6.1",
         "express": "^5.1.0",
+        "firebase": "^12.8.0",
         "firebase-admin": "^13.6.0",
         "image-size": "^2.0.2",
         "joi": "^17.13.3",
