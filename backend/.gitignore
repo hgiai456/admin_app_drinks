@@ -4,3 +4,4 @@ node_modules
 .env.development
 .env.production
 *.env
+backend/config/firebase-service-account.json
