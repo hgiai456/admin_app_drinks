@@ -11,7 +11,6 @@ import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { scrollToTop, navigation } from "@utils/editorHelpers";
 import { Flame, User } from "lucide-react";
-import { Margin } from "@mui/icons-material";
 
 export default function HomePage({
   user,
