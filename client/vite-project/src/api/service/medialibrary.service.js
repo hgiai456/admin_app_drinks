@@ -21,7 +21,7 @@ class MediaLibraryService extends BaseService {
       const mediaItems = (response.data.data || []).map((item) => {
         return MediaLibrary.fromApiResponse(item);
       });
-      return {  
+      return {
         data: mediaItems,
         pagination: response.data.pagination || {},
       };
@@ -55,7 +55,7 @@ class MediaLibraryService extends BaseService {
         formData,
         {
           headers: { "Content-Type": "multipart/form-data" },
-        }
+        },
       );
 
       return MediaLibrary.fromApiResponse(response.data.data);
@@ -64,43 +64,61 @@ class MediaLibraryService extends BaseService {
       throw error;
     }
   }
+
   async uploadMultipleMedia(files, onProgress = null) {
     try {
+      console.log("📤 Starting upload...");
+      console.log("Files to upload:", files);
+
       const formData = new FormData();
       files.forEach((file) => {
-        formData.append("images", file);
+        console.log("Appending file:", file.name, file.size, file.type);
+        formData.append("images", file); // Giữ nguyên "images" vì Postman work
       });
+
+      // Log FormData content
+      for (let pair of formData.entries()) {
+        console.log("FormData:", pair[0], pair[1]);
+      }
 
       const response = await api.post(
         ENDPOINTS.MEDIA_LIBRARY.UPLOAD_MULTIPLE,
         formData,
         {
-          headers: { "Content-Type": "multipart/form-data" },
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
           onUploadProgress: (progressEvent) => {
             if (onProgress) {
               const percentCompleted = Math.round(
-                (progressEvent.loaded * 100) / progressEvent.total
+                (progressEvent.loaded * 100) / progressEvent.total,
               );
+              console.log("Upload progress:", percentCompleted + "%");
               onProgress(percentCompleted);
             }
           },
-        }
+        },
       );
+
+      console.log("Upload success:", response.data);
 
       const uploadedItems = (response.data.data || []).map((item) => {
         return MediaLibrary.fromApiResponse(item);
       });
+
       return {
         items: uploadedItems,
         summary: response.data.summary,
         errors: response.data.errors || [],
       };
     } catch (error) {
-      console.error("Error uploading media item:", error);
+      console.error("❌ Upload error:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      console.error("Error headers:", error.response?.headers);
       throw error;
     }
   }
-
   async incrementUsageCount(file_url) {
     try {
       await api.post(ENDPOINTS.MEDIA_LIBRARY.INCREMENT_USAGE, { file_url });

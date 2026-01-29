@@ -1,7 +1,6 @@
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as m;
 
-// ✅ GLOBAL RESET
 * {
     margin: 0;
     padding: 0;
@@ -11,9 +10,9 @@
 .homepage {
     min-height: 100vh;
     background: $light-color;
-    overflow-x: hidden; // ✅ Prevent horizontal scroll
+    overflow-x: hidden;
 
-    // ✅ LOADING STATE
+
     &-loading {
         @include m.flex-center;
         min-height: 100vh;

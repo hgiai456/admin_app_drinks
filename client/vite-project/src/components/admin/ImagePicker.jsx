@@ -53,8 +53,9 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
       }
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
     };
-  }, [previewUrl]);
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -68,32 +69,33 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
 
     if (files.length === 0) return;
 
-    if (files.length > 5) {
-      alert("Bạn chỉ có thể chọn tối đa 5 tệp hình ảnh.");
+    if (files.length > 10) {
+      setUploadError("Bạn chỉ có thể chọn tối đa 10 ảnh cùng lúc.");
       return;
     }
 
     //validate files
     const invalidFiles = files.filter(
-      (file) => !file.type.startsWith("image/") || file.size > 10 * 1024 * 1024
+      (file) => !file.type.startsWith("image/") || file.size > 10 * 1024 * 1024,
     );
 
     if (invalidFiles.length > 0) {
       setUploadError(
-        `${invalidFiles.length} file không hợp lệ (phải là ảnh và < 10MB)`
+        `${invalidFiles.length} file không hợp lệ (phải là ảnh và < 10MB)`,
       );
       return;
     }
 
     setUploadError("");
     setUploadFiles(files);
+
     //clean up old preview URLs
     previewUrls.forEach((url) => URL.revokeObjectURL(url));
+
     //create new preview URLs
     const newPreviewUrls = files.map((file) => URL.createObjectURL(file));
     setPreviewUrls(newPreviewUrls);
   };
-
   const handleMultipleUpload = async (e) => {
     e.preventDefault();
     if (!uploadFiles || uploadFiles.length === 0) return;
@@ -103,11 +105,13 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
     try {
       const result = await MediaLibraryService.uploadMultipleMedia(
         uploadFiles,
-        (progress) => setUploadProgress(progress)
+        (progress) => setUploadProgress(progress),
       );
 
+      // Thêm ảnh mới vào đầu danh sách
       setMediaItems([...result.items, ...mediaItems]);
 
+      // Cleanup
       setUploadFiles([]);
       previewUrls.forEach((url) => URL.revokeObjectURL(url));
       setPreviewUrls([]);
@@ -125,7 +129,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
       alert("✅ " + message);
     } catch (error) {
       console.error("Error uploading multiple files:", error);
-      alert("Lỗi tải lên: " + error.message);
+      alert("Lỗi tải lên: " + (error.response?.data?.message || error.message));
     } finally {
       setLoading(false);
       setUploadProgress(0);
@@ -162,7 +166,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
     try {
       const newMedia = await MediaLibraryService.uploadMedia(
         uploadFile,
-        uploadAltText
+        uploadAltText,
       );
       setMediaItems([newMedia, ...mediaItems]);
       setUploadFile(null);
@@ -239,7 +243,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
 
         {/* TOOLBAR */}
         <div className="image-picker-toolbar">
-          <div onSubmit={handleSearch} className="search-form">
+          <form onSubmit={handleSearch} className="search-form">
             <input
               type="text"
               placeholder="Tìm kiếm ảnh..."
@@ -248,19 +252,24 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
               className="search-input"
             />
             <Button
-              type="button"
+              type="submit"
               variant="primary"
               size="sm"
               icon={<Search size={18} />}
             >
               Tìm kiếm
             </Button>
-          </div>
+          </form>
           <Button
             variant={showUploadForm ? "danger" : "success"}
             size="sm"
             icon={showUploadForm ? <X size={18} /> : <Upload size={18} />}
-            onClick={() => setShowUploadForm(!showUploadForm)}
+            onClick={() => {
+              setShowUploadForm(!showUploadForm);
+              if (showUploadForm) {
+                resetUploadForm();
+              }
+            }}
           >
             {showUploadForm ? "Đóng" : "Tải ảnh lên"}
           </Button>
@@ -276,15 +285,10 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                   uploadMode === "single" ? "primary" : "outline-primary"
                 }
                 size="md"
-                icon={<Images size={20} />}
+                icon={<Image size={20} />}
                 onClick={() => {
-                  setUploadMode("multiple");
-                  setUploadFile(null);
-                  if (previewUrl) {
-                    URL.revokeObjectURL(previewUrl);
-                    setPreviewUrl("");
-                  }
-                  setUploadError("");
+                  setUploadMode("single");
+                  resetUploadForm();
                 }}
                 fullWidth
               >
@@ -299,12 +303,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 icon={<Images size={20} />}
                 onClick={() => {
                   setUploadMode("multiple");
-                  setUploadFile(null);
-                  if (previewUrl) {
-                    URL.revokeObjectURL(previewUrl);
-                    setPreviewUrl("");
-                  }
-                  setUploadError("");
+                  resetUploadForm();
                 }}
                 fullWidth
               >
@@ -314,7 +313,7 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
 
             {/* SINGLE UPLOAD FORM */}
             {uploadMode === "single" && (
-              <div onSubmit={handleFileSelect} className="upload-form">
+              <form onSubmit={handleUpload} className="upload-form">
                 <input
                   type="file"
                   accept="image/*"
@@ -339,11 +338,11 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 )}
 
                 <Button
-                  type="button"
+                  type="submit"
                   variant="success"
                   size="md"
                   loading={loading}
-                  disabled={!uploadFile}
+                  disabled={!uploadFile || loading}
                   icon={<Upload size={18} />}
                   fullWidth
                 >
@@ -353,12 +352,12 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 {uploadError && (
                   <div className="upload-error">❌ {uploadError}</div>
                 )}
-              </div>
+              </form>
             )}
 
             {/* MULTIPLE UPLOAD FORM */}
             {uploadMode === "multiple" && (
-              <div onSubmit={handleMultipleUpload} className="upload-form">
+              <form onSubmit={handleMultipleUpload} className="upload-form">
                 <input
                   type="file"
                   accept="image/*"
@@ -410,11 +409,11 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 )}
 
                 <Button
-                  type="button"
+                  type="submit"
                   variant="success"
                   size="md"
                   loading={loading}
-                  disabled={uploadFiles.length === 0}
+                  disabled={uploadFiles.length === 0 || loading}
                   icon={<Upload size={18} />}
                   fullWidth
                 >
@@ -426,17 +425,20 @@ function ImagePicker({ show, onClose, onSelect, currentImage = "" }) {
                 {uploadError && (
                   <div className="upload-error">❌ {uploadError}</div>
                 )}
-              </div>
+              </form>
             )}
           </div>
         )}
 
         {/* IMAGE GRID */}
         <div className="image-picker-grid">
-          {loading ? (
+          {loading && !uploadProgress ? (
             <div className="loading">Đang tải...</div>
           ) : mediaItems.length === 0 ? (
-            <div className="empty-state">Không có ảnh nào</div>
+            <div className="empty-state">
+              <Image size={48} />
+              <p>Chưa có ảnh nào trong thư viện</p>
+            </div>
           ) : (
             mediaItems.map((item) => (
               <div

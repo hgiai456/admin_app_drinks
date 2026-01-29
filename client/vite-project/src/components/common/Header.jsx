@@ -105,7 +105,7 @@ export default function Header({
         <div className="logo-section">
           <div className="logo-container">
             <img
-              src="https://firebasestorage.googleapis.com/v0/b/hg-store-a11c5.firebasestorage.app/o/images%2F1751092040674-logo.png?alt=media&token=4b72bf76-9c9c-4257-9290-808098ceac2f"
+              src="https://storage.googleapis.com/hg-store-a11c5.firebasestorage.app/media-library/1769589733524-logo-hg-coffee%20-%20no-background.png"
               alt="HG COFFEE"
               className="logo"
               onError={(e) => {
