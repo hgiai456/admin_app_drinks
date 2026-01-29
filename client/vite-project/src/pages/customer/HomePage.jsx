@@ -123,9 +123,6 @@ export default function HomePage({
     const fetchProducts = async () => {
       try {
         setProductsLoading(true);
-        console.log(
-          `🔄 Fetching products - page: ${page}, search: "${search}"`,
-        );
         let response;
         if (selectedCategory === "all") {
           response = await ProductService.getPaging({
@@ -434,7 +431,6 @@ export default function HomePage({
         </div>
       )}
 
-      {/* ✅ HERO SLIDER (giữ nguyên) */}
       <section className="hero-slider">
         <div className="slider-container">
           {banners.map((banner, index) => (
@@ -460,31 +456,6 @@ export default function HomePage({
               </div>
               <div className="slide-content">
                 <div className="content-wrapper">
-                  <div className="slide-text">
-                    <div className="slide-badge">
-                      <span>🔥 HOT</span>
-                    </div>
-                    <h2 className="slide-title">
-                      {banner.title || "HG COFFEE"}
-                    </h2>
-                    <h3 className="slide-subtitle">
-                      {banner.subtitle || "Khám phá hương vị đặc biệt"}
-                    </h3>
-                    <p className="slide-description">
-                      {banner.description ||
-                        "Trải nghiệm không gian thư giãn với những thức uống chất lượng cao"}
-                    </p>
-                    <div className="slide-buttons">
-                      <button className="btn-primary">
-                        <span className="btn-icon">🎯</span>
-                        <span>{banner.buttonText || "Khám phá ngay"}</span>
-                      </button>
-                      <button className="btn-secondary">
-                        <span className="btn-icon">📍</span>
-                        <span>Tìm cửa hàng</span>
-                      </button>
-                    </div>
-                  </div>
                   <div className="slide-visual">
                     <div className="product-showcase"></div>
                   </div>
@@ -494,7 +465,6 @@ export default function HomePage({
           ))}
         </div>
 
-        {/* Slider controls */}
         {banners.length > 1 && (
           <>
             <button className="slider-btn prev-btn" onClick={prevSlide}>
@@ -619,7 +589,6 @@ export default function HomePage({
               ))}
             </div>
 
-            {/* ✅ FILTER STATUS */}
             {selectedCategory !== "all" && (
               <div className="filter-status">
                 <span className="filter-indicator">
@@ -747,13 +716,6 @@ export default function HomePage({
               <div className="pagination-controls">
                 <button
                   className="btn-nav"
-                  onClick={() => handlePageChange(1)}
-                  disabled={page === 1 || productsLoading}
-                >
-                  ⏪ Đầu
-                </button>
-                <button
-                  className="btn-nav"
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1 || productsLoading}
                 >
@@ -783,13 +745,6 @@ export default function HomePage({
                   disabled={page === totalPage || productsLoading}
                 >
                   Tiếp ➡️
-                </button>
-                <button
-                  className="btn-nav"
-                  onClick={() => handlePageChange(totalPage)}
-                  disabled={page === totalPage || productsLoading}
-                >
-                  Cuối ⏩
                 </button>
               </div>
             </div>

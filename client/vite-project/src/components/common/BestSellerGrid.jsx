@@ -36,9 +36,9 @@ export default function BestSellerGrid({
   const handleResize = () => {
     const width = window.innerWidth;
     if (width < 576) {
-      setVisibleItems(1);
-    } else if (width < 768) {
       setVisibleItems(2);
+    } else if (width < 768) {
+      setVisibleItems(3);
     } else if (width < 1024) {
       setVisibleItems(3);
     } else {
