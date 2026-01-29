@@ -5,9 +5,9 @@ import SizeService from "@services/size.service.js";
 import CartService from "@services/cart.service.js";
 import ProdetailService from "@services/prodetail.service.js";
 import "@styles/pages/_productdetail.scss";
-import BestSellerGrid from "@components/common/BestSellerGrid";
-import { triggerCartRefresh } from "@components/common/UtilityFunction";
-import { navigation } from "@utils/editorHelpers";
+import BestSellerGrid from "@components/common/BestSellerGrid.jsx";
+import { triggerCartRefresh } from "@components/common/UtilityFunction.js";
+import { navigation } from "@utils/editorHelpers.js";
 import { ShoppingCart } from "lucide-react";
 import AlertMessage from "@components/common/AlertMessage.jsx";
 
