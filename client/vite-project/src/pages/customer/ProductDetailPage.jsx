@@ -8,6 +8,8 @@ import "@styles/pages/_productdetail.scss";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { triggerCartRefresh } from "@components/common/UtilityFunction";
 import { navigation } from "@utils/editorHelpers";
+import { ShoppingCart } from "lucide-react";
+import AlertMessage from "@components/common/AlertMessage.jsx";
 
 export default function ProductDetailPage({
   user,
@@ -42,6 +44,7 @@ export default function ProductDetailPage({
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [messageType, setMessageType] = useState("success");
 
   useEffect(() => {
     const loadProductData = async () => {
@@ -135,9 +138,7 @@ export default function ProductDetailPage({
       }
     };
 
-    if (productId) {
-      loadProductData();
-    }
+    loadProductData();
   }, [productId]);
 
   useEffect(() => {
@@ -189,12 +190,11 @@ export default function ProductDetailPage({
 
       const guestText = isGuest ? " (khách vãng lai)" : "";
       setMessage(
-        `✅ Đã thêm ${quantity} ${product.name} (${getSizeName(
+        ` Đã thêm ${quantity} ${product.name} (${getSizeName(
           selectedSize,
         )}) vào giỏ hàng${guestText}`,
       );
       triggerCartRefresh();
-      // Reset quantity
       setQuantity(1);
     } catch (error) {
       console.error("❌ Error adding to cart:", error);
@@ -247,10 +247,11 @@ export default function ProductDetailPage({
     window.location.hash = "cart";
   };
 
-  const handleViewOtherProduct = (product) => {
-    const id = parseInt(product.id);
-    navigation(`product/${id}`);
+  const handleViewProduct = (product) => {
+    navigation(`product/${product.id}`);
+    scrollToTop();
   };
+
   if (loading) {
     return (
       <Layout user={user} onLogout={onLogout} currentPage="product-detail">
@@ -288,22 +289,11 @@ export default function ProductDetailPage({
       onRegister={onRegister}
     >
       <div className="product-detail-container">
-        {message && (
-          <div
-            className={`message ${
-              message.includes("✅")
-                ? "success"
-                : message.includes("❌")
-                  ? "error"
-                  : "warning"
-            }`}
-          >
-            {message}
-            <button onClick={() => setMessage("")} className="close-message">
-              ×
-            </button>
-          </div>
-        )}
+        <AlertMessage
+          message={message}
+          type={messageType}
+          onClose={() => setMessage("")}
+        />
 
         <div className="product-detail-content">
           <div className="product-images">
@@ -479,12 +469,14 @@ export default function ProductDetailPage({
                 {addingToCart ? (
                   <>🔄 Đang thêm...</>
                 ) : (
-                  <>🛒 Thêm vào giỏ hàng</>
+                  <>
+                    <ShoppingCart size={20} /> Thêm vào giỏ hàng
+                  </>
                 )}
               </button>
 
               <button className="btn-view-cart" onClick={handleGoToCart}>
-                👁️ Xem giỏ hàng
+                Xem giỏ hàng
               </button>
             </div>
           </div>
@@ -492,8 +484,7 @@ export default function ProductDetailPage({
 
         <BestSellerGrid
           limit={8}
-          onProductClick={handleViewOtherProduct}
-          onViewMore={() => (window.location.hash = "menu?sort=bestseller")}
+          onProductClick={handleViewProduct}
           formatPrice={formatPrice}
           getCategoryName={getCategoryName}
           title="BEST SELLERS"

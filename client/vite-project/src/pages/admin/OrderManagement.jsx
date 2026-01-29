@@ -464,36 +464,7 @@ export default function OrderManagement() {
             })}
           </div>
         </div>
-        {/* Status Flow Visualization */}
-        {/* <div className="status-flow-guide">
-          <div className="guide-title">📋 Luồng xử lý đơn hàng</div>
-          <div className="flow-steps">
-            <div className="flow-step">
-              <span className="step-number">1</span>
-              <span className="step-label">Chờ xử lý</span>
-            </div>
-            <span className="flow-arrow">→</span>
-            <div className="flow-step">
-              <span className="step-number">2</span>
-              <span className="step-label">Đang chuẩn bị</span>
-            </div>
-            <span className="flow-arrow">→</span>
-            <div className="flow-step">
-              <span className="step-number">3</span>
-              <span className="step-label">Đã vận chuyển</span>
-            </div>
-            <span className="flow-arrow">→</span>
-            <div className="flow-step">
-              <span className="step-number">4</span>
-              <span className="step-label">Đã hoàn tất</span>
-            </div>
-          </div>
-          <div className="flow-note">
-            💡 <strong>Lưu ý:</strong> Có thể Hủy hoặc Thất bại từ bất kỳ trạng
-            thái nào. Trạng thái Trả hàng chỉ áp dụng sau khi Đã hoàn tất.
-          </div>
-        </div> */}
-        {/* Action Buttons */}
+
         <div className="form-buttons">
           <Button
             type="button"

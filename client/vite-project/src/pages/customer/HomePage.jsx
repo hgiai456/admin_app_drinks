@@ -10,6 +10,8 @@ import { triggerCartRefresh } from "@components/common/UtilityFunction";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { scrollToTop, navigation } from "@utils/editorHelpers";
+import { Flame, User } from "lucide-react";
+import { Margin } from "@mui/icons-material";
 
 export default function HomePage({
   user,
@@ -507,31 +509,6 @@ export default function HomePage({
             </p>
 
             <div className="search-bar">
-              <div className="search-info">
-                {selectedCategory === "all" ? (
-                  <>
-                    Tổng <strong>{totalItems}</strong> sản phẩm - Trang{" "}
-                    <strong>{page}</strong>/{totalPage}
-                  </>
-                ) : (
-                  <>
-                    Danh mục{" "}
-                    <strong>
-                      {getCategoryName(parseInt(selectedCategory)).replace(
-                        /^[^\s]+\s/,
-                        "",
-                      )}
-                    </strong>
-                    :<strong> {totalItems}</strong> sản phẩm
-                    {totalPage > 1 && (
-                      <>
-                        {" "}
-                        - Trang <strong>{page}</strong>/{totalPage}
-                      </>
-                    )}
-                  </>
-                )}
-              </div>
               <form className="search-form" onSubmit={handleSearchSubmit}>
                 <input
                   name="search"
@@ -658,7 +635,8 @@ export default function HomePage({
                       </button>
                     </div>
                     <div className="product-badge">
-                      <span>🔥 Hot</span>
+                      <Flame size={12} />
+                      <span>Hot</span>
                     </div>
                   </div>
 
@@ -679,9 +657,6 @@ export default function HomePage({
                         onClick={() => handleAddToCart(product)}
                         disabled={addingToCart[product.id]}
                       >
-                        <span className="btn-icon">
-                          {addingToCart[product.id] ? "⏳" : "🛒"}
-                        </span>
                         <span className="btn-text">
                           {addingToCart[product.id]
                             ? "Đang thêm..."

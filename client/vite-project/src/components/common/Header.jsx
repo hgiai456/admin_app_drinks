@@ -141,7 +141,7 @@ export default function Header({
             MENU
           </a>
           <a
-            href="#store"
+            href="https://www.google.com/maps/dir//Viva+Coffee+Vi%E1%BB%87t+Nam,+Th%C3%A0nh+ph%E1%BB%91+H%E1%BB%93+Ch%C3%AD+Minh,+Qu%E1%BA%ADn+11,+%C4%90%C6%B0%E1%BB%9Dng+S%E1%BB%91+5+-+C%C6%B0+x%C3%A1+B%C3%ACnh+Th%E1%BB%9Bi,+1+%C4%90%C6%B0%E1%BB%9Dng+S%E1%BB%91+6/@10.75844,106.6642979,3422m/data=!3m1!1e3!4m8!4m7!1m0!1m5!1m1!1s0x31752f13ff393833:0x787900586abf310e!2m2!1d106.6494609!2d10.7613216?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D"
             className={`nav-link ${currentPage === "store" ? "active" : ""}`}
           >
             CỬA HÀNG
@@ -153,7 +153,7 @@ export default function Header({
             TIN TỨC
           </a>
           <a
-            href="#contact"
+            href="https://www.facebook.com/hoa.giai.826653"
             className={`nav-link ${currentPage === "contact" ? "active" : ""}`}
           >
             VỀ CHÚNG TÔI
@@ -251,7 +251,7 @@ export default function Header({
               MENU
             </a>
             <a
-              href="#store"
+              href="#https://www.google.com/maps/place/B%E1%BB%87nh+vi%E1%BB%87n+L%C3%A3nh+Binh+Th%C4%83ng/@10.7605704,106.6433577,856m/data=!3m1!1e3!4m16!1m9!4m8!1m0!1m6!1m2!1s0x31752f13ff393833:0x787900586abf310e!2zVml2YSBDb2ZmZWUgVmnhu4d0IE5hbSwgVGjDoG5oIHBo4buRIEjhu5MgQ2jDrSBNaW5oLCBRdeG6rW4gMTEsIMSQxrDhu51uZyBT4buRIDUgLSBDxrAgeMOhIELDrG5oIFRo4bubaSwgMSDEkMaw4budbmcgU-G7kSA2!2m2!1d106.6494609!2d10.7613216!3m5!1s0x31752f90d969433b:0x9bd571c18375e5b0!8m2!3d10.7605706!4d106.6481212!16s%2Fg%2F11s4zm877d?entry=ttu&g_ep=EgoyMDI2MDEyNy4wIKXMDSoASAFQAw%3D%3D"
               className={`nav-link ${currentPage === "store" ? "active" : ""}`}
             >
               CỬA HÀNG
@@ -327,14 +327,18 @@ export default function Header({
                   className="auth-btn login-btn"
                   onClick={handleLoginClick}
                 >
-                  <span className="btn-icon">👤</span>
+                  <span className="btn-icon">
+                    <User size={20} />
+                  </span>
                   <span>Đăng nhập</span>
                 </button>
                 <button
                   className="auth-btn register-btn"
                   onClick={handleRegisterClick}
                 >
-                  <span className="btn-icon">📝</span>
+                  <span className="btn-icon">
+                    <UserPlus size={20} />
+                  </span>
                   <span>Đăng ký</span>
                 </button>
               </div>

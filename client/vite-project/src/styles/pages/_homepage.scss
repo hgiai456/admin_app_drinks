@@ -1333,8 +1333,8 @@
 
 // ✅ PAGINATION
 .pagination {
-    margin-top: 3rem;
-    padding-top: 2rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
     border-top: 1px solid rgba($brown-color, 0.1);
 
     .pagination-info {
@@ -1382,7 +1382,6 @@
     }
 }
 
-// ✅ PRODUCT BRAND INFO
 .product-brand {
     margin-bottom: 0.5rem;
 
@@ -1394,7 +1393,6 @@
     }
 }
 
-// ✅ ERROR MESSAGE
 .error-message {
     position: sticky;
     top: 0;
@@ -2202,10 +2200,11 @@
         }
     }
 
+
     .products-section .products-grid .product-card {
         flex: 0 0 130px;
         max-width: 130px;
         min-width: 110px;
-        height: 180px;
+        height: 200px;
     }
 }

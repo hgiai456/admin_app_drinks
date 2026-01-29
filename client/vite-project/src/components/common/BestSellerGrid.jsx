@@ -3,10 +3,6 @@ import ProductService from "@services/product.service.js";
 import "@styles/components/_product-grid.scss";
 import { navigation } from "@utils/editorHelpers";
 
-/**
- * Component hiển thị sản phẩm bán chạy (Best Sellers)
- * Hiển thị 4 sản phẩm/line, auto scroll mỗi 2 giây
- */
 export default function BestSellerGrid({
   limit = 8,
   onProductClick,
@@ -51,10 +47,10 @@ export default function BestSellerGrid({
     if (onProductClick) {
       onProductClick(product);
     } else {
-      scrollToTop();
       setTimeout(() => {
         navigation(`product/${product.id}`);
-      }, 100);
+      },100);
+      scrollToTop();
     }
   };
 
@@ -84,7 +80,6 @@ export default function BestSellerGrid({
         return;
       }
 
-      // ✅ FIX: Dùng total_buyturn từ backend, KHÔNG CẦN tính toán lại
       const productsWithBuyturns = response
         .map((product) => {
           const price =
@@ -206,7 +201,6 @@ export default function BestSellerGrid({
             </button>
           )}
 
-          {/* PRODUCTS SLIDER */}
           <div className="bestseller-carousel">
             <div
               className="carousel-track"
@@ -241,7 +235,7 @@ export default function BestSellerGrid({
                         <span>Top {index + 1}</span>
                       </div>
                       <div className="buyturns-badge">
-                        <span>🔥 {product.total_buyturn} lượt mua</span>
+                        <span>{product.total_buyturn} lượt mua</span>
                       </div>
                     </div>
 

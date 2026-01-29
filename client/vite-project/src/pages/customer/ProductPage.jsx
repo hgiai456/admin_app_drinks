@@ -4,6 +4,7 @@ import CategoryService from "@services/category.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_homepage.scss";
 import { formatPrice, scrollToTop } from "@utils/editorHelpers.js";
+import { ShoppingCart } from "lucide-react";
 
 export default function ProductPage({
   user,
@@ -34,8 +35,6 @@ export default function ProductPage({
     const fetchCategories = async () => {
       try {
         const response = await CategoryService.getAll();
-        console.log("📦 Categories API response:", response);
-
         let categoriesData = [];
         if (response && response.data && Array.isArray(response.data)) {
           categoriesData = response.data;
@@ -43,7 +42,6 @@ export default function ProductPage({
           categoriesData = response;
         }
 
-        console.log("✅ Categories data:", categoriesData);
         setCategories(categoriesData || []);
       } catch (error) {
         console.error("❌ Error fetching categories:", error);
@@ -91,7 +89,6 @@ export default function ProductPage({
 
         console.log("📦 Raw API response:", response);
 
-        // ✅ VALIDATE response
         if (!response) {
           console.error("❌ Response is null/undefined");
           setProducts([]);
@@ -324,7 +321,7 @@ export default function ProductPage({
             </div>
 
             {/* PAGE SIZE DROPDOWN */}
-            <div className="page-size-dropdown-container">
+            {/* <div className="page-size-dropdown-container">
               <span className="selector-label">📄 Số sản phẩm mỗi trang:</span>
               <div className="page-size-dropdown">
                 <button
@@ -363,7 +360,7 @@ export default function ProductPage({
                   </div>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* CATEGORY FILTERS */}
             <div className="section-actions">
@@ -497,7 +494,7 @@ export default function ProductPage({
                             handleViewProduct(product);
                           }}
                         >
-                          <span className="btn-icon">🛒</span>
+                          <ShoppingCart size={16} className="btn-icon" />
                           <span>Thêm</span>
                         </button>
                       </div>
@@ -506,7 +503,6 @@ export default function ProductPage({
                 ))}
               </div>
 
-              {/* ✅ PAGINATION - LUÔN HIỂN THỊ */}
               <div className="pagination">
                 <div className="pagination-info">
                   <span>
@@ -528,14 +524,6 @@ export default function ProductPage({
 
                 {totalPage > 1 && (
                   <div className="pagination-controls">
-                    <button
-                      className="btn-nav"
-                      onClick={() => handlePageChange(1)}
-                      disabled={page === 1 || productsLoading}
-                      title="Trang đầu"
-                    >
-                      ⏪ Đầu
-                    </button>
                     <button
                       className="btn-nav"
                       onClick={() => handlePageChange(page - 1)}
@@ -578,14 +566,6 @@ export default function ProductPage({
                       title="Trang sau"
                     >
                       Tiếp ➡️
-                    </button>
-                    <button
-                      className="btn-nav"
-                      onClick={() => handlePageChange(totalPage)}
-                      disabled={page >= totalPage || productsLoading}
-                      title="Trang cuối"
-                    >
-                      Cuối ⏩
                     </button>
                   </div>
                 )}

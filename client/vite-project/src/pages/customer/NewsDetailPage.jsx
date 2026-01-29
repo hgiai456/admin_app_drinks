@@ -4,7 +4,7 @@ import NewsDetailService from "@services/newsdetail.service.js";
 import ProductService from "@services/product.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_newsdetail.scss";
-import { sanitizeHtml } from "@utils/editorHelpers.js";
+import { sanitizeHtml, scrollToTop } from "@utils/editorHelpers.js";
 
 function NewsDetailPage({
   user,
@@ -100,11 +100,13 @@ function NewsDetailPage({
   // ===== GO BACK =====
   const handleGoBack = () => {
     window.location.hash = "news";
+    scrollToTop();
   };
 
   // ===== HANDLE PRODUCT CLICK =====
   const handleProductClick = (productId) => {
     window.location.hash = `product/${productId}`;
+    scrollToTop();
   };
 
   // ===== LOADING STATE =====

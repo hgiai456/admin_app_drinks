@@ -38,6 +38,40 @@ export async function getCarts(req, res) {
   });
 }
 
+export async function getAll(req, res) {
+  const { search = "", page = 1 } = req.query;
+  const pageSize = 1000;
+  const offset = (page - 1) * pageSize;
+
+  let whereClause = {};
+  if (search.trim()) {
+    whereClause = {
+      session_id: { [Op.like]: `%${search.trim()}%` },
+    };
+  }
+
+  const [carts, totalCarts] = await Promise.all([
+    db.Cart.findAll({
+      where: whereClause,
+      include: {
+        model: db.CartItem,
+        as: "cart_items",
+      },
+      limit: pageSize,
+      offset,
+    }),
+    db.Cart.count({ where: whereClause }),
+  ]);
+
+  res.status(200).json({
+    message: "Lấy danh sách giỏ hàng thành công.",
+    data: carts,
+    currentPage: parseInt(page),
+    totalPage: Math.ceil(totalCarts / pageSize),
+    totalCarts,
+  });
+}
+
 export async function getCartById(req, res) {
   const { id } = req.params;
 
