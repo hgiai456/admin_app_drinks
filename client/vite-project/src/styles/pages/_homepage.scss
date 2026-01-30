@@ -12,7 +12,6 @@
     background: $light-color;
     overflow-x: hidden;
 
-
     &-loading {
         @include m.flex-center;
         min-height: 100vh;
@@ -42,7 +41,6 @@
     }
 }
 
-// ✅ FULL-WIDTH HERO SLIDER - FIXED
 .hero-slider {
     position: relative;
     width: 100%;
@@ -120,7 +118,7 @@
                         display: inline-block;
                         background: linear-gradient(135deg,
                                 $red-color,
-                                $brown-color );
+                                $brown-color);
                         color: white;
                         padding: 0.5rem 1rem;
                         border-radius: 25px;
@@ -192,7 +190,7 @@
                         .btn-primary {
                             background: linear-gradient(135deg,
                                     $red-color,
-                                    $brown-color );
+                                    $brown-color);
                             color: white;
                             box-shadow: 0 6px 20px rgba($red-color, 0.4);
 
@@ -614,157 +612,6 @@
     }
 }
 
-// ✅ RESPONSIVE - CẬP NHẬT
-@media (max-width: 1024px) {
-    .homepage-header {
-        .header-container {
-            padding: 1rem;
-        }
-
-        .main-nav {
-            gap: 1rem;
-
-            .nav-link {
-                font-size: 0.8rem;
-                padding: 0.4rem 0.8rem;
-            }
-        }
-
-        .header-actions {
-            gap: 0.75rem; // ✅ Giảm gap trên tablet
-        }
-    }
-
-    .hero-slider {
-        height: 80vh;
-
-        .slide-content .content-wrapper {
-            grid-template-columns: 1fr;
-            gap: 2rem;
-            text-align: center;
-        }
-
-        .slide-text .slide-title {
-            font-size: 2.5rem;
-        }
-    }
-}
-
-@media (max-width: 768px) {
-    .homepage-header {
-        .header-container {
-            flex-direction: column;
-            gap: 1rem;
-            padding: 1rem;
-        }
-
-        .main-nav {
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        // ✅ CART + USER TRÊN MOBILE
-        .header-actions {
-            order: -1; // ✅ Đưa lên trên navigation
-            gap: 0.3rem;
-        }
-
-        .user-section .user-dropdown {
-            .user-info {
-                display: none; // ✅ Ẩn thông tin user trên mobile
-            }
-        }
-    }
-
-    .hero-slider {
-        height: 70vh;
-
-        .slide-text {
-            .slide-title {
-                font-size: 2rem;
-            }
-
-            .slide-subtitle {
-                font-size: 1.2rem;
-            }
-
-            .slide-buttons {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.75rem;
-
-                .btn-primary,
-                .btn-secondary {
-                    width: 100%;
-                    max-width: 250px;
-                    justify-content: center;
-                }
-            }
-        }
-
-        .slider-btn {
-            width: 50px;
-            height: 50px;
-
-            &.prev-btn {
-                left: 1rem;
-            }
-
-            &.next-btn {
-                right: 1rem;
-            }
-        }
-
-        .slider-pagination {
-            .pagination-dot {
-                width: 40px;
-                height: 40px;
-            }
-        }
-    }
-
-    .features-section {
-        padding: 4rem 0;
-
-        .features-grid {
-            grid-template-columns: 1fr;
-            gap: 1.5rem;
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-slider {
-        .slide-text {
-            .slide-title {
-                font-size: 1.5rem;
-            }
-
-            .slide-subtitle {
-                font-size: 1rem;
-            }
-
-            .slide-description {
-                font-size: 0.9rem;
-            }
-        }
-
-        .slider-pagination {
-            gap: 0.5rem;
-
-            .pagination-dot {
-                width: 30px;
-                height: 30px;
-
-                .dot-number {
-                    font-size: 0.8rem;
-                }
-            }
-        }
-    }
-}
-
 .products-section {
     padding: 6rem 0;
     background: white;
@@ -829,7 +676,7 @@
                 &.active {
                     background: linear-gradient(135deg,
                             $brown-color,
-                            $red-color );
+                            $red-color);
                     border-color: $brown-color;
                     color: white;
                     transform: translateY(-2px);
@@ -873,35 +720,20 @@
         scrollbar-width: thin;
         scrollbar-color: $brown-color $light-color;
 
-        // @media (min-width: 1024px) {
-        //     grid-template-columns: repeat(4, 1fr); // ✅ Tăng từ 3 lên 4 cột
-        //     max-width: 1200px;
-        //     margin: 0 auto 3rem auto;
-        // }
-
-        // // ✅ XỬ LÝ KHI CÓ ÍT SẢN PHẨM
-        // &.few-products {
-        //     justify-content: center;
-
-        //     .product-card {
-        //         max-width: 280px; 
-        //     }
-        // }
-
         .product-card {
             background: white;
-            border-radius: 15px; // Giảm từ 20px xuống 15px
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 6px 20px rgba($black-color, 0.08); // Giảm shadow
+            box-shadow: 0 6px 20px rgba($black-color, 0.08);
             transition: all 0.3s ease;
             border: 1px solid rgba($brown-color, 0.1);
             position: relative;
             width: 100%;
-            max-width: 300px; // Giảm từ 350px xuống 300px
+            max-width: 300px;
 
             &:hover {
-                transform: translateY(-6px); // ✅ Giảm từ -8px xuống -6px
-                box-shadow: 0 12px 30px rgba($brown-color, 0.15); // ✅ Giảm shadow
+                transform: translateY(-6px);
+                box-shadow: 0 12px 30px rgba($brown-color, 0.15);
 
                 .product-overlay {
                     opacity: 1;
@@ -914,7 +746,7 @@
 
             .product-image {
                 position: relative;
-                height: 180px; // ✅ Giảm từ 220px xuống 180px
+                height: 180px;
                 overflow: hidden;
 
                 img {
@@ -938,13 +770,13 @@
                     .quick-view-btn {
                         background: rgba(white, 0.9);
                         border: none;
-                        width: 40px; // ✅ Giảm từ 50px xuống 40px
-                        height: 40px; // ✅ Giảm từ 50px xuống 40px
+                        width: 40px;
+                        height: 40px;
                         border-radius: 50%;
                         @include m.flex-center;
                         cursor: pointer;
                         transition: all 0.3s ease;
-                        font-size: 1rem; // ✅ Giảm từ 1.2rem xuống 1rem
+                        font-size: 1rem;
 
                         &:hover {
                             background: white;
@@ -955,39 +787,38 @@
 
                 .product-badge {
                     position: absolute;
-                    top: 0.75rem; // ✅ Giảm từ 1rem xuống 0.75rem
-                    left: 0.75rem; // ✅ Giảm từ 1rem xuống 0.75rem
+                    top: 0.75rem;
+                    left: 0.75rem;
                     background: linear-gradient(135deg,
                             $red-color,
-                            $brown-color );
+                            $brown-color);
                     color: white;
-                    padding: 0.3rem 0.6rem; // ✅ Giảm padding
-                    border-radius: 12px; // ✅ Giảm từ 15px xuống 12px
-                    font-size: 0.7rem; // ✅ Giảm từ 0.75rem xuống 0.7rem
+                    padding: 0.3rem 0.6rem;
+                    border-radius: 12px;
+                    font-size: 0.7rem;
                     font-weight: 600;
                     box-shadow: 0 2px 8px rgba($red-color, 0.3);
                 }
             }
 
             .product-info {
-                padding: 1.2rem; // ✅ Giảm từ 1.5rem xuống 1.2rem
+                padding: 1.2rem;
 
                 .product-category {
                     color: $brown-color;
-                    font-size: 0.75rem; // ✅ Giảm từ 0.8rem xuống 0.75rem
+                    font-size: 0.75rem;
                     font-weight: 600;
-                    margin-bottom: 0.4rem; // ✅ Giảm từ 0.5rem xuống 0.4rem
+                    margin-bottom: 0.4rem;
                     text-transform: uppercase;
                     letter-spacing: 0.5px;
                 }
 
                 .product-name {
-                    font-size: 1.1rem; // ✅ Giảm từ 1.3rem xuống 1.1rem
+                    font-size: 1.1rem;
                     font-weight: 700;
                     color: $black-color;
-                    margin: 0 0 0.6rem 0; // ✅ Giảm margin
+                    margin: 0 0 0.6rem 0;
                     line-height: 1.3;
-                    // ✅ THÊM: Giới hạn 2 dòng cho tên sản phẩm
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
@@ -996,9 +827,9 @@
 
                 .product-description-short {
                     color: $secondary-color;
-                    font-size: 0.85rem; // ✅ Giảm từ 0.9rem xuống 0.85rem
-                    line-height: 1.4; // ✅ Giảm line-height
-                    margin: 0 0 1.2rem 0; // ✅ Giảm margin
+                    font-size: 0.85rem;
+                    line-height: 1.4;
+                    margin: 0 0 1.2rem 0;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
@@ -1009,11 +840,11 @@
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    gap: 0.75rem; // ✅ Giảm từ 1rem xuống 0.75rem
+                    gap: 0.75rem;
 
                     .product-price {
                         .current-price {
-                            font-size: 1.1rem; // ✅ Giảm từ 1.2rem xuống 1.1rem
+                            font-size: 1.1rem;
                             font-weight: 700;
                             color: $red-color;
                         }
@@ -1022,18 +853,18 @@
                     .add-to-cart-btn {
                         background: linear-gradient(135deg,
                                 $brown-color,
-                                $red-color );
+                                $red-color);
                         color: white;
                         border: none;
-                        padding: 0.6rem 1.2rem; // ✅ Giảm từ 0.75rem 1.5rem xuống 0.6rem 1.2rem
-                        border-radius: 20px; // ✅ Giảm từ 25px xuống 20px
+                        padding: 0.6rem 1.2rem;
+                        border-radius: 20px;
                         font-weight: 600;
                         cursor: pointer;
                         transition: all 0.3s ease;
                         display: flex;
                         align-items: center;
-                        gap: 0.4rem; // ✅ Giảm từ 0.5rem xuống 0.4rem
-                        font-size: 0.85rem; // ✅ Thêm font-size nhỏ hơn
+                        gap: 0.4rem;
+                        font-size: 0.85rem;
 
                         &:hover {
                             transform: translateY(-2px);
@@ -1041,7 +872,7 @@
                         }
 
                         .btn-icon {
-                            font-size: 0.9rem; // ✅ Giảm từ 1rem xuống 0.9rem
+                            font-size: 0.9rem;
                         }
                     }
                 }
@@ -1049,110 +880,6 @@
         }
     }
 
-    // ✅ RESPONSIVE - ĐIỀU CHỈNH CHO MOBILE
-    @media (max-width: 1200px) {
-        .products-section {
-            .products-grid {
-                grid-template-columns: repeat(3, 1fr); // ✅ 3 cột cho tablet
-                max-width: none;
-            }
-        }
-    }
-
-    @media (max-width: 768px) {
-        .products-section {
-            padding: 4rem 0;
-            min-height: 600px;
-
-            .container {
-                min-height: 400px;
-            }
-
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr); // ✅ 2 cột cho mobile
-                gap: 1rem; // ✅ Giảm gap trên mobile
-                min-height: 300px;
-            }
-
-            .product-card {
-                max-width: none; // ✅ Cho phép full width trên mobile
-
-                .product-image {
-                    height: 160px; // ✅ Giảm chiều cao hình trên mobile
-                }
-
-                .product-info {
-                    padding: 1rem; // ✅ Giảm padding trên mobile
-
-                    .product-name {
-                        font-size: 1rem; // ✅ Font nhỏ hơn trên mobile
-                    }
-
-                    .product-description {
-                        font-size: 0.8rem;
-                        -webkit-line-clamp: 1; // ✅ Chỉ 1 dòng trên mobile
-                    }
-
-                    .product-footer {
-                        gap: 0.5rem;
-
-                        .add-to-cart-btn {
-                            padding: 0.5rem 0.8rem;
-                            font-size: 0.8rem;
-                        }
-                    }
-                }
-            }
-
-            .section-header {
-                .section-actions {
-                    gap: 0.5rem;
-
-                    .filter-btn {
-                        padding: 0.6rem 1rem;
-                        font-size: 0.8rem;
-                    }
-                }
-            }
-        }
-    }
-
-    @media (max-width: 480px) {
-        .products-section {
-            min-height: 500px;
-
-            .container {
-                min-height: 300px;
-            }
-
-            .products-grid {
-                grid-template-columns: 1fr; // ✅ 1 cột cho mobile nhỏ
-                min-height: 200px;
-            }
-
-            .product-card {
-                .product-image {
-                    height: 140px; // ✅ Chiều cao nhỏ nhất
-                }
-
-                .product-info {
-                    padding: 0.8rem;
-
-                    .product-footer {
-                        flex-direction: column; // ✅ Stack vertical trên mobile nhỏ
-                        gap: 0.8rem;
-
-                        .add-to-cart-btn {
-                            width: 100%;
-                            justify-content: center;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    // ✅ THÊM MESSAGE KHI KHÔNG CÓ SẢN PHẨM
     .no-products {
         @include m.flex-center;
         flex-direction: column;
@@ -1232,53 +959,9 @@
     }
 }
 
-// ✅ MOBILE RESPONSIVE FOR PRODUCTS
-@media (max-width: 768px) {
-    .products-section {
-        padding: 4rem 0;
-
-        .products-grid {
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-        }
-
-        .section-header {
-            .section-actions {
-                gap: 0.5rem;
-
-                .filter-btn {
-                    padding: 0.6rem 1.2rem;
-                    font-size: 0.9rem;
-                }
-            }
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .products-section {
-        .products-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .product-card {
-            .product-footer {
-                flex-direction: column;
-                gap: 1rem;
-
-                .add-to-cart-btn {
-                    width: 100%;
-                    justify-content: center;
-                }
-            }
-        }
-    }
-}
-
 .search-bar {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: end;
     margin: 2rem 0;
     padding: 1.5rem;
     background: rgba($brown-color, 0.05);
@@ -1298,6 +981,7 @@
     .search-form {
         display: flex;
         gap: 0.5rem;
+
 
         .search-input {
             padding: 0.75rem 1rem;
@@ -1328,10 +1012,30 @@
                 box-shadow: 0 4px 15px rgba($brown-color, 0.3);
             }
         }
+
+        .btn-clear-search {
+            background: rgba($red-color, 0.1);
+            color: $red-color;
+            border: 1px solid rgba($red-color, 0.3);
+            padding: 0.75rem;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            &:hover {
+                background: $red-color;
+                color: white;
+                transform: scale(1.1);
+            }
+        }
     }
 }
 
-// ✅ PAGINATION
 .pagination {
     margin-top: 0.5rem;
     padding-top: 0.5rem;
@@ -1410,62 +1114,6 @@
     }
 }
 
-// ✅ MOBILE RESPONSIVE
-@media (max-width: 768px) {
-    .search-bar {
-        flex-direction: column;
-        gap: 1rem;
-
-        .search-form {
-            width: 100%;
-
-            .search-input {
-                flex: 1;
-                min-width: auto;
-            }
-        }
-    }
-
-    .pagination-controls {
-        gap: 0.25rem;
-
-        .btn-nav,
-        .btn-page {
-            padding: 0.4rem 0.8rem;
-            font-size: 0.8rem;
-        }
-    }
-
-    .section-actions {
-        gap: 0.5rem;
-
-        .filter-btn {
-            padding: 0.6rem 1rem;
-            font-size: 0.8rem;
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .pagination-controls {
-        .btn-nav {
-            span {
-                display: none;
-            }
-
-            &::after {
-                content: attr(data-short);
-            }
-        }
-    }
-
-    .search-bar {
-        .search-form {
-            flex-direction: column;
-        }
-    }
-}
-
 .filter-status {
     display: flex;
     align-items: center;
@@ -1491,41 +1139,19 @@
         background: rgba($red-color, 0.1);
         color: $red-color;
         border: 1px solid rgba($red-color, 0.3);
-        padding: 0.4rem 0.8rem;
-        border-radius: 15px;
+        width: 32px;
+        height: 32px;
+        border-radius: 100%;
         font-size: 0.8rem;
         font-weight: 600;
         cursor: pointer;
+        align-content: center;
         transition: all 0.3s ease;
 
         &:hover {
             background: $red-color;
             color: white;
             transform: scale(1.05);
-        }
-    }
-}
-
-// ✅ CLEAR SEARCH BUTTON
-.search-form {
-    .btn-clear-search {
-        background: rgba($red-color, 0.1);
-        color: $red-color;
-        border: 1px solid rgba($red-color, 0.3);
-        padding: 0.75rem;
-        border-radius: 50%;
-        width: 44px;
-        height: 44px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-
-        &:hover {
-            background: $red-color;
-            color: white;
-            transform: scale(1.1);
         }
     }
 }
@@ -1652,31 +1278,12 @@
     }
 }
 
-/* ✅ RESPONSIVE */
-@media (max-width: 768px) {
-    .page-size-dropdown-container {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-
-        .page-size-dropdown {
-            width: 100%;
-
-            .page-size-dropdown-trigger {
-                width: 100%;
-                min-width: auto;
-            }
-        }
-    }
-}
-
 .news-section-home {
     padding: 100px 0;
     background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
     position: relative;
     overflow: hidden;
 
-    // Background decoration
     &::before {
         content: "";
         position: absolute;
@@ -1706,14 +1313,13 @@
     }
 
     .container {
-        max-width: 1400px;
+        max-width: 1300px;
         margin: 0 auto;
         padding: 0 20px;
         position: relative;
         z-index: 1;
     }
 
-    // ===== SECTION HEADER =====
     .section-header {
         display: flex;
         justify-content: space-between;
@@ -1721,13 +1327,6 @@
         margin-bottom: 60px;
         gap: 40px;
         flex-wrap: wrap;
-
-        @media (max-width: 768px) {
-            flex-direction: column;
-            align-items: flex-start;
-            margin-bottom: 40px;
-            gap: 24px;
-        }
     }
 
     .header-content {
@@ -1755,14 +1354,6 @@
         margin: 0 0 16px 0;
         letter-spacing: -1px;
         line-height: 1.2;
-
-        @media (max-width: 768px) {
-            font-size: 2rem;
-        }
-
-        @media (max-width: 480px) {
-            font-size: 1.75rem;
-        }
     }
 
     .section-subtitle {
@@ -1770,10 +1361,6 @@
         color: $text-secondary;
         line-height: 1.6;
         margin: 0;
-
-        @media (max-width: 480px) {
-            font-size: 1rem;
-        }
     }
 
     .btn-view-all {
@@ -1807,31 +1394,14 @@
                 transform: translateX(4px);
             }
         }
-
-        @media (max-width: 768px) {
-            width: 100%;
-            justify-content: center;
-        }
     }
 
-    // ===== NEWS GRID =====
     .news-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 32px;
-
-        @media (max-width: 1024px) {
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-        }
-
-        @media (max-width: 768px) {
-            grid-template-columns: 1fr;
-            gap: 20px;
-        }
     }
 
-    // ===== NEWS CARD =====
     .news-card {
         background: white;
         border-radius: 20px;
@@ -1863,14 +1433,13 @@
             }
         }
 
-        // Featured card (first card)
         &.featured {
-            @media (min-width: 1024px) {
+            @media (min-width: $desktop) {
                 grid-column: span 2;
                 grid-row: span 1;
 
                 .news-image {
-                    height: 400px;
+                    height: 300px;
                 }
 
                 .news-title {
@@ -1878,14 +1447,13 @@
                 }
 
                 .news-excerpt {
-                    -webkit-line-clamp: 3;
-                    font-size: 1.05rem;
+                    -webkit-line-clamp: 2;
+                    font-size: 1.0rem;
                 }
             }
         }
     }
 
-    // ===== NEWS IMAGE =====
     .news-image {
         position: relative;
         height: 280px;
@@ -1897,10 +1465,6 @@
             height: 100%;
             object-fit: cover;
             transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        @media (max-width: 768px) {
-            height: 220px;
         }
     }
 
@@ -1931,13 +1495,8 @@
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
-    // ===== NEWS CONTENT =====
     .news-content {
         padding: 28px;
-
-        @media (max-width: 480px) {
-            padding: 20px;
-        }
     }
 
     .news-meta {
@@ -1967,14 +1526,6 @@
         -webkit-box-orient: vertical;
         overflow: hidden;
         transition: color 0.3s ease;
-
-        @media (max-width: 768px) {
-            font-size: 1.25rem;
-        }
-
-        @media (max-width: 480px) {
-            font-size: 1.15rem;
-        }
     }
 
     .news-excerpt {
@@ -1986,11 +1537,6 @@
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-
-        @media (max-width: 480px) {
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-        }
     }
 
     .btn-read-more {
@@ -2011,15 +1557,8 @@
             font-size: 1.1rem;
             transition: transform 0.3s ease;
         }
-
-        @media (max-width: 480px) {
-            width: 100%;
-            justify-content: center;
-            padding: 10px 20px;
-        }
     }
 
-    // ===== LOADING STATE =====
     .news-loading {
         display: flex;
         flex-direction: column;
@@ -2040,7 +1579,6 @@
         }
     }
 
-    // ===== EMPTY STATE =====
     .no-news {
         display: flex;
         flex-direction: column;
@@ -2061,7 +1599,6 @@
         }
     }
 
-    // ===== ANIMATIONS =====
     @keyframes pulse {
 
         0%,
@@ -2075,136 +1612,607 @@
             transform: scale(1.1);
         }
     }
-
 }
 
-@media (max-width: $tablet-large) {
+
+@media (max-width: 950px) {
+
+    // Hero Slider
     .hero-slider {
-        height: 55vw; // hoặc 60vh, tuỳ ý bạn
-        min-height: 320px;
-        max-height: 400px;
+        height: 30vh;
+        min-height: 300px;
 
         .slide-content .content-wrapper {
             grid-template-columns: 1fr;
-            gap: 1.5rem;
+            gap: 2rem;
             text-align: center;
             padding: 0 1rem;
         }
 
-        .slide-text .slide-title {
-            font-size: 2rem;
-        }
+        .slide-text {
+            .slide-title {
+                font-size: 2rem;
+            }
 
-        .slide-text .slide-subtitle {
-            font-size: 1.1rem;
-        }
+            .slide-subtitle {
+                font-size: 1.2rem;
+            }
 
-        .slide-description {
-            font-size: 1rem;
-        }
+            .slide-description {
+                font-size: 1rem;
+            }
 
-        .slide-buttons {
-            flex-direction: column;
-            gap: 0.5rem;
+            .slide-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
 
-            .btn-primary,
-            .btn-secondary {
-                width: 100%;
-                max-width: 220px;
-                font-size: 0.95rem;
-                padding: 0.7rem 1rem;
+                .btn-primary,
+                .btn-secondary {
+                    width: 100%;
+                    max-width: 250px;
+                    justify-content: center;
+                }
             }
         }
 
         .slider-btn {
-            width: 40px;
-            height: 40px;
+            width: 50px;
+            height: 50px;
+
+            &.prev-btn {
+                left: 1rem;
+            }
+
+            &.next-btn {
+                right: 1rem;
+            }
 
             span {
-                font-size: 1.1rem;
+                font-size: 1.2rem;
             }
         }
 
-        .slider-pagination .pagination-dot {
-            width: 24px;
-            height: 24px;
+        .slider-pagination {
+            gap: 0.75rem;
 
-            .dot-number {
-                font-size: 0.7rem;
+            .pagination-dot {
+                width: 40px;
+                height: 40px;
+
+                .dot-number {
+                    font-size: 0.8rem;
+                }
             }
         }
     }
 
-    .products-section .products-grid .product-card {
-        flex: 0 0 170px;
-        max-width: 170px;
-        min-width: 140px;
-        height: 240px;
+    // Products Section
+    .products-section {
+        padding: 4rem 0;
+        min-height: 600px;
+
+
+        .container {
+            min-height: 400px;
+        }
+
+        .section-header {
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .section-actions {
+                gap: 0.5rem;
+
+                .filter-btn {
+                    padding: 0.6rem 1rem;
+                    font-size: 0.85rem;
+                }
+            }
+        }
+
+        .products-grid {
+            gap: 1rem;
+            align-content: center;
+
+            .product-card {
+                flex: 0 0 170px;
+                max-width: 250px;
+                min-width: 200px;
+
+                .product-image {
+                    height: 140px;
+                }
+
+                .product-info {
+                    padding: 1rem;
+
+                    .product-name {
+                        font-size: 0.95rem;
+                    }
+
+                    .product-description-short {
+                        font-size: 0.8rem;
+                        -webkit-line-clamp: 1;
+                    }
+
+                    .product-footer {
+                        gap: 0.5rem;
+
+                        .product-price .current-price {
+                            font-size: 1rem;
+                        }
+
+                        .add-to-cart-btn {
+                            display: none !important;
+                            visibility: hidden;
+                            pointer-events: none;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Search Bar
+    .search-bar {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+
+        .search-form {
+            width: 95%;
+
+            .search-input {
+                flex: 1;
+                min-width: auto;
+            }
+        }
+    }
+
+    // Pagination
+    .pagination-controls {
+        gap: 0.25rem;
+
+        .btn-nav,
+        .btn-page {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            min-width: 40px;
+        }
+    }
+
+    // Page Size Dropdown
+    .page-size-dropdown-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+
+        .page-size-dropdown {
+            width: 100%;
+
+            .page-size-dropdown-trigger {
+                width: 100%;
+                min-width: auto;
+            }
+        }
+    }
+
+    // Features Section
+    .features-section {
+        padding: 4rem 0;
+
+        .features-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    // News Section
+    .news-section-home {
+        padding: 60px 0;
+
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            gap: 24px;
+        }
+
+        .section-title {
+            font-size: 2rem;
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+        }
+
+        .btn-view-all {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .news-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .news-card {
+            &.featured {
+                grid-column: span 2;
+
+                .news-image {
+                    height: 280px;
+                }
+
+                .news-title {
+                    font-size: 1.4rem;
+                }
+
+                .news-excerpt {
+                    font-size: 1rem;
+                }
+
+
+            }
+        }
+
+        .news-image {
+            height: 220px;
+        }
+
+        .news-content {
+            padding: 10px;
+
+            .news-meta {
+                display: none !important;
+                visibility: hidden;
+            }
+
+            .btn-read-more {
+                display: none !important;
+                visibility: hidden;
+            }
+        }
+
+        .news-title {
+            font-size: 1.25rem;
+        }
+
+        .news-excerpt {
+            font-size: 0.95rem;
+            margin-bottom: 20px;
+        }
+
+        .btn-read-more {
+            width: 100%;
+            justify-content: center;
+            padding: 10px 20px;
+        }
     }
 }
 
-// Mobile
+
 @media (max-width: $mobile) {
-
-
     .hero-slider {
-        height: 45vw;
-        min-height: 180px;
-        max-height: 220px;
+        height: 30vh;
+        min-height: 300px;
 
         .slide-content .content-wrapper {
             padding: 0 0.5rem;
             gap: 1rem;
         }
 
-        .slide-text .slide-title {
-            font-size: 1.1rem;
-        }
-
-        .slide-text .slide-subtitle {
-            font-size: 0.9rem;
-        }
-
-        .slide-description {
-            font-size: 0.8rem;
-        }
-
-        .slide-buttons {
-            flex-direction: column;
-            gap: 0.3rem;
-
-            .btn-primary,
-            .btn-secondary {
-                width: 100%;
-                font-size: 0.85rem;
-                padding: 0.5rem 0.7rem;
-            }
-        }
-
         .slider-btn {
-            width: 32px;
-            height: 32px;
+            width: 40px;
+            height: 40px;
+
+            &.prev-btn {
+                left: 0.5rem;
+            }
+
+            &.next-btn {
+                right: 0.5rem;
+            }
 
             span {
-                font-size: 0.9rem;
+                font-size: 1rem;
             }
         }
 
-        .slider-pagination .pagination-dot {
-            width: 16px;
-            height: 16px;
+        .slider-pagination {
+            gap: 0.5rem;
 
-            .dot-number {
-                font-size: 0.6rem;
+            .pagination-dot {
+                width: 30px;
+                height: 30px;
+
+                .dot-number {
+                    font-size: 0.7rem;
+                }
             }
         }
     }
 
+    // Products Section
+    .products-section {
+        padding: 3rem 0;
+        min-height: 500px;
 
-    .products-section .products-grid .product-card {
-        flex: 0 0 130px;
-        max-width: 130px;
-        min-width: 110px;
-        height: 200px;
+        .container {
+            min-height: 350px;
+        }
+
+        .section-header {
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .section-subtitle {
+                font-size: 0.95rem;
+            }
+
+            .section-actions {
+                gap: 0.4rem;
+
+                .filter-btn {
+                    padding: 0.5rem 0.8rem;
+                    font-size: 0.75rem;
+                }
+            }
+        }
+
+        .products-grid {
+            gap: 0.8rem;
+
+            .product-card {
+                flex: 0 0 140px;
+                max-width: 150px;
+                min-width: 130px;
+
+                .product-image {
+                    height: 120px;
+                }
+
+                .product-info {
+                    padding: 0.8rem;
+
+                    .product-category {
+                        font-size: 0.65rem;
+                        margin-bottom: 0.3rem;
+                    }
+
+                    .product-name {
+                        font-size: 0.85rem;
+                        margin-bottom: 0.4rem;
+                        line-height: 1.2;
+                    }
+
+                    .product-description-short {
+                        font-size: 0.7rem;
+                        margin-bottom: 0.8rem;
+                        -webkit-line-clamp: 1;
+                    }
+
+                    .product-footer {
+                        flex-direction: column;
+                        gap: 0.5rem;
+                        align-items: stretch;
+
+                        .product-price .current-price {
+                            font-size: 0.9rem;
+                        }
+
+                        .add-to-cart-btn {
+                            display: none !important;
+                            visibility: hidden;
+                            pointer-events: none;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Search Bar
+    .search-bar {
+        padding: 1rem;
+
+        .search-info {
+            font-size: 0.8rem;
+        }
+
+        .search-form {
+            flex-direction: column;
+            gap: 0.5rem;
+
+            .search-input {
+                font-size: 0.85rem;
+                padding: 0.6rem 0.8rem;
+            }
+
+            .btn-search {
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .btn-clear-search {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    }
+
+    // Pagination
+    .pagination {
+        .pagination-info {
+            font-size: 0.8rem;
+        }
+
+        .pagination-controls {
+            .btn-nav {
+                span {
+                    display: none;
+                }
+
+                &::after {
+                    content: attr(data-short);
+                }
+            }
+
+            .btn-page {
+                font-size: 0.75rem;
+                min-width: 36px;
+                padding: 0.4rem 0.6rem;
+            }
+        }
+    }
+
+    // Features Section
+    .features-section {
+        padding: 3rem 0;
+
+        .section-header {
+            margin-bottom: 2rem;
+
+            .section-title {
+                font-size: 1.75rem;
+            }
+
+            .section-subtitle {
+                font-size: 0.95rem;
+            }
+        }
+
+        .features-grid {
+            gap: 1.25rem;
+
+            .feature-card {
+                padding: 2rem 1.5rem;
+
+                .feature-icon {
+                    font-size: 2.5rem;
+                }
+
+                h3 {
+                    font-size: 1.2rem;
+                }
+
+                p {
+                    font-size: 0.9rem;
+                }
+            }
+        }
+    }
+
+    // News Section
+    .news-section-home {
+        padding: 40px 0;
+
+        .container {
+            padding: 0 15px;
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+        }
+
+        .section-badge {
+            font-size: 0.75rem;
+            padding: 6px 16px;
+        }
+
+        .section-title {
+            font-size: 1.75rem;
+        }
+
+        .section-subtitle {
+            font-size: 0.95rem;
+        }
+
+        .btn-view-all {
+            padding: 12px 24px;
+            font-size: 0.9rem;
+        }
+
+        .news-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .news-card {
+            &.featured {
+                grid-column: span 1;
+
+                .news-image {
+                    height: 220px;
+                }
+
+                .news-title {
+                    font-size: 1.25rem;
+                }
+
+                .news-excerpt {
+                    font-size: 0.95rem;
+                }
+            }
+        }
+
+        .news-image {
+            height: 200px;
+        }
+
+        .news-overlay {
+            padding: 15px;
+        }
+
+        .news-badge {
+            font-size: 0.75rem;
+            padding: 6px 12px;
+        }
+
+        .news-content {
+            padding: 16px;
+        }
+
+        .news-meta {
+            gap: 12px;
+            margin-bottom: 12px;
+            display: none !important;
+            visibility: hidden;
+
+        }
+
+        .news-title {
+            font-size: 1.15rem;
+            margin-bottom: 12px;
+        }
+
+        .news-excerpt {
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+        }
+
+        .btn-read-more {
+            padding: 10px 20px;
+            font-size: 0.85rem;
+        }
+    }
+
+    // Filter Status
+    .filter-status {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
+
+        .filter-indicator {
+            font-size: 0.8rem;
+        }
+
+        .clear-filter-btn {
+            font-size: 0.75rem;
+            padding: 0.4rem 0.8rem;
+        }
     }
 }

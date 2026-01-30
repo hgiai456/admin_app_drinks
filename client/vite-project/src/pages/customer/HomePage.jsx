@@ -8,7 +8,7 @@ import Header from "@components/common/Header.jsx";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { scrollToTop, navigation } from "@utils/editorHelpers";
-import { Flame, User } from "lucide-react";
+import { Flame, X } from "lucide-react";
 
 export default function HomePage({
   user,
@@ -43,7 +43,6 @@ export default function HomePage({
     const fetchCategories = async () => {
       try {
         const response = await CategoryService.getAll();
-        console.log("📦 Categories API response:", response);
 
         let categoriesData = [];
         if (response && response.data && Array.isArray(response.data)) {
@@ -438,6 +437,14 @@ export default function HomePage({
               className={`slide ${index === currentSlide ? "active" : ""}`}
             >
               <div className="slide-background">
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "white",
+                  }}
+                >
+                  Hình ảnh chỉ mang tính chất học thuật. Không sử dụng với mục đích thương mại{" "}
+                </p>
                 <img
                   src={banner.image}
                   alt={banner.title || "Banner"}
@@ -566,7 +573,7 @@ export default function HomePage({
             {selectedCategory !== "all" && (
               <div className="filter-status">
                 <span className="filter-indicator">
-                  🎯 Đang lọc theo:{" "}
+                  Đang lọc theo:{" "}
                   <strong>{getCategoryName(parseInt(selectedCategory))}</strong>
                 </span>
                 <button
@@ -574,7 +581,7 @@ export default function HomePage({
                   onClick={() => handleCategoryFilter("all")}
                   title="Xóa bộ lọc"
                 >
-                  ✖️ Bỏ lọc
+                  <X size={20} />
                 </button>
               </div>
             )}
@@ -672,7 +679,7 @@ export default function HomePage({
           {!productsLoading && products.length > 0 && totalPage > 1 && (
             <div className="pagination">
               <div className="pagination-info">
-                Trang {page} / {totalPage} - Tổng {totalItems} sản phẩm
+                Trang {page} / {totalPage}
                 {selectedCategory !== "all" && (
                   <span>
                     {" "}
@@ -691,7 +698,7 @@ export default function HomePage({
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1 || productsLoading}
                 >
-                  ⬅️ Trước
+                  ⬅️
                 </button>
 
                 {Array.from({ length: Math.min(5, totalPage) }, (_, i) => {
@@ -716,7 +723,7 @@ export default function HomePage({
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPage || productsLoading}
                 >
-                  Tiếp ➡️
+                  ➡️
                 </button>
               </div>
             </div>

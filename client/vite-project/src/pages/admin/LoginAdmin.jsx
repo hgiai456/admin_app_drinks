@@ -9,7 +9,7 @@ import {
   getLockoutLevelInfo,
 } from "@utils/loginRateLimit";
 
-import { ArrowLeftCircle } from "lucide-react";
+import { ArrowLeftCircle, Eye, EyeOff } from "lucide-react";
 
 export default function LoginAdmin({
   onLogin,
@@ -27,6 +27,7 @@ export default function LoginAdmin({
     remainingTime: 0,
   });
   const [remainingAttempts, setRemainingAttempts] = useState(5);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     checkLockoutStatus();
@@ -192,6 +193,17 @@ export default function LoginAdmin({
   };
   return (
     <div className="login-container">
+      <div className="test-account-info">
+        <p>
+          <strong>Tài khoản User:</strong> 0774162631
+        </p>
+        <p>
+          <strong>Tài khoản Admin:</strong> 0776666181
+        </p>
+        <p>
+          <strong>Mật khẩu:</strong> 123456
+        </p>
+      </div>
       <div className="login-background">
         <div className="bg-shapes">
           <div className="shape shape-1"></div>
@@ -208,7 +220,7 @@ export default function LoginAdmin({
           title="Trở về trang chủ"
         >
           <span className="btn-icon">
-            <ArrowLeftCircle size={30} />
+            <ArrowLeftCircle size={35} />
           </span>
         </button>
         <form className="login-form" onSubmit={handleSubmit}>
@@ -257,7 +269,7 @@ export default function LoginAdmin({
               <label className="form-label">Mật khẩu</label>
               <div className="input-wrapper">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={handlePasswordChange}
                   required
@@ -265,6 +277,15 @@ export default function LoginAdmin({
                   placeholder="Nhập mật khẩu..."
                   className="form-input"
                 />
+                <span
+                  className="toggle-password"
+                  onClick={() => setShowPassword((v) => !v)}
+                  tabIndex={0}
+                  aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+                  role="button"
+                >
+                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                </span>
                 <div className="input-border"></div>
               </div>
             </div>

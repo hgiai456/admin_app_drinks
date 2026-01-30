@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import "@styles/components/_sepay-modal.scss";
-import { formatPrice } from "@utils/validationValue";
+import { formatPrice } from "@utils/validationValue.js";
+import { scrollToTop } from "@utils/editorHelpers.js";
 import PaymentService from "@services/payment.service.js";
 
 export default function SePayQRModal({
@@ -32,7 +33,6 @@ export default function SePayQRModal({
         console.log("📦 Poll result:", result);
 
         if (result.success && result.data?.status === "completed") {
-          console.log("✅ Payment confirmed!");
           clearInterval(pollingRef.current);
           setAutoChecking(false);
           setStatusMessage("✅ Thanh toán thành công!");
@@ -42,11 +42,11 @@ export default function SePayQRModal({
           } else {
             window.location.hash = `#payment-result?status=success&orderId=${orderId}&amount=${amount}`;
           }
+          scrollToTop();
           onClose();
         } else {
           setCheckCount((prev) => prev + 1);
 
-          // ✅ Hiển thị message từ server
           if (result.data?.hint) {
             setStatusMessage(result.data.hint);
           } else if (result.message) {
@@ -127,7 +127,7 @@ export default function SePayQRModal({
         onClose();
       } else {
         setStatusMessage(
-          result.data?.hint || result.message || "⏳ Chưa nhận được thanh toán"
+          result.data?.hint || result.message || "⏳ Chưa nhận được thanh toán",
         );
       }
     } catch (error) {
@@ -148,15 +148,15 @@ export default function SePayQRModal({
         </button>
 
         <div className="modal-header">
-          <h2>📱 Quét mã QR để thanh toán</h2>
+          <h2>Quét mã QR để thanh toán</h2>
           <div className="countdown">
-            <span className="timer">⏰ {formatTime(countdown)}</span>
+            <span className="timer">{formatTime(countdown)} </span>
           </div>
         </div>
 
         <div className="modal-body">
           {/* Status message */}
-          {statusMessage && (
+          {/* {statusMessage && (
             <div
               className={`status-message ${
                 statusMessage.includes("✅") ? "success" : ""
@@ -164,7 +164,7 @@ export default function SePayQRModal({
             >
               {statusMessage}
             </div>
-          )}
+          )} */}
 
           {/* Auto checking indicator */}
           {autoChecking && (
@@ -190,7 +190,7 @@ export default function SePayQRModal({
 
           {/* Transfer Info */}
           <div className="transfer-info">
-            <h3>💳 Thông tin chuyển khoản</h3>
+            <h3>Thông tin chuyển khoản</h3>
 
             <div className="info-row">
               <label>Ngân hàng:</label>
@@ -268,7 +268,7 @@ export default function SePayQRModal({
             onClick={handleManualCheck}
             disabled={checking}
           >
-            {checking ? "⏳ Đang kiểm tra..." : "🔄 Kiểm tra thanh toán"}
+            {checking ? "Đang kiểm tra..." : "Kiểm tra thanh toán"}
           </button>
         </div>
       </div>

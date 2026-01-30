@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_payment-result.scss";
 import PaymentService from "@services/payment.service.js";
+import { navigation } from "@utils/editorHelpers.js";
 
 export default function PaymentResult({ user, onLogout }) {
   const [status, setStatus] = useState("loading");
@@ -90,7 +91,7 @@ export default function PaymentResult({ user, onLogout }) {
   };
 
   const handleViewOrder = () => {
-    window.location.hash = `orders?id=${orderId}`;
+    navigation(`orders`);
   };
 
   const handleRetry = () => {
@@ -105,7 +106,6 @@ export default function PaymentResult({ user, onLogout }) {
     <Layout user={user} onLogout={onLogout} currentPage="payment-result">
       <div className="payment-result-container">
         <div className="payment-result-card">
-          {/* LOADING */}
           {status === "loading" && (
             <div className="result-loading">
               <div className="spinner">⏳</div>
@@ -113,7 +113,6 @@ export default function PaymentResult({ user, onLogout }) {
             </div>
           )}
 
-          {/* SUCCESS */}
           {status === "success" && (
             <div className="result-success">
               <div className="result-icon success-icon">✓</div>

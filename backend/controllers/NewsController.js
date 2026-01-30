@@ -2,12 +2,9 @@ import { Sequelize } from "sequelize";
 import db from "../models/index.js";
 const { Op } = Sequelize;
 
-/**
- * GET: Danh sách News (phân trang + tìm kiếm)
- */
 export async function getNewsArticles(req, res) {
   const { search = "", page = 1 } = req.query;
-  const pageSize = 4;
+  const pageSize = 5;
   const offset = (page - 1) * pageSize;
 
   let whereClause = {};

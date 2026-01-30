@@ -41,14 +41,8 @@ export default function CheckoutPage({
       description: "Thanh toán bằng tiềm mặt khi nhận hàng",
     },
     {
-      id: "vnpay",
-      name: "VNPAY",
-      icon: "🏦",
-      description: "Thanh toán qua VNPAY (ATM/Visa/MasterCard)",
-    },
-    {
       id: "sepay",
-      name: "SePay",
+      name: "Thanh toán Online (SePay)",
       icon: "📱",
       description: "Thanh toán qua SePay (QR Code/Chuyển khoản)",
     },
@@ -559,7 +553,7 @@ export default function CheckoutPage({
               </div>
 
               <div className="payment-section-sidebar">
-                <h3>💳 Thanh toán</h3>
+                <h3>Phương Thức Thanh Toán</h3>
                 <div className="payment-methods">
                   {paymentMethods.map((method) => (
                     <div
@@ -593,15 +587,15 @@ export default function CheckoutPage({
                   ))}
                 </div>
 
-                {formData.payment_method === "vnpay" && (
+                {/* {formData.payment_method === "vnpay" && (
                   <div className="payment-info-box vnpay">
-                    <h4>🏦 VNPAY Test</h4>
+                    <h4>🏦 cVNPAY Test</h4>
                     <ul>
                       <li>NCB: 9704198526191432198</li>
                       <li>OTP: 123456</li>
                     </ul>
                   </div>
-                )}
+                )} */}
               </div>
               <div className="form-actions">
                 <button
@@ -624,7 +618,7 @@ export default function CheckoutPage({
                       Đang xử lý...
                     </>
                   ) : (
-                    <>💳 Đặt hàng ({formatPrice(calculateCartTotal())})</>
+                    <>Đặt hàng ({formatPrice(calculateCartTotal())})</>
                   )}
                 </button>
               </div>

@@ -468,21 +468,14 @@ function App() {
     />
   );
 }
-
 function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
-  const [currentPage, setCurrentPage] = useState(() => {
-    const hash = window.location.hash.replace("#", "");
-    if (hash.match(/^news\/\d+$/)) return "news-detail";
-    if (hash.startsWith("product/")) return "product-detail";
-    return hash.split("?")[0] || "home";
-  });
+  const [currentHash, setCurrentHash] = useState(
+    () => window.location.hash.replace("#", "") || "home",
+  );
 
   useEffect(() => {
     const onHashChange = () => {
-      const hash = window.location.hash.replace("#", "");
-      if (hash.match(/^news\/\d+$/)) setCurrentPage("news-detail");
-      else if (hash.startsWith("product/")) setCurrentPage("product-detail");
-      else setCurrentPage(hash.split("?")[0] || "home");
+      setCurrentHash(window.location.hash.replace("#", "") || "home");
     };
     window.addEventListener("hashchange", onHashChange);
     return () => window.removeEventListener("hashchange", onHashChange);
@@ -490,7 +483,7 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
 
   const handleLoginFromGuest = () => {
     if (onLogin) {
-      onLogin(); //  CHUYỂN SANG LOGIN FORM
+      onLogin();
     } else {
       console.error("❌ onLogin is not defined or not a function!");
       alert("Lỗi hệ thống: Không thể chuyển trang đăng nhập.");
@@ -501,15 +494,13 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
   const handleRegisterFromGuest = () => {
     console.log("🔄 Switching from guest to register mode");
     if (onLogin) {
-      onLogin(); // ✅ CHUYỂN SANG LOGIN FORM, SAU ĐÓ CÓ THỂ CHUYỂN REGISTER
+      onLogin();
     } else {
       console.warn("⚠️ No onLogin handler in CustomerRouter");
     }
   };
 
-  //  HELPER FUNCTION ĐỂ LẤY PRODUCT ID TỪ HASH
-  const getProductIdFromHash = () => {
-    const hash = window.location.hash.replace("#", "");
+  const getProductIdFromHash = (hash = currentHash) => {
     if (hash.startsWith("product/")) {
       const productId = hash.split("/")[1];
       console.log("✅ Product ID extracted:", productId);
@@ -518,126 +509,134 @@ function CustomerRouter({ user, onLogout, isGuest = false, onLogin }) {
     return null;
   };
 
-  //  RENDER PAGES BASED ON HASH
-  switch (currentPage) {
-    case "home":
-      return (
-        <HomePage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      );
-
-    case "news-detail":
-      const newsDetailMatch = window.location.hash.match(/^#news\/(\d+)$/);
-      if (newsDetailMatch) {
-        return (
-          <NewsDetailPage
-            user={user}
-            onLogout={onLogout}
-            isGuest={isGuest}
-            onLogin={handleLoginFromGuest}
-            onRegister={handleRegisterFromGuest}
-          />
-        );
-      }
-      // If no match, fall through to news list
-      return (
-        <NewsPage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      );
-    case "news":
-      return (
-        <NewsPage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      );
-    case "orders":
-      return (
-        <Layout
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-        >
-          <OrderHistory user={user} />
-        </Layout>
-      );
-    case "menu":
-      return (
-        <ProductPage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      );
-    case "product-detail":
-      const productId = getProductIdFromHash();
-      return productId ? (
-        <ProductDetailPage
-          user={user}
-          onLogout={onLogout}
-          productId={productId}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      ) : (
-        <div style={{ padding: "2rem", textAlign: "center" }}>
-          <h2>❌ Lỗi</h2>
-          <p>Không tìm thấy ID sản phẩm</p>
-          <button onClick={() => (window.location.hash = "home")}>
-            ← Về trang chủ
-          </button>
-        </div>
-      );
-    case "cart":
-      return (
-        <CartPage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      );
-    case "checkout":
-      return (
-        <CheckoutPage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-        />
-      );
-    case "payment-result":
-      return <PaymentResult user={user} onLogout={onLogout} />;
-
-    default:
-      return (
-        <HomePage
-          user={user}
-          onLogout={onLogout}
-          isGuest={isGuest}
-          onLogin={handleLoginFromGuest}
-          onRegister={handleRegisterFromGuest}
-        />
-      );
+  if (currentHash === "" || currentHash === "home") {
+    return (
+      <HomePage
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+        onRegister={handleRegisterFromGuest}
+      />
+    );
   }
+
+  // News detail (hash like: news/123)
+  if (/^news\/\d+$/.test(currentHash)) {
+    return (
+      <NewsDetailPage
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+        onRegister={handleRegisterFromGuest}
+      />
+    );
+  }
+
+  if (currentHash === "news") {
+    return (
+      <NewsPage
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+        onRegister={handleRegisterFromGuest}
+      />
+    );
+  }
+
+  if (currentHash === "orders") {
+    return (
+      <Layout
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+      >
+        <OrderHistory user={user} />
+      </Layout>
+    );
+  }
+
+  if (currentHash === "menu") {
+    return (
+      <ProductPage
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+        onRegister={handleRegisterFromGuest}
+      />
+    );
+  }
+
+  // Product detail (hash like: product/456)
+  if (
+    /^product\/\d+$/.test(currentHash) ||
+    currentHash.startsWith("product/")
+  ) {
+    const productId = getProductIdFromHash(currentHash);
+    return productId ? (
+      <ProductDetailPage
+        user={user}
+        onLogout={onLogout}
+        productId={productId}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+        onRegister={handleRegisterFromGuest}
+      />
+    ) : (
+      <div style={{ padding: "2rem", textAlign: "center" }}>
+        <h2>❌ Lỗi</h2>
+        <p>Không tìm thấy ID sản phẩm</p>
+        <button onClick={() => (window.location.hash = "home")}>
+          ← Về trang chủ
+        </button>
+      </div>
+    );
+  }
+
+  if (currentHash === "cart") {
+    return (
+      <CartPage
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+        onRegister={handleRegisterFromGuest}
+      />
+    );
+  }
+
+  if (currentHash === "checkout") {
+    return (
+      <CheckoutPage
+        user={user}
+        onLogout={onLogout}
+        isGuest={isGuest}
+        onLogin={handleLoginFromGuest}
+      />
+    );
+  }
+
+  if (
+    currentHash === "payment-result" ||
+    currentHash.startsWith("payment-result?")
+  ) {
+    return <PaymentResult user={user} onLogout={onLogout} />;
+  }
+
+  // Mặc định: home
+  return (
+    <HomePage
+      user={user}
+      onLogout={onLogout}
+      isGuest={isGuest}
+      onLogin={handleLoginFromGuest}
+      onRegister={handleRegisterFromGuest}
+    />
+  );
 }
 
 createRoot(document.getElementById("root")).render(

@@ -495,7 +495,28 @@ export async function sepayWebhook(req, res) {
     //Tim payment theo order id
     const payment = await db.Payment.findOne({
       where: { order_id: orderId },
-      include: [{ model: db.Order, as: "order" }],
+      include: [
+        {
+          model: db.Order,
+          as: "order",
+          include: [
+            {
+              model: db.OrderDetail,
+              as: "order_details",
+              include: [
+                {
+                  model: db.ProDetail,
+                  as: "product_details",
+                  include: [
+                    { model: db.Product, as: "product" },
+                    { model: db.Size, as: "sizes" },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     if (!payment) {
@@ -569,7 +590,7 @@ export async function sepayWebhook(req, res) {
       try {
         const user = await db.User.findByPk(payment.order.user_id);
         if (user?.email) {
-          await EmailService.sendOrderConfirmation(user.email, {
+          EmailService.sendOrderConfirmation(user.email, {
             order: payment.order,
             user: user,
             OrderDetails: payment.order.order_details || [],

@@ -2,7 +2,7 @@
 @use '../abstracts/mixins' as m;
 
 // ============================================
-// 🎨 HEADER COMPONENT - NEW RESPONSIVE LAYOUT
+// 🎨 HEADER COMPONENT - RESPONSIVE LAYOUT
 // ============================================
 
 .homepage-header {
@@ -13,7 +13,10 @@
     top: 0;
     z-index: 1000;
     width: 100%;
+    height: 90px;
     border-bottom: 1px solid rgba(white, 0.1);
+    display: flex;
+    align-content: center;
 
     // TOP ACCENT LINE
     &::before {
@@ -27,123 +30,209 @@
         animation: shimmer 3s ease-in-out infinite;
     }
 
-    // ============================================
-    // 📦 HEADER CONTAINER
-    // ============================================
     .header-container {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
         max-width: $desktop;
         margin: 0 auto;
         width: 100%;
+        height: 100%;
+        padding: 0 2rem;
+        position: relative;
 
-        // 🖥️ DESKTOP: 1 HÀNG - FLEXBOX (GIỮ NGUYÊN 100%)
-        @media (min-width: #{$tablet + 1px}) {
+        .desktop-nav {
+            justify-self: start;
+        }
+
+        .logo-section {
+            justify-self: center;
+        }
+
+        .header-actions {
+            justify-self: end;
+        }
+
+        // 📱 MOBILE: Menu Button - Logo (Center Fixed) - Actions
+        @media (max-width: $tablet) {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            padding: 0 1rem;
+
+            .desktop-nav {
+                display: none !important;
+            }
+
+            // Logo luôn ở giữa với position absolute
+            .logo-section {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+                z-index: 5;
+            }
+
+            .mobile-menu-btn {
+                justify-self: start;
+                z-index: 10;
+            }
+
+            .header-actions {
+                justify-self: end;
+                z-index: 10;
+            }
+        }
+    }
+
+    // ============================================
+    // 🍔 MOBILE MENU BUTTON
+    // ============================================
+    .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: all 0.3s ease;
+        flex-shrink: 0;
+
+        &:hover {
+            background: rgba(white, 0.1);
+            border-radius: 8px;
+        }
+
+        @media (max-width: $tablet) {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+
+    // ============================================
+    // 📱 MOBILE SIDEBAR MENU
+    // ============================================
+    .mobile-sidebar {
+        position: fixed;
+        top: 0;
+        left: -100%;
+        width: 280px;
+        height: 100vh;
+        background: linear-gradient(135deg, $brown-color 0%, rgba($brown-color, 0.95) 100%);
+        z-index: 1100;
+        transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+        overflow-y: auto;
+
+        &.open {
+            left: 0;
+        }
+
+        // HEADER CỦA SIDEBAR
+        .mobile-sidebar-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: $spacing-xl;
-            padding: $spacing-lg $spacing-xxxl;
-            min-height: 80px;
+            padding: 1.5rem 1.25rem;
+            border-bottom: 1px solid rgba(white, 0.2);
+            background: rgba(0, 0, 0, 0.1);
 
-            .logo-section {
-                flex: 0 0 auto;
+            .sidebar-logo {
+                img {
+                    height: 50px;
+                    width: auto;
+                    object-fit: contain;
+                }
             }
 
-            .main-nav {
-                flex: 1;
-                justify-content: center;
-            }
+            .close-btn {
+                background: none;
+                border: none;
+                color: white;
+                cursor: pointer;
+                padding: 0.5rem;
+                transition: all 0.3s ease;
+                border-radius: 8px;
 
-            .header-actions {
-                flex: 0 0 auto;
-            }
-
-            // ✅ ẨN NAV-ACTIONS-WRAPPER TRÊN DESKTOP
-            .nav-actions-wrapper {
-                display: none;
+                &:hover {
+                    background: rgba(white, 0.15);
+                }
             }
         }
 
-        // 📱 TABLET & MOBILE: 2 HÀNG
-        @media (max-width: $tablet) {
-            display: flex;
-            flex-direction: column;
-            gap: $spacing-md;
-            padding: $spacing-md $spacing-lg;
+        // MENU ITEMS
+        .mobile-nav-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
 
-            // HÀNG 1: LOGO GIỮA
-            .logo-section {
+            .mobile-nav-item {
                 display: flex;
-                justify-content: center;
-                width: 100%;
-            }
+                align-items: center;
+                padding: 1.25rem 1.5rem;
+                color: white;
+                text-decoration: none;
+                font-size: 1rem;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+                border-bottom: 1px solid rgba(white, 0.1);
+                transition: all 0.3s ease;
+                position: relative;
+                text-transform: uppercase;
 
-
-            .main-nav {
-                flex: 1 1 auto;
-                overflow-x: auto;
-                overflow-y: hidden;
-                -ms-overflow-style: none;
-                scrollbar-width: none;
-                scroll-behavior: smooth;
-                -webkit-overflow-scrolling: touch;
-                min-width: 0;
-
-                // ẨN SCROLLBAR
-                &::-webkit-scrollbar {
-                    display: none;
+                // HOVER EFFECT
+                &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    top: 0;
+                    height: 100%;
+                    width: 4px;
+                    background: white;
+                    transform: scaleY(0);
+                    transition: transform 0.3s ease;
                 }
 
-                display: flex;
-                gap: $spacing-md;
-                padding: $spacing-xs 0;
-            }
+                &:hover {
+                    background: rgba(white, 0.1);
+                    padding-left: 2rem;
 
-            .header-actions {
-                flex: 0 0 auto;
-                display: flex;
-                gap: $spacing-sm;
-                margin-left: auto;
-            }
-
-            .nav-actions-wrapper {
-                display: none;
-            }
-        }
-
-        @media (max-width: $mobile) {
-            padding: $spacing-sm $spacing-md;
-            gap: $spacing-sm;
-
-            .nav-actions-wrapper {
-                gap: $spacing-sm;
-
-                .main-nav {
-                    gap: $spacing-sm;
+                    &::before {
+                        transform: scaleY(1);
+                    }
                 }
 
-                .header-actions {
-                    gap: $spacing-xs;
-                    margin-left: $spacing-sm;
+                // ACTIVE STATE
+                &.active {
+                    background: rgba(white, 0.15);
+                    color: white;
+                    font-weight: 700;
+
+                    &::before {
+                        transform: scaleY(1);
+                    }
+                }
+
+                span {
+                    display: block;
                 }
             }
         }
+    }
 
-        @media (max-width: $mobile-small) {
-            padding: $spacing-sm;
-            gap: $spacing-xs;
-
-            .nav-actions-wrapper {
-                gap: $spacing-xs;
-
-                .main-nav {
-                    gap: $spacing-xs;
-                }
-
-                .header-actions {
-                    margin-left: $spacing-xs;
-                }
-            }
-        }
+    // ============================================
+    // 🌑 MOBILE BACKDROP (Overlay)
+    // ============================================
+    .mobile-nav-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1050;
+        animation: fadeIn 0.3s ease;
+        backdrop-filter: blur(2px);
     }
 
     // ============================================
@@ -162,6 +251,11 @@
 
         @media (max-width: $tablet) {
             gap: $spacing-sm;
+
+            // Không scale khi hover trên mobile vì logo ở giữa cố định
+            &:hover {
+                transform: translate(-50%, -50%) scale(1.02);
+            }
         }
 
         .logo-container {
@@ -170,10 +264,7 @@
             height: 70px;
             border-radius: $border-radius-xl;
             overflow: hidden;
-            box-shadow: 0 4px 15px rgba(white, 0.2);
             flex-shrink: 0;
-            border: 2px solid rgba(white, 0.3);
-            background: linear-gradient(135deg, rgba(white, 0.1), rgba(white, 0.05));
 
             @media (max-width: $tablet) {
                 width: 55px;
@@ -201,78 +292,15 @@
                 }
             }
         }
-
-        .brand-info {
-            display: flex;
-            flex-direction: column;
-            gap: $spacing-xs;
-
-            @media (max-width: $tablet) {
-                gap: 2px;
-            }
-
-            .brand-name {
-                font-size: $font-size-huge;
-                font-weight: $font-weight-bold;
-                color: white;
-                margin: 0;
-                letter-spacing: 2px;
-                text-shadow: 2px 2px 4px rgba($brown-dark, 0.5);
-                line-height: 1;
-                font-family: $font-family-heading;
-
-                @media (max-width: $tablet) {
-                    font-size: $font-size-xxxl;
-                    letter-spacing: 1.5px;
-                }
-
-                @media (max-width: $mobile) {
-                    font-size: $font-size-xxl;
-                    letter-spacing: 1px;
-                }
-
-                @media (max-width: $mobile-small) {
-                    font-size: $font-size-xl;
-                    letter-spacing: 0.5px;
-                }
-            }
-
-            .brand-subtitle {
-                font-size: $font-size-sm;
-                color: rgba(white, 0.9);
-                font-weight: $font-weight-medium;
-                letter-spacing: 1.5px;
-                text-transform: uppercase;
-                line-height: 1;
-
-                @media (max-width: $tablet) {
-                    font-size: $font-size-xs;
-                    letter-spacing: 1px;
-                }
-
-                @media (max-width: $mobile) {
-                    font-size: 10px;
-                    letter-spacing: 0.5px;
-                }
-
-                @media (max-width: $mobile-small) {
-                    display: none;
-                }
-            }
-        }
     }
 
     // ============================================
-    // 🧭 MAIN NAVIGATION
+    // 🧭 MAIN NAVIGATION (Desktop)
     // ============================================
     .main-nav {
         display: flex;
         gap: $spacing-xl;
         align-items: center;
-
-        @media (max-width: $tablet) {
-            // Đã được xử lý trong .nav-actions-wrapper
-        }
 
         .nav-link {
             color: rgba(white, 0.95);
@@ -283,12 +311,12 @@
             border-radius: $border-radius-lg;
             transition: all $transition-normal;
             letter-spacing: 0.5px;
-            white-space: nowrap; // ✅ QUAN TRỌNG: Không cho wrap
+            white-space: nowrap;
             position: relative;
             overflow: hidden;
             border: 1px solid transparent;
             font-family: $font-family-base;
-            flex-shrink: 0; // ✅ QUAN TRỌNG: Không cho shrink
+            flex-shrink: 0;
 
             // SHINE EFFECT
             &::before {
@@ -306,18 +334,6 @@
                 left: 100%;
             }
 
-            @media (max-width: $tablet) {
-                font-size: $font-size-sm;
-                padding: $spacing-xs $spacing-md;
-                border-radius: $border-radius-md;
-            }
-
-            @media (max-width: $mobile) {
-                font-size: $font-size-xs;
-                padding: $spacing-xs $spacing-sm;
-                border-radius: $border-radius-sm;
-            }
-
             // HOVER STATE
             &:hover {
                 background: rgba(white, 0.15);
@@ -325,11 +341,6 @@
                 transform: translateY(-2px);
                 box-shadow: $box-shadow-md;
                 border-color: rgba(white, 0.3);
-
-                @media (max-width: $tablet) {
-                    transform: translateY(-1px);
-                    box-shadow: $box-shadow-sm;
-                }
             }
 
             // ACTIVE STATE
@@ -340,28 +351,19 @@
                 transform: translateY(-1px);
                 border-color: rgba($red-color, 0.5);
 
-                @media (max-width: $tablet) {
-                    box-shadow: $box-shadow-sm;
-                    transform: none;
-                }
-
-                // ACTIVE INDICATOR (CHỈ DESKTOP)
                 &::after {
-                    @media (min-width: #{$tablet + 1px}) {
-                        content: '';
-                        position: absolute;
-                        bottom: -2px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        width: 20px;
-                        height: 3px;
-                        background: white;
-                        border-radius: $border-radius-sm;
-                    }
+                    content: '';
+                    position: absolute;
+                    bottom: -2px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    width: 20px;
+                    height: 3px;
+                    background: white;
+                    border-radius: $border-radius-sm;
                 }
             }
 
-            // FOCUS STATE
             &:focus {
                 outline: 2px solid rgba(white, 0.5);
                 outline-offset: 2px;
@@ -386,7 +388,6 @@
             gap: $spacing-xs;
         }
 
-        // CART BUTTON
         .cart-btn {
             background: rgba(white, 0.15);
             border: 2px solid rgba(white, 0.3);
@@ -430,15 +431,6 @@
                 @media (max-width: $mobile) {
                     width: 18px;
                     height: 18px;
-                }
-
-                .cart-badge-bg {
-                    fill: $red-color;
-                }
-
-                .cart-badge-text {
-                    fill: white;
-                    font-weight: $font-weight-bold;
                 }
             }
 
@@ -759,8 +751,18 @@
 }
 
 // ============================================
-// 🎬 ANIMATIONS
+// ⚡ ANIMATIONS
 // ============================================
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
 @keyframes dropdownSlide {
     0% {
         opacity: 0;
@@ -785,47 +787,15 @@
     }
 }
 
-// ============================================
-// 🖼️ HIGH DPI SCREENS
-// ============================================
-@media (-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+
+@media (max-width: $tablet) {
     .homepage-header {
-        .logo-section .logo-container .logo {
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-        }
+        height: 70px;
     }
 }
 
-// ============================================
-// 📱 LANDSCAPE MODE
-// ============================================
-@media (max-height: 500px) and (orientation: landscape) {
+@media (max-width: $mobile) {
     .homepage-header {
-        .header-container {
-            min-height: 60px;
-            padding: $spacing-sm $spacing-lg;
-        }
-
-        .logo-section {
-            .logo-container {
-                width: 40px;
-                height: 40px;
-            }
-
-            .brand-info .brand-name {
-                font-size: $font-size-lg;
-            }
-
-            .brand-info .brand-subtitle {
-                display: none;
-            }
-        }
-
-        .main-nav .nav-link {
-            padding: $spacing-xs $spacing-sm;
-            font-size: $font-size-xs;
-        }
+        height: 60px;
     }
 }

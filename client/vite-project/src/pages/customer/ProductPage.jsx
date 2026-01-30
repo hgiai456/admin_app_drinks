@@ -268,10 +268,7 @@ export default function ProductPage({
             <div className="search-bar">
               <div className="search-info">
                 {selectedCategory === "all" ? (
-                  <>
-                    Tổng <strong>{totalProducts}</strong> sản phẩm - Trang{" "}
-                    <strong>{page}</strong>/{totalPage}
-                  </>
+                  <></>
                 ) : (
                   <>
                     Danh mục{" "}
@@ -290,9 +287,6 @@ export default function ProductPage({
                     )}
                   </>
                 )}
-                <span className="page-size-info">
-                  | Hiển thị <strong>{pageSize}</strong> sản phẩm/trang
-                </span>
               </div>
               <form className="search-form" onSubmit={handleSearchSubmit}>
                 <input
@@ -504,24 +498,6 @@ export default function ProductPage({
               </div>
 
               <div className="pagination">
-                <div className="pagination-info">
-                  <span>
-                    Hiển thị{" "}
-                    <strong>
-                      {Math.min((page - 1) * pageSize + 1, totalProducts)}-
-                      {Math.min(page * pageSize, totalProducts)}
-                    </strong>{" "}
-                    / <strong>{totalProducts}</strong> sản phẩm
-                  </span>
-                  {totalPage > 1 && (
-                    <span>
-                      {" "}
-                      • Trang <strong>{page}</strong> /{" "}
-                      <strong>{totalPage}</strong>
-                    </span>
-                  )}
-                </div>
-
                 {totalPage > 1 && (
                   <div className="pagination-controls">
                     <button
