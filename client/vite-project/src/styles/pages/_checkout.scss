@@ -217,8 +217,14 @@
     }
 
     .item-details {
-      flex: 1;
+      display: flex;
       min-width: 0;
+      flex-direction: column;
+      flex: 1;
+
+      .item-info {
+        display: flex;
+      }
 
       h4 {
         font-size: $font-size-md;
@@ -233,7 +239,9 @@
       p {
         font-size: $font-size-xs;
         color: $secondary-color;
-        margin-bottom: $spacing-xs;
+        margin-bottom: 4px;
+        margin-top: 2px;
+        margin-left: 5px;
       }
 
       .item-pricing {
@@ -257,61 +265,6 @@
       }
     }
 
-  }
-
-  .payment-section-sidebar {
-    margin-top: $spacing-xl;
-    padding-top: $spacing-xl;
-    border-top: 2px solid rgba($brown-border, 0.5);
-
-    h3 {
-      font-size: $font-size-lg;
-      color: $brown-dark;
-      margin-bottom: $spacing-lg;
-      font-weight: $font-weight-bold;
-      display: flex;
-      align-items: center;
-      gap: $spacing-sm;
-    }
-
-    .payment-methods {
-      display: flex;
-      flex-direction: column;
-      gap: $spacing-sm; // Giảm gap để fit sidebar
-
-      .payment-method-card {
-        padding: $spacing-md; // Giảm padding
-        font-size: $font-size-sm; // Giảm font
-
-        .method-icon {
-          font-size: 1.5rem; // Giảm icon size
-        }
-
-        .method-info {
-          h4 {
-            font-size: $font-size-sm;
-          }
-
-          p {
-            font-size: $font-size-xs;
-          }
-        }
-      }
-    }
-
-    .payment-info-box {
-      margin-top: $spacing-md;
-      padding: $spacing-md;
-      font-size: $font-size-xs;
-
-      h4 {
-        font-size: $font-size-sm;
-      }
-
-      ul {
-        font-size: $font-size-xs;
-      }
-    }
   }
 
   .form-actions-sidebar {
@@ -734,70 +687,69 @@
     }
   }
 
-  .form-actions {
+}
+
+.form-actions {
+  display: flex;
+  gap: $spacing-lg;
+  margin-top: 5px;
+  padding-top: $spacing-lg;
+  border-top: 1px solid rgba($brown-border, 0.5);
+  max-width: 720px;
+
+  @media (max-width: $mobile) {
+    flex-direction: column-reverse;
+  }
+
+  button {
+    padding: 14px 28px;
+    border-radius: $border-radius-lg;
+    font-weight: $font-weight-semibold;
+    font-size: $font-size-md;
+    cursor: pointer;
+    transition: $transition-normal;
     display: flex;
-    gap: $spacing-lg;
-    margin-top: 40px;
-    padding-top: $spacing-lg;
-    border-top: 1px solid rgba($brown-border, 0.5);
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 
-    @media (max-width: $mobile) {
-      flex-direction: column-reverse;
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .btn-back {
+    background: #ffffff;
+    color: $brown-primary;
+    border: 2px solid $brown-primary;
+    flex: 1;
+
+    &:hover:not(:disabled) {
+      background: $brown-bg;
+      transform: translateX(-4px);
+    }
+  }
+
+  .btn-checkout {
+    background: $brown-primary;
+    color: #ffffff;
+    border: none;
+    flex: 2;
+    box-shadow: $box-shadow-md;
+
+    &:hover:not(:disabled) {
+      background: $brown-dark;
+      box-shadow: $box-shadow-lg;
+      transform: translateY(-2px);
     }
 
-    button {
-      padding: 14px 28px;
-      border-radius: $border-radius-lg;
-      font-weight: $font-weight-semibold;
-      font-size: $font-size-md;
-      cursor: pointer;
-      transition: $transition-normal;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-
-      &:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-    }
-
-    .btn-back {
-      background: #ffffff;
-      color: $brown-primary;
-      border: 2px solid $brown-primary;
-      flex: 1;
-
-      &:hover:not(:disabled) {
-        background: $brown-bg;
-        transform: translateX(-4px);
-      }
-    }
-
-    .btn-checkout {
-      background: $brown-primary;
-      color: #ffffff;
-      border: none;
-      flex: 2;
-      box-shadow: $box-shadow-md;
-
-      &:hover:not(:disabled) {
-        background: $brown-dark;
-        box-shadow: $box-shadow-lg;
-        transform: translateY(-2px);
-      }
-
-      .loading-spinner {
-        animation: spin 1s linear infinite;
-      }
+    .loading-spinner {
+      animation: spin 1s linear infinite;
     }
   }
 }
 
-// =============================================
-// ✅ ADDRESS AUTOCOMPLETE - FIX CRITICAL
-// =============================================
 .address-autocomplete-wrapper {
   position: relative;
   width: 100%;
@@ -1038,6 +990,68 @@
   }
 }
 
+.payment-section-sidebar {
+  margin-top: $spacing-xl;
+  padding-top: $spacing-xl;
+  border-top: 2px solid rgba($brown-border, 0.5);
+
+  h3 {
+    font-size: $font-size-lg;
+    color: $brown-dark;
+    margin-bottom: $spacing-lg;
+    font-weight: $font-weight-bold;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+
+  .payment-methods {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm; // Giảm gap để fit sidebar
+
+    .payment-method-card {
+      padding: $spacing-md; // Giảm padding
+      font-size: $font-size-sm; // Giảm font
+      display: flex;
+      align-items: center;
+      gap: $spacing-sm;
+      background-color: white;
+      border-radius: 10px;
+      border: 1px solid rgba($brown-border, 0.5);
+
+      .method-icon {
+        font-size: 1.5rem; // Giảm icon size
+        margin-bottom: 10px;
+      }
+
+      .method-info {
+        h4 {
+          font-size: $font-size-sm;
+        }
+
+        p {
+          font-size: $font-size-xs;
+        }
+      }
+    }
+  }
+
+  .payment-info-box {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    font-size: $font-size-xs;
+
+    h4 {
+      font-size: $font-size-sm;
+    }
+
+    ul {
+      font-size: $font-size-xs;
+    }
+  }
+}
+
 // ===== KEYFRAMES =====
 @keyframes pulse {
 
@@ -1082,7 +1096,65 @@
 }
 
 // ===== RESPONSIVE =====
-@media (max-width: $tablet) {
+@media (max-width: $tablet-large) {
+  .checkout-container {
+    padding: $spacing-lg;
+  }
+
+  .checkout-content {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    padding: 5px !important;
+    gap: $spacing-md !important;
+  }
+
+  .order-summary {
+    order: 2;
+    width: 100%;
+    position: static;
+    margin-bottom: $spacing-lg;
+    box-shadow: none;
+
+    .summary-items {
+      .summary-item {
+        padding: $spacing-sm;
+
+        .item-details {
+          display: flex;
+        }
+      }
+    }
+
+  }
+
+  .checkout-form {
+    order: 1;
+    width: 100%;
+    margin-bottom: $spacing-lg;
+
+
+    .form-section {
+      width: 100%;
+      margin-bottom: $spacing-md;
+      padding: $spacing-md;
+    }
+
+
+  }
+
+  .form-actions {
+    border-top: 1px solid rgba($brown-border, 0.5);
+    padding: 10px;
+    flex-direction: column;
+    align-items: center;
+
+    button {
+      width: 100%;
+    }
+  }
+
+
   .address-autocomplete-wrapper {
     .address-autocomplete-dropdown {
       max-height: 200px;

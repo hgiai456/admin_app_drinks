@@ -439,11 +439,12 @@ export default function HomePage({
               <div className="slide-background">
                 <p
                   style={{
-                    fontSize: "12px",
+                    fontSize: "11px",
                     color: "white",
                   }}
                 >
-                  Hình ảnh chỉ mang tính chất học thuật. Không sử dụng với mục đích thương mại{" "}
+                  Hình ảnh chỉ mang tính chất học thuật. Không sử dụng với mục
+                  đích thương mại{" "}
                 </p>
                 <img
                   src={banner.image}
@@ -507,7 +508,7 @@ export default function HomePage({
       <section className="products-section">
         <div className="container">
           <div className="section-header">
-            <h2 className="section-title">FEATURED PRODUCTS</h2>
+            <h2 className="section-title">SẢN PHẨM NỔI BẬT</h2>
             <p className="section-subtitle">
               Khám phá những thức uống được yêu thích nhất tại HG Coffee
             </p>
@@ -737,7 +738,7 @@ export default function HomePage({
         onViewMore={() => (window.location.hash = "menu?sort=bestseller")}
         formatPrice={formatPrice}
         getCategoryName={getCategoryName}
-        title="BEST SELLERS"
+        title="SẢN PHẨM BÁN CHẠY"
       />
 
       <section className="news-section-home">

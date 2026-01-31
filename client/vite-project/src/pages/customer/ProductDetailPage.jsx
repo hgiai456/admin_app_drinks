@@ -7,7 +7,7 @@ import ProdetailService from "@services/prodetail.service.js";
 import "@styles/pages/_productdetail.scss";
 import BestSellerGrid from "@components/common/BestSellerGrid.jsx";
 import { triggerCartRefresh } from "@components/common/UtilityFunction.jsx";
-import { navigation } from "@utils/editorHelpers.js";
+import { navigation, scrollToTop } from "@utils/editorHelpers.js";
 import { ShoppingCart } from "lucide-react";
 import AlertMessage from "@components/common/AlertMessage.jsx";
 
@@ -194,6 +194,7 @@ export default function ProductDetailPage({
           selectedSize,
         )}) vào giỏ hàng${guestText}`,
       );
+      scrollToTop();
       triggerCartRefresh();
       setQuantity(1);
     } catch (error) {
@@ -487,7 +488,7 @@ export default function ProductDetailPage({
           onProductClick={handleViewProduct}
           formatPrice={formatPrice}
           getCategoryName={getCategoryName}
-          title="BEST SELLERS"
+          title="sẢN PHẨM BÁN CHẠY"
         />
       </div>
     </Layout>

@@ -10,6 +10,7 @@ export default function PaymentResult({ user, onLogout }) {
   const [amount, setAmount] = useState(null);
   const [message, setMessage] = useState("");
   const [orderDetails, setOrderDetails] = useState(null);
+  const [methodPayment, setMethodPayment] = useState(null);
 
   useEffect(() => {
     const hash = window.location.hash;
@@ -25,6 +26,7 @@ export default function PaymentResult({ user, onLogout }) {
     const orderIdParam = params.get("orderId") || params.get("vnp_TxnRef");
     const amountParam = params.get("amount");
     const messageParam = params.get("message");
+    const methodParam = params.get("method") || "";
 
     console.log("📦 Payment Result Params:", {
       status: statusParam,
@@ -35,6 +37,7 @@ export default function PaymentResult({ user, onLogout }) {
 
     setOrderId(orderIdParam);
     setAmount(amountParam);
+    setMethodPayment(methodParam);
 
     if (orderIdParam) {
       loadOrderDetails(orderIdParam);
@@ -43,7 +46,11 @@ export default function PaymentResult({ user, onLogout }) {
     // Xác định status
     if (statusParam === "success") {
       setStatus("success");
-      setMessage("Thanh toán thành công! Cảm ơn bạn đã đặt hàng.");
+      setMessage(
+        methodParam === "sepay"
+          ? "Thanh toán thành công! Cảm ơn bạn đã đặt hàng."
+          : "Đặt hàng thành công! Cảm ơn bạn đã đặt hàng.",
+      );
     } else if (statusParam === "failed") {
       setStatus("failed");
       setMessage(messageParam || "Thanh toán thất bại. Vui lòng thử lại.");
@@ -116,7 +123,11 @@ export default function PaymentResult({ user, onLogout }) {
           {status === "success" && (
             <div className="result-success">
               <div className="result-icon success-icon">✓</div>
-              <h1>Thanh toán thành công!</h1>
+              <h1>
+                {methodPayment === "sepay"
+                  ? "Thanh toán thành công !"
+                  : "Đặt hàng thành công!"}
+              </h1>
               <p className="result-message">{message}</p>
 
               {orderDetails && (
@@ -138,9 +149,8 @@ export default function PaymentResult({ user, onLogout }) {
                   <div className="detail-row">
                     <span className="label">Phương thức:</span>
                     <span className="value">
-                      {orderDetails.payment_method === "sepay" && "📱 SePay"}
-                      {orderDetails.payment_method === "vnpay" && "🏦 VNPay"}
-                      {orderDetails.payment_method === "cod" && "💵 COD"}
+                      {methodPayment === "sepay" && "📱 SePay"}
+                      {methodPayment === "cod" && "💵 COD"}
                     </span>
                   </div>
 

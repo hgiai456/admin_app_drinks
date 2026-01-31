@@ -321,13 +321,10 @@ export default function CheckoutPage({
 
   if (loading) {
     return (
-      <Layout
-        user={user}
-        onLogout={onLogout}
-        currentPage="checkout"
-        isGuest={isGuest}
-        onLogin={onLogin}
-      ></Layout>
+      <div className="homepage-loading">
+        <div className="loading-spinner">☕</div>
+        <p>Đang tải...</p>
+      </div>
     );
   }
 
@@ -359,7 +356,7 @@ export default function CheckoutPage({
         </div>
 
         <div className="checkout-header">
-          <h1>💳 Thanh toán đơn hàng</h1>
+          <h1>Thanh toán đơn hàng</h1>
           <p>Vui lòng kiểm tra thông tin và hoàn tất đơn hàng</p>
         </div>
 
@@ -385,7 +382,7 @@ export default function CheckoutPage({
 
         <div className="checkout-content">
           <div className="order-summary">
-            <h2>📋 Thông tin đơn hàng</h2>
+            <h2>Thông tin đơn hàng</h2>
 
             <div className="summary-items">
               {cartItems.map((item) => (
@@ -401,8 +398,11 @@ export default function CheckoutPage({
                     />
                   </div>
                   <div className="item-details">
-                    <h4>{item.product_name}</h4>
-                    <p>{item.size_name}</p>
+                    <div className="item-info">
+                      <h4>{item.product_name}</h4>
+                      <p>({item.size_name})</p>
+                    </div>
+
                     <div className="item-pricing">
                       <span className="quantity">x{item.quantity}</span>
                       <span className="price">{formatPrice(item.price)}</span>
@@ -429,11 +429,45 @@ export default function CheckoutPage({
                 <span>{formatPrice(calculateCartTotal())}</span>
               </div>
             </div>
+
+            <div className="payment-section-sidebar">
+              <h3>Phương Thức Thanh Toán</h3>
+              <div className="payment-methods">
+                {paymentMethods.map((method) => (
+                  <div
+                    key={method.id}
+                    className={`payment-method-card ${
+                      formData.payment_method === method.id ? "selected" : ""
+                    }`}
+                    onClick={() =>
+                      !submitting && handlePaymentMethodChange(method.id)
+                    }
+                  >
+                    <div className="method-radio">
+                      <input
+                        type="radio"
+                        id={`payment-desktop-${method.id}`}
+                        name="payment_method"
+                        value={method.id}
+                        checked={formData.payment_method === method.id}
+                        onChange={() => handlePaymentMethodChange(method.id)}
+                        disabled={submitting}
+                      />
+                    </div>
+                    <span className="method-icon">{method.icon}</span>
+                    <div className="method-info">
+                      <h4>{method.name}</h4>
+                    </div>
+                    {formData.payment_method === method.id && (
+                      <span className="method-check">✓</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           <div className="checkout-form">
-            <h2>📝 Thông tin giao hàng</h2>
-
             <form onSubmit={handleCheckout}>
               <div className="form-section">
                 <h3>Thông tin khách hàng</h3>
@@ -483,7 +517,7 @@ export default function CheckoutPage({
                     onPlaceSelected={handlePlaceSelected}
                   />
 
-                  {addressDetails && (
+                  {/* {addressDetails && (
                     <div className="address-details-box">
                       <div className="details-title">
                         📍 Thông tin địa chỉ đã chọn:
@@ -523,7 +557,7 @@ export default function CheckoutPage({
                         )}
                       </div>
                     </div>
-                  )}
+                  )} */}
 
                   <div className="address-usage-hint">
                     💡 <em>Gõ ít nhất 3 ký tự để tìm kiếm địa chỉ</em>
@@ -552,51 +586,6 @@ export default function CheckoutPage({
                 </div>
               </div>
 
-              <div className="payment-section-sidebar">
-                <h3>Phương Thức Thanh Toán</h3>
-                <div className="payment-methods">
-                  {paymentMethods.map((method) => (
-                    <div
-                      key={method.id}
-                      className={`payment-method-card ${
-                        formData.payment_method === method.id ? "selected" : ""
-                      }`}
-                      onClick={() =>
-                        !submitting && handlePaymentMethodChange(method.id)
-                      }
-                    >
-                      <div className="method-radio">
-                        <input
-                          type="radio"
-                          id={`payment-desktop-${method.id}`}
-                          name="payment_method"
-                          value={method.id}
-                          checked={formData.payment_method === method.id}
-                          onChange={() => handlePaymentMethodChange(method.id)}
-                          disabled={submitting}
-                        />
-                      </div>
-                      <span className="method-icon">{method.icon}</span>
-                      <div className="method-info">
-                        <h4>{method.name}</h4>
-                      </div>
-                      {formData.payment_method === method.id && (
-                        <span className="method-check">✓</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-
-                {/* {formData.payment_method === "vnpay" && (
-                  <div className="payment-info-box vnpay">
-                    <h4>🏦 cVNPAY Test</h4>
-                    <ul>
-                      <li>NCB: 9704198526191432198</li>
-                      <li>OTP: 123456</li>
-                    </ul>
-                  </div>
-                )} */}
-              </div>
               <div className="form-actions">
                 <button
                   type="button"

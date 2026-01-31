@@ -194,7 +194,6 @@
     }
 }
 
-//BEST SELLER SECTION - 4 PRODUCTS/LINE
 
 .best-sellers-section {
     padding: $spacing-xxxl 0;
@@ -206,7 +205,6 @@
         padding: 0 $spacing-lg;
     }
 
-    // ✅ SECTION HEADER
     .section-header {
         text-align: center;
         margin-bottom: $spacing-xxl;
@@ -260,7 +258,7 @@
         padding: 0 60px;
 
         @media (max-width: $tablet) {
-            padding: 0 50px;
+            padding: 0 40px;
         }
 
         @media (max-width: $mobile) {
@@ -268,28 +266,23 @@
         }
     }
 
-    // ✅ CAROUSEL CONTAINER
     .bestseller-carousel {
         overflow: hidden;
         border-radius: $border-radius-xl;
     }
 
-    // ✅ CAROUSEL TRACK - 4 items visible
     .carousel-track {
         display: flex;
         will-change: transform;
     }
 
-    // ✅ CAROUSEL ITEM
     .carousel-item {
         flex-shrink: 0;
         padding: $spacing-lg $spacing-md;
         box-sizing: border-box;
 
         @media (max-width: $mobile) {
-            @media (max-width: $mobile) {
-                padding: $spacing-md $spacing-sm;
-            }
+            padding: $spacing-md $spacing-sm;
         }
     }
 
@@ -392,7 +385,7 @@
                 backdrop-filter: blur(10px);
                 padding: 6px 12px;
                 border-radius: 20px;
-                font-size: 0.7rem;
+                font-size: 10px;
                 font-weight: $font-weight-bold;
                 color: $red-color;
                 box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -485,15 +478,15 @@
         }
 
         @media (max-width: $tablet) {
-            width: 42px;
-            height: 42px;
+            width: 36px;
+            height: 36px;
             font-size: 1.5rem;
         }
 
         @media (max-width: $mobile) {
-            width: 36px;
-            height: 36px;
-            font-size: 1.3rem;
+            width: 30px;
+            height: 30px;
+            font-size: 1.2rem;
         }
     }
 
@@ -527,7 +520,6 @@
         }
     }
 
-    // ✅ VIEW MORE BUTTON
     .section-footer {
         text-align: center;
         margin-top: $spacing-lg;
@@ -606,5 +598,39 @@
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+@media (max-width: $tablet) {
+    .best-sellers-section {
+        .bestseller-card {
+            .product-image {
+                .bestseller-badge {
+                    padding: 4px 10px;
+                    font-size: 0.65rem;
+                    border-radius: 14px;
+                }
+
+                .buyturns-badge {
+                    padding: 4px 8px;
+                    font-size: 9px;
+                    border-radius: 14px;
+                }
+            }
+
+            .product-info {
+                .product-name {
+                    font-size: 0.95rem;
+                }
+            }
+
+            .product-footer {
+                .product-price {
+                    .span {
+                        font-size: 0.2rem;
+                    }
+                }
+            }
+        }
     }
 }

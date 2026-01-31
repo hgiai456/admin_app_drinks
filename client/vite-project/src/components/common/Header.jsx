@@ -58,11 +58,6 @@ export default function Header({
     console.log("🔄 Guest register clicked, onRegister:", onRegister);
     if (onRegister) {
       onRegister();
-    } else if (onLogin) {
-      onLogin();
-    } else {
-      console.warn("⚠️ No onRegister/onLogin handler provided");
-      alert("Chức năng đăng ký đang được phát triển.");
     }
   };
 
