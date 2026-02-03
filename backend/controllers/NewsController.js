@@ -36,9 +36,6 @@ export async function getNewsArticles(req, res) {
   });
 }
 
-/**
- * GET: Lấy toàn bộ News (dùng cho dropdown / admin)
- */
 export async function getAllNewsArticles(req, res) {
   const { search = "", page = 1 } = req.query;
   const pageSize = 100;

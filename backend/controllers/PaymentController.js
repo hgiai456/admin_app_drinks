@@ -3,9 +3,40 @@ import SePayService from "../services/SePayService.js";
 import EmailService from "../services/EmailService.js";
 import db from "../models/index.js";
 import dotenv from "dotenv";
+import { Where } from "sequelize/lib/utils";
+import { Op, where } from "sequelize";
 
 dotenv.config();
+export async function getAllPayments(req, res) {
+  const { search = "", page = 1 } = req.query;
+  const pageSize = 20;
+  const offset = (page - 1) * pageSize;
 
+  const [payments, totalPayments] = await Promise.all([
+    db.Payment.findAll({
+      where: whereClause,
+      limit: pageSize,
+      include: [
+        {
+          model: db.Payment,
+          as: "payment",
+          limit: pageSize,
+          offset,
+        },
+      ],
+    }),
+    db.Payment.count({ where: whereClause }),
+    db.Payment.sum("total_amount", { where: whereClause }),
+  ]);
+
+  return res.status(200).json({
+    message: "Lấy danh sách thanh toán thành công",
+    data: payments,
+    currentPage: parseInt(page, 10),
+    totalPage: Math.ceil(totalPayments / pageSize), //ceil(11 / 5) = 2.1 => 3 (Lam tron)
+    totalPayments,
+  });
+}
 export async function createPayment(req, res) {
   const transaction = await db.sequelize.transaction();
 
@@ -590,7 +621,7 @@ export async function sepayWebhook(req, res) {
       try {
         const user = await db.User.findByPk(payment.order.user_id);
         if (user?.email) {
-          EmailService.sendOrderConfirmation(user.email, {
+          await EmailService.sendOrderConfirmation(user.email, {
             order: payment.order,
             user: user,
             OrderDetails: payment.order.order_details || [],

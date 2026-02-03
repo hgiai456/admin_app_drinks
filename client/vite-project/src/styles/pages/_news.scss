@@ -201,6 +201,11 @@
               .title-text {
                 font-weight: $font-weight-bold;
                 font-size: $font-size-sm;
+                display: -webkit-box;
+                -webkit-line-clamp: 2; // số dòng muốn hiển thị
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
                 color: #333;
               }
             }
@@ -240,6 +245,11 @@
               font-size: $font-size-xs;
               color: $admin-text-light;
               line-height: 1.5;
+              display: -webkit-box;
+              -webkit-line-clamp: 2; // số dòng muốn hiển thị
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
             }
           }
 

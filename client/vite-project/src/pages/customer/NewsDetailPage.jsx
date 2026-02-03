@@ -4,6 +4,7 @@ import NewsDetailService from "@services/newsdetail.service.js";
 import ProductService from "@services/product.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_newsdetail.scss";
+import { Calendar } from "lucide-react";
 import { sanitizeHtml, scrollToTop } from "@utils/editorHelpers.js";
 
 function NewsDetailPage({
@@ -180,7 +181,9 @@ function NewsDetailPage({
 
               <div className="news-meta">
                 <div className="meta-item">
-                  <span className="meta-icon">📅</span>
+                  <span className="meta-icon">
+                    <Calendar size={16} />
+                  </span>
                   <span className="meta-text">
                     {formatDate(news.createdAt)}
                   </span>

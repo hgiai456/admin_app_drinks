@@ -6,7 +6,7 @@ const route = express.Router();
 
 // POST /api/payments/create
 route.post("/create", asyncHandle(PaymentController.createPayment));
-
+route.get("/all", asyncHandle(PaymentController.getAllPayments));
 // POST /api/payments/sepay/webhook
 route.post("/sepay/webhook", PaymentController.sepayWebhook);
 route.post("/sepay/check", asyncHandle(PaymentController.checkSePayPayment));

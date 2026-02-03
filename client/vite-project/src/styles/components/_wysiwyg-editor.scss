@@ -13,7 +13,6 @@
     box-shadow: 0 0 0 4px rgba($brown-primary, 0.1);
   }
 
-  // ===== QUICK TOOLBAR =====
   .quick-toolbar {
     display: flex;
     align-items: center;
@@ -38,7 +37,7 @@
     button {
       min-width: auto;
       padding: $spacing-xs $spacing-sm;
-      
+
       &:hover {
         background: white;
         border-color: $brown-primary;
@@ -95,7 +94,7 @@
       .ql-editor {
         min-height: 300px;
         padding: $spacing-lg;
-        line-height: 1.8;
+        line-height: 1.4;
 
         &.ql-blank::before {
           color: $admin-text-light;
@@ -103,17 +102,33 @@
         }
 
         // ===== CONTENT STYLING =====
-        h1, h2, h3, h4, h5, h6 {
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
           color: $brown-dark;
           font-weight: $font-weight-semibold;
           margin: $spacing-lg 0 $spacing-md 0;
           font-family: $font-family-heading;
         }
 
-        h1 { font-size: $font-size-xxxl; }
-        h2 { font-size: $font-size-xxl; }
-        h3 { font-size: $font-size-xl; }
-        h4 { font-size: $font-size-lg; }
+        h1 {
+          font-size: $font-size-xxxl;
+        }
+
+        h2 {
+          font-size: $font-size-xxl;
+        }
+
+        h3 {
+          font-size: $font-size-xl;
+        }
+
+        h4 {
+          font-size: $font-size-lg;
+        }
 
         p {
           margin-bottom: $spacing-md;
@@ -136,7 +151,8 @@
           }
         }
 
-        ul, ol {
+        ul,
+        ol {
           padding-left: $spacing-xl;
           margin: $spacing-md 0;
 

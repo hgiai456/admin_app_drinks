@@ -1,7 +1,6 @@
 @use 'sass:color';
 @use '../abstracts/variables' as *;
 
-// ===== MIXINS & RESET CỤC BỘ =====
 @mixin flex-center-between {
   display: flex;
   align-items: center;
@@ -15,7 +14,6 @@
   transition: $transition-normal;
 }
 
-// ===== LAYOUT CHÍNH =====
 .checkout-container {
   max-width: $desktop;
   margin: 0 auto;

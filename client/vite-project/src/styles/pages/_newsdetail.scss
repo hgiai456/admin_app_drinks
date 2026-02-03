@@ -97,20 +97,20 @@
 
   .news-meta {
     display: flex;
-    justify-content: center;
-    gap: 40px; // ✅ Tăng từ 32px
+    justify-content: start;
+    gap: 40px;
     flex-wrap: wrap;
 
     .meta-item {
       display: flex;
       align-items: center;
-      gap: 10px; // ✅ Tăng từ 8px
-      font-size: 1rem; // ✅ Tăng từ 0.95rem
+      gap: 10px;
+      font-size: 1rem;
       color: $text-secondary;
-      font-weight: $font-weight-medium; // ✅ Thêm font weight
+      font-weight: $font-weight-medium;
 
       .meta-icon {
-        font-size: 1.25rem; // ✅ Tăng từ 1.1rem
+        font-size: 1.25rem;
       }
     }
   }
@@ -118,7 +118,7 @@
 
 // ===== FEATURED IMAGE =====
 .news-featured-image {
-  margin-bottom: 56px; // ✅ Tăng từ 48px
+  margin-bottom: 56px;
   border-radius: $border-radius-xl;
   overflow: hidden;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
@@ -127,21 +127,26 @@
     width: 100%;
     height: auto;
     display: block;
-    max-height: 550px; // ✅ Tăng từ 500px
+    max-height: 550px;
     object-fit: cover;
   }
 }
 
 // ===== CONTENT BODY =====
 .news-body {
-  font-size: 1.15rem; // ✅ Tăng từ 1.1rem
-  line-height: 1.9; // ✅ Tăng từ 1.8 để dễ đọc hơn
+  font-size: 1.15rem;
+  line-height: 1.9;
   color: $text-primary;
   margin-bottom: 60px;
-  letter-spacing: 0.2px; // ✅ Thêm letter spacing nhẹ
+  letter-spacing: 0.2px;
 
   // ===== TYPOGRAPHY =====
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     color: $brown-dark;
     font-weight: $font-weight-bold;
     margin-top: 56px; // ✅ Tăng từ 48px
@@ -179,11 +184,11 @@
     margin-bottom: 28px; // ✅ Tăng từ 24px
     line-height: 1.9;
     text-align: justify; // ✅ Thêm căn đều 2 bên
-    
+
     // ✅ First paragraph after heading - larger
-    h1 + &,
-    h2 + &,
-    h3 + & {
+    h1+&,
+    h2+&,
+    h3+& {
       font-size: 1.2rem; // ✅ Đoạn đầu sau heading to hơn
       line-height: 1.85;
       color: $text-secondary;
@@ -207,7 +212,8 @@
   }
 
   // ===== LISTS =====
-  ul, ol {
+  ul,
+  ol {
     margin-bottom: 32px; // ✅ Tăng từ 24px
     padding-left: 40px; // ✅ Tăng từ 32px
     line-height: 1.9;
@@ -219,7 +225,8 @@
     }
 
     // Nested lists
-    ul, ol {
+    ul,
+    ol {
       margin-top: 12px;
       margin-bottom: 12px;
     }
@@ -230,7 +237,7 @@
 
     ul {
       list-style-type: circle;
-      
+
       ul {
         list-style-type: square;
       }
@@ -245,13 +252,13 @@
     margin: 48px auto; // ✅ Tăng từ 32px và center
     display: block; // ✅ Đảm bảo margin auto work
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12); // ✅ Tăng shadow
-    
+
     // ✅ Spacing với text
-    & + p {
+    &+p {
       margin-top: 32px; // ✅ Khoảng cách sau ảnh
     }
-    
-    p + & {
+
+    p+& {
       margin-top: 40px; // ✅ Khoảng cách trước ảnh
     }
   }
@@ -281,7 +288,7 @@
       color: $brown-dark;
       font-style: normal;
       font-weight: $font-weight-semibold;
-      
+
       &::before {
         content: "— ";
       }
@@ -325,7 +332,8 @@
     border-radius: $border-radius-md;
     overflow: hidden;
 
-    th, td {
+    th,
+    td {
       border: 1px solid #e5e7eb;
       padding: 16px; // ✅ Tăng từ 12px
       text-align: left;
@@ -362,12 +370,14 @@
   }
 
   // ===== STRONG & EM =====
-  strong, b {
+  strong,
+  b {
     font-weight: $font-weight-bold;
     color: $admin-text;
   }
 
-  em, i {
+  em,
+  i {
     font-style: italic;
     color: $text-secondary;
   }
@@ -653,7 +663,10 @@
     line-height: 1.8;
     letter-spacing: 0.1px;
 
-    h1, h2, h3, h4 {
+    h1,
+    h2,
+    h3,
+    h4 {
       margin-top: 40px;
       margin-bottom: 20px;
     }
@@ -679,7 +692,8 @@
       text-align: left; // ✅ Bỏ justify trên mobile
     }
 
-    ul, ol {
+    ul,
+    ol {
       padding-left: 28px;
       margin-bottom: 24px;
 
@@ -701,7 +715,8 @@
     table {
       font-size: 0.9rem;
 
-      th, td {
+      th,
+      td {
         padding: 12px 10px;
       }
     }
