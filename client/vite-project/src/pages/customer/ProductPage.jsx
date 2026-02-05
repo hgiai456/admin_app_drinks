@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import ProductService from "@services/product.service.js";
 import CategoryService from "@services/category.service.js";
 import Layout from "@components/common/Layout.jsx";
-import "@styles/pages/_homepage.scss";
+import "@styles/pages/_product-page.scss";
 import { formatPrice, scrollToTop } from "@utils/editorHelpers.js";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, X } from "lucide-react";
 
 export default function ProductPage({
   user,
@@ -161,7 +161,7 @@ export default function ProductPage({
   const handlePageSizeChange = (newPageSize) => {
     console.log("📏 Changing page size to:", newPageSize);
     setPageSize(newPageSize);
-    setPage(1); // Reset về trang 1
+    setPage(1);
     setShowPageSizeDropdown(false);
   };
 
@@ -236,7 +236,6 @@ export default function ProductPage({
       pageSize,
     });
   }, [products, page, totalPage, totalProducts, selectedCategory, pageSize]);
-
   return (
     <Layout
       user={user}
@@ -247,168 +246,165 @@ export default function ProductPage({
       onRegister={onRegister}
     >
       {error && (
-        <div className="error-banner">
-          <span className="error-icon">⚠️</span>
-          <span className="error-text">{error}</span>
-          <button className="error-close" onClick={() => setError("")}>
+        <div className="menu-error-banner">
+          <span className="menu-error-icon">⚠️</span>
+          <span className="menu-error-text">{error}</span>
+          <button className="menu-error-close" onClick={() => setError("")}>
             ✖️
           </button>
         </div>
       )}
 
-      <section className="products-section" style={{ paddingTop: "2rem" }}>
-        <div className="container">
-          <div className="section-header">
-            <h2 className="section-title">THỰC ĐƠN SẢN PHẨM</h2>
-            <p className="section-subtitle">
+      <section className="menu-page-section">
+        <div className="menu-container">
+          {/* HEADER */}
+          <div className="menu-header">
+            <h2 className="menu-page-title">Thực Đơn</h2>
+            <p className="menu-page-subtitle">
               Khám phá toàn bộ bộ sưu tập thức uống đặc biệt tại HG Coffee
             </p>
+          </div>
 
-            {/* SEARCH BAR */}
-            <div className="search-bar">
-              <div className="search-info">
-                {selectedCategory === "all" ? (
-                  <></>
-                ) : (
-                  <>
-                    Danh mục{" "}
-                    <strong>
-                      {getCategoryName(parseInt(selectedCategory)).replace(
-                        /^[^\s]+\s/,
-                        "",
-                      )}
-                    </strong>
-                    : <strong>{totalProducts}</strong> sản phẩm
-                    {totalPage > 1 && (
-                      <>
-                        {" "}
-                        - Trang <strong>{page}</strong>/{totalPage}
-                      </>
+          {/* SEARCH BAR */}
+          <div className="menu-search-bar">
+            <div className="menu-search-info">
+              {selectedCategory === "all" ? (
+                <>
+                  Tổng cộng <strong>{totalProducts}</strong> sản phẩm
+                  {totalPage > 1 && (
+                    <>
+                      {" "}
+                      - Trang <strong>{page}</strong>/{totalPage}
+                    </>
+                  )}
+                </>
+              ) : (
+                <>
+                  Danh mục{" "}
+                  <strong>
+                    {getCategoryName(parseInt(selectedCategory)).replace(
+                      /^[^\s]+\s/,
+                      "",
                     )}
-                  </>
-                )}
-              </div>
-              <form className="search-form" onSubmit={handleSearchSubmit}>
-                <input
-                  name="search"
-                  className="search-input"
-                  placeholder="Tìm kiếm sản phẩm..."
-                  defaultValue={search}
-                />
-                <button type="submit" className="btn-search">
-                  🔍 Tìm kiếm
-                </button>
-                {search && (
-                  <button
-                    type="button"
-                    className="btn-clear-search"
-                    onClick={() => {
-                      setSearch("");
-                      setPage(1);
-                    }}
-                    title="Xóa tìm kiếm"
-                  >
-                    ✖️
-                  </button>
-                )}
-              </form>
+                  </strong>
+                  : <strong>{totalProducts}</strong> sản phẩm
+                </>
+              )}
             </div>
-
-            {/* PAGE SIZE DROPDOWN */}
-            {/* <div className="page-size-dropdown-container">
-              <span className="selector-label">📄 Số sản phẩm mỗi trang:</span>
-              <div className="page-size-dropdown">
+            <form className="menu-search-form" onSubmit={handleSearchSubmit}>
+              <input
+                name="search"
+                className="menu-search-input"
+                placeholder="Tìm kiếm sản phẩm..."
+                defaultValue={search}
+              />
+              <button type="submit" className="menu-btn-search">
+                🔍 Tìm kiếm
+              </button>
+              {search && (
                 <button
-                  className="page-size-dropdown-trigger"
-                  onClick={() => setShowPageSizeDropdown(!showPageSizeDropdown)}
                   type="button"
+                  className="menu-btn-clear-search"
+                  onClick={() => {
+                    setSearch("");
+                    setPage(1);
+                  }}
+                  title="Xóa tìm kiếm"
                 >
-                  <span className="current-size">
-                    {pageSize} sản phẩm/trang
-                  </span>
-                  <span
-                    className={`dropdown-arrow ${
-                      showPageSizeDropdown ? "open" : ""
-                    }`}
-                  >
-                    ▼
-                  </span>
+                  ✖️
                 </button>
+              )}
+            </form>
+          </div>
 
-                {showPageSizeDropdown && (
-                  <div className="page-size-dropdown-menu">
-                    {pageSizeOptions.map((option) => (
-                      <button
-                        key={option.value}
-                        className={`dropdown-item ${
-                          pageSize === option.value ? "active" : ""
-                        }`}
-                        onClick={() => handlePageSizeChange(option.value)}
-                      >
-                        <span className="item-text">{option.label}</span>
-                        {pageSize === option.value && (
-                          <span className="check-mark">✓</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div> */}
-
-            {/* CATEGORY FILTERS */}
-            <div className="section-actions">
+          {/* PAGE SIZE SELECTOR */}
+          <div className="menu-page-size-container">
+            <span className="menu-selector-label">
+              📄 Số sản phẩm mỗi trang:
+            </span>
+            <div className="menu-page-size-dropdown">
               <button
-                className={`filter-btn ${
-                  selectedCategory === "all" ? "active" : ""
-                }`}
-                onClick={() => handleCategoryFilter("all")}
+                className="menu-dropdown-trigger"
+                onClick={() => setShowPageSizeDropdown(!showPageSizeDropdown)}
+                type="button"
               >
-                <span>🍽️ Tất cả</span>
+                <span className="menu-current-size">{pageSize} sản phẩm</span>
+                <span
+                  className={`menu-dropdown-arrow ${showPageSizeDropdown ? "open" : ""}`}
+                >
+                  ▼
+                </span>
               </button>
 
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  className={`filter-btn ${
-                    selectedCategory === category.id.toString() ? "active" : ""
-                  }`}
-                  onClick={() => handleCategoryFilter(category.id.toString())}
-                >
-                  <span>
-                    {getCategoryIcon(category.id)} {category.name}
-                  </span>
-                </button>
-              ))}
+              {showPageSizeDropdown && (
+                <div className="menu-dropdown-menu">
+                  {pageSizeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      className={`menu-dropdown-item ${pageSize === option.value ? "active" : ""}`}
+                      onClick={() => handlePageSizeChange(option.value)}
+                    >
+                      <span className="menu-item-text">{option.label}</span>
+                      {pageSize === option.value && (
+                        <span className="menu-check-mark">✓</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-
-            {/* FILTER STATUS */}
-            {selectedCategory !== "all" && (
-              <div className="filter-status">
-                <span className="filter-indicator">
-                  🎯 Đang lọc theo:{" "}
-                  <strong>{getCategoryName(parseInt(selectedCategory))}</strong>
-                </span>
-                <button
-                  className="clear-filter-btn"
-                  onClick={() => handleCategoryFilter("all")}
-                  title="Xóa bộ lọc"
-                >
-                  ✖️ Bỏ lọc
-                </button>
-              </div>
-            )}
           </div>
+
+          {/* CATEGORY FILTERS */}
+          <div className="menu-category-filters">
+            <button
+              className={`menu-filter-btn ${selectedCategory === "all" ? "active" : ""}`}
+              onClick={() => handleCategoryFilter("all")}
+            >
+              <span>🍽️ Tất cả</span>
+            </button>
+
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                className={`menu-filter-btn ${
+                  selectedCategory === category.id.toString() ? "active" : ""
+                }`}
+                onClick={() => handleCategoryFilter(category.id.toString())}
+              >
+                <span>
+                  {getCategoryIcon(category.id)} {category.name}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          {/* FILTER STATUS */}
+          {selectedCategory !== "all" && (
+            <div className="menu-filter-status">
+              <span className="menu-filter-indicator">
+                🎯 Đang lọc theo:{" "}
+                <strong>{getCategoryName(parseInt(selectedCategory))}</strong>
+              </span>
+              <button
+                className="menu-clear-filter-btn"
+                onClick={() => handleCategoryFilter("all")}
+                title="Xóa bộ lọc"
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
 
           {/* PRODUCTS GRID */}
           {productsLoading ? (
-            <div className="products-loading">
-              <div className="loading-spinner">☕</div>
+            <div className="menu-products-loading">
+              <div className="menu-loading-spinner">☕</div>
               <p>Đang tải thực đơn...</p>
             </div>
           ) : products.length === 0 ? (
-            <div className="no-products">
-              <div className="no-products-icon">📭</div>
+            <div className="menu-no-products">
+              <div className="menu-no-products-icon">📭</div>
               <h3>Không tìm thấy sản phẩm</h3>
               <p>
                 {search
@@ -419,7 +415,7 @@ export default function ProductPage({
               </p>
               {(search || selectedCategory !== "all") && (
                 <button
-                  className="reset-filter-btn"
+                  className="menu-reset-filter-btn"
                   onClick={() => {
                     setSearch("");
                     setSelectedCategory("all");
@@ -433,17 +429,15 @@ export default function ProductPage({
           ) : (
             <>
               <div
-                className={`products-grid ${
-                  products.length <= 3 ? "few-products" : ""
-                }`}
+                className={`menu-products-grid ${products.length <= 3 ? "menu-few-products" : ""}`}
               >
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className="product-card"
+                    className="menu-product-card"
                     onClick={() => handleViewProduct(product)}
                   >
-                    <div className="product-image">
+                    <div className="menu-product-image">
                       <img
                         src={product.image}
                         alt={product.name}
@@ -452,9 +446,9 @@ export default function ProductPage({
                             "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=300&h=300&q=80&fit=crop";
                         }}
                       />
-                      <div className="product-overlay">
+                      <div className="menu-product-overlay">
                         <button
-                          className="quick-view-btn"
+                          className="menu-quick-view-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewProduct(product);
@@ -464,31 +458,31 @@ export default function ProductPage({
                           👁️
                         </button>
                       </div>
-                      <div className="product-badge">
+                      <div className="menu-product-badge">
                         <span>🔥 Hot</span>
                       </div>
                     </div>
 
-                    <div className="product-info">
-                      <div className="product-category">
+                    <div className="menu-product-info">
+                      <div className="menu-product-category">
                         {getCategoryName(product.category_id)}
                       </div>
-                      <h3 className="product-name">{product.name}</h3>
+                      <h3 className="menu-product-name">{product.name}</h3>
 
-                      <div className="product-footer">
-                        <div className="product-price">
-                          <span className="current-price">
+                      <div className="menu-product-footer">
+                        <div className="menu-product-price">
+                          <span className="menu-current-price">
                             {formatPrice(product.price)}
                           </span>
                         </div>
                         <button
-                          className="add-to-cart-btn"
+                          className="menu-add-to-cart-btn"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleViewProduct(product);
                           }}
                         >
-                          <ShoppingCart size={16} className="btn-icon" />
+                          <ShoppingCart size={14} className="menu-btn-icon" />
                           <span>Thêm</span>
                         </button>
                       </div>
@@ -497,11 +491,12 @@ export default function ProductPage({
                 ))}
               </div>
 
-              <div className="pagination">
-                {totalPage > 1 && (
-                  <div className="pagination-controls">
+              {/* PAGINATION */}
+              {totalPage > 1 && (
+                <div className="menu-pagination">
+                  <div className="menu-pagination-controls">
                     <button
-                      className="btn-nav"
+                      className="menu-btn-nav"
                       onClick={() => handlePageChange(page - 1)}
                       disabled={page === 1 || productsLoading}
                       title="Trang trước"
@@ -509,8 +504,7 @@ export default function ProductPage({
                       ⬅️ Trước
                     </button>
 
-                    {/* Page numbers */}
-                    <div className="page-numbers">
+                    <div className="menu-page-numbers">
                       {Array.from(
                         { length: Math.min(5, totalPage) },
                         (_, i) => {
@@ -524,7 +518,7 @@ export default function ProductPage({
                           return (
                             <button
                               key={pageNum}
-                              className={`btn-page ${page === pageNum ? "active" : ""}`}
+                              className={`menu-btn-page ${page === pageNum ? "active" : ""}`}
                               onClick={() => handlePageChange(pageNum)}
                               disabled={productsLoading}
                             >
@@ -536,7 +530,7 @@ export default function ProductPage({
                     </div>
 
                     <button
-                      className="btn-nav"
+                      className="menu-btn-nav"
                       onClick={() => handlePageChange(page + 1)}
                       disabled={page >= totalPage || productsLoading}
                       title="Trang sau"
@@ -544,8 +538,8 @@ export default function ProductPage({
                       Tiếp ➡️
                     </button>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </>
           )}
         </div>

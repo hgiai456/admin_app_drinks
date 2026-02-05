@@ -13,6 +13,7 @@
     box-shadow: 0 0 0 4px rgba($brown-primary, 0.1);
   }
 
+  // ===== QUICK TOOLBAR =====
   .quick-toolbar {
     display: flex;
     align-items: center;
@@ -94,7 +95,7 @@
       .ql-editor {
         min-height: 300px;
         padding: $spacing-lg;
-        line-height: 1.4;
+        line-height: 1.8;
 
         &.ql-blank::before {
           color: $admin-text-light;

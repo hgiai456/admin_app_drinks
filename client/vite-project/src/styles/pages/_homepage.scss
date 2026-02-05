@@ -718,6 +718,8 @@
         padding-bottom: 1rem;
         scrollbar-width: thin;
         scrollbar-color: $brown-color $light-color;
+        align-content: center;
+        justify-content: center;
 
         .product-card {
             background: white;
@@ -728,7 +730,7 @@
             border: 1px solid rgba($brown-color, 0.1);
             position: relative;
             width: 100%;
-            max-width: 300px;
+            max-width: 260px;
 
             &:hover {
                 transform: translateY(-6px);
@@ -745,7 +747,7 @@
 
             .product-image {
                 position: relative;
-                height: 180px;
+                height: 150px;
                 overflow: hidden;
 
                 img {
@@ -1719,6 +1721,7 @@
         .products-grid {
             gap: 1rem;
             align-content: center;
+            justify-content: center;
 
             .product-card {
                 flex: 0 0 170px;
@@ -1986,6 +1989,8 @@
 
         .products-grid {
             gap: 0.8rem;
+            align-content: center;
+            justify-content: center;
 
             .product-card {
                 flex: 0 0 140px;
