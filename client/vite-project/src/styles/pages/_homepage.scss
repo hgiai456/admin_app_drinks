@@ -1341,6 +1341,8 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
+        margin-bottom: 10px;
+        padding: 5px;
         gap: 40px;
         flex-wrap: wrap;
     }
@@ -1375,8 +1377,9 @@
     .section-subtitle {
         font-size: 1rem;
         color: $text-secondary;
-        line-height: 1.6;
-        margin: 0;
+        line-height: 1.4;
+        font-weight: 500;
+
     }
 
     .btn-view-all {
@@ -1427,12 +1430,14 @@
         cursor: pointer;
         position: relative;
 
+
         &:hover {
             transform: translateY(-8px);
             box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 
             .news-image img {
-                transform: scale(1.1);
+                transform: scale(1);
+
             }
 
             .news-overlay {
@@ -1455,11 +1460,12 @@
                 grid-row: span 1;
 
                 .news-image {
-                    height: 300px;
+                    height: 350px;
+                    width: 100%;
                 }
 
                 .news-title {
-                    font-size: 1.75rem;
+                    font-size: 1.4rem;
                 }
 
                 .news-excerpt {
@@ -1982,6 +1988,7 @@
     }
 
 }
+
 
 
 @media (max-width: $mobile) {

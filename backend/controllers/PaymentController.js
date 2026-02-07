@@ -362,6 +362,35 @@ export async function checkSePayPayment(req, res) {
         {
           model: db.Order,
           as: "order",
+          include: [
+            {
+              model: db.User,
+              as: "user",
+              attributes: ["id", "name", "email"],
+            },
+            {
+              model: db.OrderDetail,
+              as: "order_details",
+              include: [
+                {
+                  model: db.ProDetail,
+                  as: "product_details",
+                  include: [
+                    {
+                      model: db.Product,
+                      as: "product",
+                      attributes: ["id", "name", "image"],
+                    },
+                    {
+                      model: db.Size,
+                      as: "sizes",
+                      attributes: ["id", "name"],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
         },
       ],
     });
@@ -388,6 +417,37 @@ export async function checkSePayPayment(req, res) {
         },
       });
     }
+
+    const sendEmailAfterPayment = async (paymentData) => {
+      try {
+        const user = paymentData.order.user;
+        if (!user?.email) {
+          console.log("No user email found");
+          return;
+        }
+
+        const emailOrderDetails = (paymentData.order.order_details || []).map(
+          (detail) => ({
+            quantity: detail.quantity,
+            price: detail.price,
+            product_details: {
+              name:
+                detail.product_details?.product?.name ||
+                detail.product_details?.name ||
+                "Sản phẩm",
+              image: detail.product_details?.product?.image || "",
+              size_name: detail.product_details?.sizes?.name || "",
+            },
+          }),
+        );
+
+        await EmailService.sendOrderConfirmation(user.email, {
+          order: paymentData.order,
+          user: user,
+          orderDetails: emailOrderDetails,
+        });
+      } catch (error) {}
+    };
 
     // BƯỚC 3: NẾU CHƯA COMPLETED → THỬ GỌI SEPAY API (optional)
     // Nếu API lỗi thì vẫn trả về pending, không block user
@@ -430,6 +490,7 @@ export async function checkSePayPayment(req, res) {
           }
 
           await transaction.commit();
+          await sendEmailAfterPayment(payment);
 
           console.log("✅ Payment updated via API check!");
 

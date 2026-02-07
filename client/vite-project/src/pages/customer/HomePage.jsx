@@ -8,7 +8,7 @@ import Header from "@components/common/Header.jsx";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { scrollToTop, navigation } from "@utils/editorHelpers";
-import { Flame, X, SearchIcon } from "lucide-react";
+import { Flame, X, SearchIcon, Calendar } from "lucide-react";
 
 export default function HomePage({
   user,
@@ -799,9 +799,8 @@ export default function HomePage({
                   <div className="news-content">
                     <div className="news-meta">
                       <span className="news-date">
-                        📅 {formatDate(item.createdAt)}
+                        <Calendar size={14} /> {formatDate(item.createdAt)}
                       </span>
-                      <span className="news-read-time">⏱️ 3 phút đọc</span>
                     </div>
 
                     <h3 className="news-title">{item.title}</h3>

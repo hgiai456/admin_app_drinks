@@ -4,8 +4,8 @@ import NewsDetailService from "@services/newsdetail.service.js";
 import ProductService from "@services/product.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_newsdetail.scss";
-import { Calendar } from "lucide-react";
-import { sanitizeHtml, scrollToTop } from "@utils/editorHelpers.js";
+import { Calendar, ChevronRight } from "lucide-react";
+import { sanitizeHtml, scrollToTop, formatDate } from "@utils/editorHelpers.js";
 
 function NewsDetailPage({
   user,
@@ -18,6 +18,7 @@ function NewsDetailPage({
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [otherNews, setOtherNews] = useState([]);
 
   // Get news ID from URL hash
   const getNewsIdFromHash = () => {
@@ -76,6 +77,20 @@ function NewsDetailPage({
           console.log("✅ Related products with prices:", related);
           setRelatedProducts(related);
         }
+        try {
+          const allNewsResponse = await NewsService.getPaging({
+            page: 1,
+            search: "",
+          });
+          const allNews = allNewsResponse.data || [];
+          const filtered = allNews
+            .filter((item) => item.id !== newsId)
+            .slice(0, 6); // Lấy tối đa 6 tin
+          setOtherNews(filtered);
+        } catch (newsListError) {
+          console.error("⚠️ Error fetching other news:", newsListError);
+          setOtherNews([]);
+        }
       } catch (error) {
         console.error("❌ Error fetching news detail:", error);
         setError("Không thể tải tin tức. Vui lòng thử lại sau.");
@@ -87,14 +102,12 @@ function NewsDetailPage({
     fetchNewsDetail();
   }, [newsId]);
 
-  // ===== FORMAT DATE =====
-  const formatDate = (dateString) => {
+  const formatShortDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN", {
-      weekday: "long",
+      day: "2-digit",
+      month: "2-digit",
       year: "numeric",
-      month: "long",
-      day: "numeric",
     });
   };
 
@@ -108,6 +121,17 @@ function NewsDetailPage({
   const handleProductClick = (productId) => {
     window.location.hash = `product/${productId}`;
     scrollToTop();
+  };
+
+  const handleOtherNewsClick = (newsItem) => {
+    window.location.hash = `news/${newsItem.id}`;
+    scrollToTop();
+  };
+
+  const getExcerpt = (content, length = 100) => {
+    if (!content) return "Đọc thêm để khám phá nội dung thú vị...";
+    const text = content.replace(/<[^>]*>/g, "");
+    return text.length > length ? text.slice(0, length) + "..." : text;
   };
 
   // ===== LOADING STATE =====
@@ -246,12 +270,31 @@ function NewsDetailPage({
               </section>
             )}
 
-            {/* Back Button */}
-            <div className="news-actions">
-              <button className="btn-back-large" onClick={handleGoBack}>
-                ⬅️ Quay lại danh sách tin tức
-              </button>
-            </div>
+            {otherNews.length > 0 && (
+              <section className="other-news-section">
+                <div className="other-news-header">
+                  <h2 className="other-news-title">CÁC TIN KHÁC</h2>
+                </div>
+
+                <ul className="other-news-list">
+                  {otherNews.map((item) => (
+                    <li
+                      key={item.id}
+                      className="other-news-item"
+                      onClick={() => handleOtherNewsClick(item)}
+                    >
+                      <div className="other-news-icon">▸</div>
+                      <div className="other-news-info">
+                        <h3 className="other-news-item-title">{item.title}</h3>
+                        <span className="other-news-item-date">
+                          ({formatShortDate(item.createdAt)})
+                        </span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </div>
         </article>
       </div>

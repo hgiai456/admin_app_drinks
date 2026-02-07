@@ -67,6 +67,7 @@
   }
 }
 
+
 // ===== HEADER =====
 .news-header {
   margin-bottom: 15px;
@@ -388,8 +389,8 @@
 
 // ===== RELATED PRODUCTS =====
 .related-products {
-  margin-top: 80px;
-  padding-top: 60px;
+  margin-top: 10px;
+  padding-top: 30px;
   border-top: 2px solid #e5e7eb;
 
   .section-title {
@@ -476,9 +477,97 @@
   }
 }
 
+.other-news-section {
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 2px solid #f0ebe6;
+
+  .other-news-header {
+    margin-bottom: 6px;
+  }
+
+  .other-news-title {
+    font-size: 1.5rem;
+    font-weight: $font-weight-bold;
+    color: $admin-text;
+    margin: 0;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .other-news-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .other-news-item {
+    display: flex;
+    gap: 12px;
+    padding: 8px 6px;
+    border-bottom: 1px solid #e5e7eb;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    &:hover {
+      background: rgba($brown-primary, 0.04);
+      padding-left: 20px;
+
+      .other-news-icon {
+        color: $brown-primary;
+        transform: translateX(4px);
+      }
+
+      .other-news-item-title {
+        color: $brown-primary;
+      }
+    }
+  }
+
+  .other-news-icon {
+    font-size: 1.2rem;
+    color: $brown-light;
+    line-height: 1.5;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all 0.3s ease;
+  }
+
+  .other-news-info {
+    display: flex;
+    gap: 4px;
+    justify-content: space-between;
+    margin-top: 3px;
+  }
+
+  .other-news-item-title {
+    font-size: 1.05rem;
+    font-weight: $font-weight-semibold;
+    color: $admin-text;
+    margin: 0;
+    line-height: 1.5;
+    transition: color 0.3s ease;
+  }
+
+  .other-news-item-date {
+    font-size: 0.85rem;
+    color: $text-muted;
+    font-weight: $font-weight-medium ;
+    margin-top: 3px;
+  }
+}
+
 // ===== ACTIONS =====
 .news-actions {
-  margin-top: 64px; // ✅ Tăng từ 60px
+  margin-top: 64px;
   text-align: center;
 
   .btn-back-large {
@@ -614,6 +703,31 @@
     }
   }
 
+  .other-news-section {
+    margin-top: 48px;
+    padding-top: 32px;
+
+    .other-news-title {
+      font-size: 1.35rem;
+    }
+
+    .other-news-item {
+      padding: 14px 10px;
+
+      &:hover {
+        padding-left: 18px;
+      }
+    }
+
+    .other-news-item-title {
+      font-size: 1rem;
+    }
+
+    .other-news-item-date {
+      font-size: 0.8rem;
+    }
+  }
+
   .related-products .section-title {
     font-size: 1.75rem;
   }
@@ -622,6 +736,40 @@
 @media (max-width: $mobile) {
   .news-detail-content {
     padding: 2px 8px;
+  }
+
+  .other-news-section {
+    margin-top: 36px;
+    padding-top: 24px;
+
+    .other-news-title {
+      font-size: 1.2rem;
+      letter-spacing: 0.3px;
+    }
+
+    .other-news-item {
+      padding: 12px 8px;
+      gap: 10px;
+
+      &:hover {
+        padding-left: 16px;
+      }
+    }
+
+    .other-news-icon {
+      font-size: 1rem;
+      margin-top: 3px;
+    }
+
+    .other-news-item-title {
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
+
+    .other-news-item-date {
+      font-size: 0.75rem;
+      margin-top: 2px;
+    }
   }
 
   .breadcrumb {
