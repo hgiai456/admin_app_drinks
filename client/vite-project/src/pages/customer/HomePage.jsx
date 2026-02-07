@@ -8,7 +8,7 @@ import Header from "@components/common/Header.jsx";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { scrollToTop, navigation } from "@utils/editorHelpers";
-import { Flame, X } from "lucide-react";
+import { Flame, X, SearchIcon } from "lucide-react";
 
 export default function HomePage({
   user,
@@ -528,7 +528,8 @@ export default function HomePage({
                   defaultValue={search}
                 />
                 <button type="submit" className="btn-search">
-                  🔍 Tìm kiếm
+                  <SearchIcon size={16} className="search-icon" />
+                  <p className="search-text">Tìm kiếm</p>
                 </button>
                 {search && (
                   <button
@@ -540,7 +541,7 @@ export default function HomePage({
                     }}
                     title="Xóa tìm kiếm"
                   >
-                    ✖️
+                    <X size={20} />
                   </button>
                 )}
               </form>
@@ -570,22 +571,25 @@ export default function HomePage({
                 </button>
               ))}
             </div>
-
-            {selectedCategory !== "all" && (
-              <div className="filter-status">
-                <span className="filter-indicator">
-                  Đang lọc theo:{" "}
-                  <strong>{getCategoryName(parseInt(selectedCategory))}</strong>
-                </span>
-                <button
-                  className="clear-filter-btn"
-                  onClick={() => handleCategoryFilter("all")}
-                  title="Xóa bộ lọc"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-            )}
+            <div className="filter-status-all">
+              {selectedCategory !== "all" && (
+                <div className="filter-status">
+                  <span className="filter-indicator">
+                    Đang lọc theo:{" "}
+                    <strong>
+                      {getCategoryName(parseInt(selectedCategory))}
+                    </strong>
+                  </span>
+                  <button
+                    className="clear-filter-btn"
+                    onClick={() => handleCategoryFilter("all")}
+                    title="Xóa bộ lọc"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {productsLoading ? (

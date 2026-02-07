@@ -6,6 +6,7 @@
 .news-detail-page {
   background: #fff;
   min-height: 100vh;
+  padding: 5px;
 }
 
 .breadcrumb {
@@ -210,7 +211,7 @@
   ul,
   ol {
     margin-bottom: 4px;
-    padding-left: 40px;
+    padding-left: 25px;
     line-height: 1.9;
 
     li {
@@ -580,7 +581,7 @@
 // ===== RESPONSIVE =====
 @media (max-width: $tablet) {
   .news-detail-content {
-    padding: 40px 20px; // ✅ Tăng padding cho tablet
+    padding: 20px 20px; // ✅ Tăng padding cho tablet
   }
 
   .news-header .news-title {
@@ -588,7 +589,7 @@
   }
 
   .news-body {
-    font-size: 1.1rem; // ✅ Giữ size lớn cho tablet
+    font-size: 1.1rem;
     line-height: 1.85;
 
     h1 {
@@ -620,7 +621,7 @@
 
 @media (max-width: $mobile) {
   .news-detail-content {
-    padding: 32px 16px;
+    padding: 2px 8px;
   }
 
   .breadcrumb {
@@ -632,7 +633,7 @@
   }
 
   .news-header {
-    margin-bottom: 36px;
+    margin-bottom: 8px;
 
     .news-title {
       font-size: 1.75rem;
@@ -682,16 +683,18 @@
     }
 
     p {
-      text-align: left; // ✅ Bỏ justify trên mobile
+      text-align: left;
     }
 
     ul,
     ol {
       padding-left: 4px;
       margin-bottom: 4px;
+      margin-left: 4px;
 
       li {
         margin-bottom: 4px;
+        margin-left: 10px;
       }
     }
 

@@ -532,6 +532,11 @@ export async function sepayWebhook(req, res) {
           as: "order",
           include: [
             {
+              model: db.User,
+              as: "user",
+              attributes: ["id", "name", "email"],
+            },
+            {
               model: db.OrderDetail,
               as: "order_details",
               include: [
@@ -539,8 +544,12 @@ export async function sepayWebhook(req, res) {
                   model: db.ProDetail,
                   as: "product_details",
                   include: [
-                    { model: db.Product, as: "product" },
-                    { model: db.Size, as: "sizes" },
+                    {
+                      model: db.Product,
+                      as: "product",
+                      attributes: ["id", "name", "image"],
+                    },
+                    { model: db.Size, as: "sizes", attributes: ["id", "name"] },
                   ],
                 },
               ],
@@ -619,12 +628,27 @@ export async function sepayWebhook(req, res) {
       });
 
       try {
-        const user = await db.User.findByPk(payment.order.user_id);
+        const user = payment.order.user;
         if (user?.email) {
+          const emailOrderDetails = (payment.order.order_details || []).map(
+            (detail) => ({
+              quantity: detail.quantity,
+              price: detail.price,
+              product_details: {
+                name:
+                  detail.product_details?.product?.name ||
+                  detail.product_details?.name ||
+                  "Sản phẩm",
+                image: detail.product_details?.product?.image || "",
+                size_name: detail.product_details?.sizes?.name || "",
+              },
+            }),
+          );
+
           await EmailService.sendOrderConfirmation(user.email, {
             order: payment.order,
             user: user,
-            OrderDetails: payment.order.order_details || [],
+            OrderDetails: emailOrderDetails,
           });
           console.log("📧 Email sent to:", user.email);
         }

@@ -4,7 +4,8 @@ import CategoryService from "@services/category.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_product-page.scss";
 import { formatPrice, scrollToTop } from "@utils/editorHelpers.js";
-import { ShoppingCart, X } from "lucide-react";
+
+import { ShoppingCart, X, Search } from "lucide-react";
 
 export default function ProductPage({
   user,
@@ -164,6 +165,10 @@ export default function ProductPage({
     setPage(1);
     setShowPageSizeDropdown(false);
   };
+  const handleClickDeleteSearch = () => {
+    setSearch("");
+    setPage(1);
+  };
 
   const handlePageChange = (newPage) => {
     if (
@@ -292,28 +297,30 @@ export default function ProductPage({
               )}
             </div>
             <form className="menu-search-form" onSubmit={handleSearchSubmit}>
-              <input
-                name="search"
-                className="menu-search-input"
-                placeholder="Tìm kiếm sản phẩm..."
-                defaultValue={search}
-              />
-              <button type="submit" className="menu-btn-search">
-                🔍 Tìm kiếm
-              </button>
-              {search && (
-                <button
-                  type="button"
-                  className="menu-btn-clear-search"
-                  onClick={() => {
-                    setSearch("");
-                    setPage(1);
-                  }}
-                  title="Xóa tìm kiếm"
-                >
-                  ✖️
+              <div className="menu-search-input-wrapper">
+                <input
+                  name="search"
+                  className="menu-search-input"
+                  placeholder="Tìm kiếm sản phẩm..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search && (
+                  <button
+                    type="button"
+                    className="menu-btn-clear-search-inside"
+                    onClick={handleClickDeleteSearch}
+                    title="Xóa tìm kiếm"
+                  >
+                    <X size={18} />
+                  </button>
+                )}
+
+                <button type="submit" className="menu-btn-search">
+                  <Search size={18} />
+                  <p className="text-btn-search">Tìm kiếm</p>
                 </button>
-              )}
+              </div>
             </form>
           </div>
 
@@ -383,7 +390,7 @@ export default function ProductPage({
           {selectedCategory !== "all" && (
             <div className="menu-filter-status">
               <span className="menu-filter-indicator">
-                🎯 Đang lọc theo:{" "}
+                Đang lọc theo:{" "}
                 <strong>{getCategoryName(parseInt(selectedCategory))}</strong>
               </span>
               <button

@@ -484,11 +484,11 @@ export default function ProductDetailPage({
         </div>
 
         <BestSellerGrid
-          limit={8}
+          limit={5}
           onProductClick={handleViewProduct}
           formatPrice={formatPrice}
           getCategoryName={getCategoryName}
-          title="sẢN PHẨM BÁN CHẠY"
+          title="SẢN PHẨM BÁN CHẠY"
         />
       </div>
     </Layout>
