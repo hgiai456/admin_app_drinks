@@ -312,15 +312,14 @@ export default function ProductPage({
                     onClick={handleClickDeleteSearch}
                     title="Xóa tìm kiếm"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 )}
-
-                <button type="submit" className="menu-btn-search">
-                  <Search size={18} />
-                  <p className="text-btn-search">Tìm kiếm</p>
-                </button>
               </div>
+              <button type="submit" className="menu-btn-search">
+                <Search size={18} />
+                <p className="text-btn-search">Tìm kiếm</p>
+              </button>
             </form>
           </div>
 

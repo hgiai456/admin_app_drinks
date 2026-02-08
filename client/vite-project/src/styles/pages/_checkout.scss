@@ -332,9 +332,6 @@
       order: 2; // Summary xuống dưới
       position: static; // Không sticky trên mobile
 
-      .payment-section-sidebar {
-        display: none; // Ẩn payment trong sidebar trên mobile
-      }
 
       .form-actions-sidebar {
         display: none; // Ẩn buttons trong sidebar trên mobile
@@ -395,10 +392,6 @@
   .order-summary {
     order: 2; // Summary xuống dưới
     position: static; // Không sticky trên mobile
-
-    .payment-section-sidebar {
-      display: none; // Ẩn payment trong sidebar trên mobile
-    }
 
     .form-actions-sidebar {
       display: none;
