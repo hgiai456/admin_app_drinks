@@ -101,13 +101,19 @@
     .meta-item {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 5px;
       font-size: 1rem;
       color: $text-secondary;
       font-weight: $font-weight-medium;
 
       .meta-icon {
-        font-size: 1.25rem;
+        font-size: 1rem;
+        color: $text-muted;
+      }
+
+      .meta-text {
+        font-size: 0.9rem;
+        color: $text-muted;
       }
     }
   }

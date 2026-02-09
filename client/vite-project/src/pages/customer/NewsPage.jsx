@@ -123,11 +123,7 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
         <section className="news-hero">
           <div className="container">
             <div className="hero-content">
-              <h1 className="hero-title">TIN TỨC HG COFFEE</h1>
-              <p className="hero-subtitle">
-                Cập nhật những tin tức mới nhất về cà phê, trà và văn hóa thưởng
-                thức
-              </p>
+              <h1 className="hero-title">TIN TỨC</h1>
             </div>
           </div>
         </section>
@@ -170,15 +166,6 @@ function NewsPage({ user, onLogout, isGuest = false, onLogin, onRegister }) {
 
                 {hasMore && !loading && (
                   <div ref={observerTarget} className="observer-target" />
-                )}
-
-                {!hasMore && newsList.length > 0 && (
-                  <div className="end-message">
-                    <span> Bạn đã xem hết tất cả tin tức!</span>
-                    <button className="btn-scroll-top" onClick={scrollToTop}>
-                      ⬆️ Lên đầu trang
-                    </button>
-                  </div>
                 )}
               </>
             )}

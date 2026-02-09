@@ -1,15 +1,35 @@
 import { useEffect, useState } from "react";
 import OrderService from "@services/order.service.js";
 import "@styles/pages/_order.scss";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
+  Clock,
+  RefreshCw,
+  Truck,
+  CheckCircle,
+  PartyPopper,
+  XCircle,
+  Package,
+  MapPin,
+  Phone,
+  FileText,
+  ChevronDown,
+  ChevronUp,
+  ShoppingBag,
+  CalendarDays,
+} from "lucide-react";
 
 export default function OrderHistory({ user }) {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
   const [error, setError] = useState("");
   const [expandedOrder, setExpandedOrder] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -22,7 +42,6 @@ export default function OrderHistory({ user }) {
         setLoading(true);
         setError("");
 
-        // ✅ GỌI API
         const response = await OrderService.getOrdersByUserId(
           user.id,
           currentPage,
@@ -30,13 +49,9 @@ export default function OrderHistory({ user }) {
 
         console.log("📦 OrderHistory response:", response);
 
-        // ✅ LẤY DATA
-        const ordersData = response?.data || [];
-
-        setOrders(ordersData);
-        setTotalPage(response.totalPage || 1);
-
-        console.log(`✅ Loaded ${ordersData.length} orders`);
+        setOrders(response?.data);
+        setTotalPage(response.totalPage);
+        setTotalOrders(response.totalOrders);
       } catch (err) {
         console.error("❌ Error loading orders:", err);
         setError(err.message || "Không thể tải lịch sử đơn hàng");
@@ -46,15 +61,87 @@ export default function OrderHistory({ user }) {
     };
 
     fetchOrders();
-  }, [user, page]);
+  }, [user, currentPage]);
+
+  const handlePageChange = (newPage) => {
+    if (
+      newPage >= 1 &&
+      newPage <= totalPage &&
+      newPage !== currentPage &&
+      !loading
+    ) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const getPageNumbers = () => {
+    const maxVisible = 5;
+    const pages = [];
+
+    if (totalPage <= maxVisible) {
+      for (let i = 1; i <= totalPage; i++) {
+        pages.push(i);
+      }
+    } else {
+      let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+      let end = start + maxVisible - 1;
+
+      if (end > totalPage) {
+        end = totalPage;
+        start = Math.max(1, end - maxVisible + 1);
+      }
+
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+    }
+
+    return pages;
+  };
 
   const getStatusInfo = (status) => {
     const statusMap = {
-      1: { text: "Chờ xác nhận", class: "status-pending", icon: "⏳" },
-      2: { text: "Đang xử lý", class: "status-processing", icon: "🔄" },
-      3: { text: "Đã giao", class: "status-delivered", icon: "✅" },
-      4: { text: "Hoàn thành", class: "status-completed", icon: "🎉" },
-      0: { text: "Đã hủy", class: "status-cancelled", icon: "❌" },
+      1: {
+        text: "Chờ xác nhận",
+        class: "status-pending",
+        icon: <Clock size={14} />,
+      },
+      2: {
+        text: "Đang xử lý",
+        class: "status-processing",
+        icon: <RefreshCw size={14} />,
+      },
+      3: {
+        text: "Đã giao",
+        class: "status-delivered",
+        icon: <Truck size={14} />,
+      },
+      4: {
+        text: "Hoàn thành",
+        class: "status-completed",
+        icon: <CheckCircle size={14} />,
+      },
+      5: {
+        text: "Đã hủy",
+        class: "status-cancelled",
+        icon: <XCircle size={14} />,
+      },
+      6: {
+        text: "Đã hủy",
+        class: "status-cancelled",
+        icon: <XCircle size={14} />,
+      },
+      7: {
+        text: "Đã hủy",
+        class: "status-cancelled",
+        icon: <XCircle size={14} />,
+      },
+      0: {
+        text: "Đã hủy",
+        class: "status-cancelled",
+        icon: <XCircle size={14} />,
+      },
     };
     return statusMap[status] || statusMap[0];
   };
@@ -90,33 +177,38 @@ export default function OrderHistory({ user }) {
   if (error) {
     return (
       <div className="order-history-container">
-        <div className="error-state">
-          <div className="error-icon">❌</div>
-          <h3>Có lỗi xảy ra</h3>
+        <div className="empty-state">
+          <div className="empty-icon">⚠️</div>
+          <h3>Lỗi tải dữ liệu</h3>
           <p>{error}</p>
           <button
             className="btn-retry"
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              setCurrentPage(1);
+              setError("");
+            }}
           >
-            🔄 Thử lại
+            <RefreshCw size={16} /> Thử lại
           </button>
         </div>
       </div>
     );
   }
 
-  if (!orders.length) {
+  if (orders.length === 0 && currentPage === 1) {
     return (
       <div className="order-history-container">
         <div className="empty-state">
-          <div className="empty-icon">📦</div>
-          <h3>Chưa có đơn hàng</h3>
-          <p>Bạn chưa có đơn hàng nào. Hãy đặt hàng ngay!</p>
+          <div className="empty-icon">
+            <ShoppingBag size={48} />
+          </div>
+          <h3>Chưa có đơn hàng nào</h3>
+          <p>Hãy bắt đầu mua sắm và đặt đơn hàng đầu tiên!</p>
           <button
-            className="btn-shop-now"
+            className="btn-shop"
             onClick={() => (window.location.hash = "home")}
           >
-            🛒 Mua sắm ngay
+            <ShoppingBag size={16} /> Mua sắm ngay
           </button>
         </div>
       </div>
@@ -128,9 +220,18 @@ export default function OrderHistory({ user }) {
       {/* Header */}
       <div className="order-history-header">
         <div className="header-content">
-          <h1>📋 Lịch sử đơn hàng</h1>
+          <h1>
+            <Package size={28} /> Lịch sử đơn hàng
+          </h1>
           <p className="order-count">
-            Tổng <strong>{orders.length}</strong> đơn hàng
+            Tổng <strong>{totalOrders}</strong> đơn hàng
+            {totalPage > 1 && (
+              <span className="page-info">
+                {" "}
+                — Trang <strong>{currentPage}</strong>/
+                <strong>{totalPage}</strong>
+              </span>
+            )}
           </p>
         </div>
       </div>
@@ -160,7 +261,7 @@ export default function OrderHistory({ user }) {
                 </div>
                 <div className="header-right">
                   <span className="order-date">
-                    📅{" "}
+                    <CalendarDays size={14} />{" "}
                     {new Date(order.createdAt).toLocaleDateString("vi-VN", {
                       day: "2-digit",
                       month: "2-digit",
@@ -168,7 +269,7 @@ export default function OrderHistory({ user }) {
                     })}
                   </span>
                   <span className="order-time">
-                    🕐{" "}
+                    <Clock size={14} />{" "}
                     {new Date(order.createdAt).toLocaleTimeString("vi-VN", {
                       hour: "2-digit",
                       minute: "2-digit",
@@ -182,14 +283,18 @@ export default function OrderHistory({ user }) {
                 {/* Quick Info */}
                 <div className="order-quick-info">
                   <div className="info-item">
-                    <span className="info-icon">📍</span>
+                    <span className="info-icon">
+                      <MapPin size={16} />
+                    </span>
                     <div className="info-content">
                       <span className="info-label">Địa chỉ giao hàng</span>
                       <span className="info-value">{order.address}</span>
                     </div>
                   </div>
                   <div className="info-item">
-                    <span className="info-icon">📞</span>
+                    <span className="info-icon">
+                      <Phone size={16} />
+                    </span>
                     <div className="info-content">
                       <span className="info-label">Số điện thoại</span>
                       <span className="info-value">{order.phone}</span>
@@ -197,7 +302,9 @@ export default function OrderHistory({ user }) {
                   </div>
                   {order.note && (
                     <div className="info-item full-width">
-                      <span className="info-icon">📝</span>
+                      <span className="info-icon">
+                        <FileText size={16} />
+                      </span>
                       <div className="info-content">
                         <span className="info-label">Ghi chú</span>
                         <span className="info-value">{order.note}</span>
@@ -221,7 +328,13 @@ export default function OrderHistory({ user }) {
                   className={`toggle-details-btn ${isExpanded ? "active" : ""}`}
                   onClick={() => toggleOrderDetails(order.id)}
                 >
-                  <span className="btn-icon">{isExpanded ? "▲" : "▼"}</span>
+                  <span className="btn-icon">
+                    {isExpanded ? (
+                      <ChevronUp size={16} />
+                    ) : (
+                      <ChevronDown size={16} />
+                    )}
+                  </span>
                   <span className="btn-text">
                     {isExpanded ? "Ẩn chi tiết" : "Xem chi tiết"}
                   </span>
@@ -231,7 +344,9 @@ export default function OrderHistory({ user }) {
                 {isExpanded && (
                   <div className="order-details">
                     <div className="details-header">
-                      <h4>📦 Chi tiết sản phẩm</h4>
+                      <h4>
+                        <Package size={16} /> Chi tiết sản phẩm
+                      </h4>
                       <span className="product-count">
                         {order.order_details?.length || 0} sản phẩm
                       </span>
@@ -241,7 +356,10 @@ export default function OrderHistory({ user }) {
                         <div key={idx} className="product-item">
                           <div className="product-image-wrapper">
                             <img
-                              src={item.product_details?.product?.image}
+                              src={
+                                item.product_details?.product?.image ||
+                                item.product_details?.image
+                              }
                               alt={item.product_details?.name}
                               className="product-image"
                               onError={(e) => {
@@ -280,30 +398,69 @@ export default function OrderHistory({ user }) {
         })}
       </div>
 
-      {/* Pagination */}
+      {/* ✅ PAGINATION - Fixed */}
       {totalPage > 1 && (
         <div className="pagination">
-          <button
-            className="pagination-btn btn-prev"
-            disabled={page <= 1}
-            onClick={() => setPage(page - 1)}
-          >
-            <span className="btn-icon">⬅️</span>
-            <span className="btn-text">Trước</span>
-          </button>
-          <div className="pagination-info">
-            <span className="current-page">{page}</span>
-            <span className="separator">/</span>
-            <span className="total-pages">{totalPage}</span>
+          <div className="pagination-info-text">
+            Trang <strong>{currentPage}</strong> / <strong>{totalPage}</strong>{" "}
+            — Tổng <strong>{totalOrders}</strong> đơn hàng
           </div>
-          <button
-            className="pagination-btn btn-next"
-            disabled={page >= totalPage}
-            onClick={() => setPage(page + 1)}
-          >
-            <span className="btn-text">Tiếp</span>
-            <span className="btn-icon">➡️</span>
-          </button>
+
+          <div className="pagination-controls">
+            {/* First page */}
+            <button
+              className="pagination-btn btn-first"
+              disabled={currentPage === 1 || loading}
+              onClick={() => handlePageChange(1)}
+              title="Trang đầu"
+            >
+              <ChevronsLeft size={18} />
+            </button>
+
+            {/* Previous page */}
+            <button
+              className="pagination-btn btn-prev"
+              disabled={currentPage === 1 || loading}
+              onClick={() => handlePageChange(currentPage - 1)}
+              title="Trang trước"
+            >
+              <ChevronLeft size={18} />
+            </button>
+
+            {/* Page numbers */}
+            <div className="page-numbers">
+              {getPageNumbers().map((pageNum) => (
+                <button
+                  key={pageNum}
+                  className={`pagination-btn btn-page ${currentPage === pageNum ? "active" : ""}`}
+                  onClick={() => handlePageChange(pageNum)}
+                  disabled={loading}
+                >
+                  {pageNum}
+                </button>
+              ))}
+            </div>
+
+            {/* Next page */}
+            <button
+              className="pagination-btn btn-next"
+              disabled={currentPage >= totalPage || loading}
+              onClick={() => handlePageChange(currentPage + 1)}
+              title="Trang sau"
+            >
+              <ChevronRight size={18} />
+            </button>
+
+            {/* Last page */}
+            <button
+              className="pagination-btn btn-last"
+              disabled={currentPage >= totalPage || loading}
+              onClick={() => handlePageChange(totalPage)}
+              title="Trang cuối"
+            >
+              <ChevronsRight size={18} />
+            </button>
+          </div>
         </div>
       )}
     </div>

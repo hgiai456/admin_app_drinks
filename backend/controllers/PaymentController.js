@@ -709,7 +709,7 @@ export async function sepayWebhook(req, res) {
           await EmailService.sendOrderConfirmation(user.email, {
             order: payment.order,
             user: user,
-            OrderDetails: emailOrderDetails,
+            orderDetails: emailOrderDetails,
           });
           console.log("📧 Email sent to:", user.email);
         }

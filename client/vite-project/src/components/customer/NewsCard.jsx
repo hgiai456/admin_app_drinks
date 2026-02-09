@@ -56,25 +56,16 @@ function NewsCard({ news, onClick }) {
           </div>
         )}
 
-        {/* Category Badge */}
         <div className="category-badge">{getCategoryBadge()}</div>
       </div>
 
-      {/* Content */}
       <div className="news-card-content">
-        {/* Meta Info */}
         <div className="news-meta">
           <span className="meta-category">{getCategoryBadge()}</span>
           <span className="meta-date">{formatDate(news.createdAt)}</span>
         </div>
 
-        {/* Title */}
         <h3 className="news-title">{news.title}</h3>
-
-        {/* Excerpt */}
-        <p className="news-excerpt">{getExcerpt(news.content, 120)}</p>
-
-        {/* Read More Link */}
         <button className="read-more">
           <span>Đọc thêm</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">

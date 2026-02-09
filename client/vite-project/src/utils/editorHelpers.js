@@ -106,13 +106,14 @@ export function formatDate(date) {
   const d = new Date(date);
   if (isNaN(d.getTime())) return "-";
 
-  return d.toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = d.getFullYear();
+
+  const hour = String(d.getHours()).padStart(2, "0");
+  const minute = String(d.getMinutes()).padStart(2, "0");
+
+  return `${day}/${month}/${year}, ${hour}:${minute}`;
 }
 
 export function formatPrice(price) {

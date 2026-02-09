@@ -69,27 +69,21 @@ class OrderService extends BaseService {
     }
   }
 
-  // =============================================
-  // ✅ GIỮ NGUYÊN TÊN: getOrdersByUserId (thay vì getByUserId)
-  // =============================================
   async getOrdersByUserId(userId, page = 1) {
     try {
       console.log("🔗 Orders getOrdersByUserId:", { userId, page });
 
-      const response = await api.get(`${this.endpoint}/user/${userId}`, {
-        params: { page },
-      });
+      const response = await api.get(
+        `${this.endpoint}/user/${userId}?page=${page}`,
+      );
+
       const data = response.data;
 
-      console.log("✅ Orders by UserId:", data);
-
       return {
-        data: data.data || data.orders || [],
-        pagination: {
-          currentPage: data.currentPage || page,
-          totalPage: data.totalPage || 1,
-          totalOrders: data.totalOrders || 0,
-        },
+        data: data?.data || data.orders || [],
+        currentPage: data.currentPage,
+        totalPage: data.totalPage || 1,
+        totalOrders: data.totalOrders || 0,
       };
     } catch (error) {
       console.error("❌ Lỗi getOrdersByUserId:", error);

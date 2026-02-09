@@ -14,7 +14,7 @@
 // ===== HERO SECTION =====
 .news-hero {
   background: linear-gradient(135deg, $brown-primary 0%, $brown-dark 100%);
-  padding: 80px 20px;
+  padding: 20px 10px;
   text-align: center;
   color: white;
   position: relative;
@@ -43,7 +43,6 @@
   .hero-title {
     font-size: 2.5rem;
     font-weight: $font-weight-bold;
-    margin-bottom: $spacing-lg;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 
     @media (max-width: $tablet) {
@@ -189,7 +188,6 @@
   // CONTENT
   .news-card-content {
     padding: 24px;
-    flex: 1;
     display: flex;
     flex-direction: column;
   }
@@ -238,8 +236,9 @@
   }
 
   .read-more {
-    display: flex;
+    display: inline-flex;
     align-items: center;
+    align-self: flex-end;
     gap: 8px;
     color: $admin-text;
     font-weight: $font-weight-semibold;
@@ -249,8 +248,10 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 0.95rem;
+    white-space: nowrap;
 
     svg {
+
       transition: transform 0.3s ease;
     }
 
@@ -395,7 +396,7 @@
 
   .news-card {
     .news-card-content {
-      padding: 20px;
+      padding: 15px;
     }
 
     .news-title {
@@ -419,8 +420,10 @@
       align-content: center;
     }
 
-    .news-excerpt {
-      font-size: 0.9rem;
+    .read-more {
+      margin-left: 200px;
+      max-width: fit-content;
     }
+
   }
 }

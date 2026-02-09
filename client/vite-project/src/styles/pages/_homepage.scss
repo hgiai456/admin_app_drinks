@@ -795,7 +795,7 @@
                             $brown-color);
                     color: white;
                     padding: 0.3rem 0.6rem;
-                    border-radius: 12px;
+                    border-radius: 20px;
                     font-size: 0.7rem;
                     font-weight: 600;
                     box-shadow: 0 2px 8px rgba($red-color, 0.3);
@@ -1423,7 +1423,7 @@
 
     .news-card {
         background: white;
-        border-radius: 20px;
+        border-radius: 10px;
         overflow: hidden;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -1456,13 +1456,15 @@
 
         &.featured {
             @media (min-width: $desktop) {
-                grid-column: span 2;
+                grid-column: span 1;
                 grid-row: span 1;
 
                 .news-image {
-                    height: 350px;
+                    height: 250px;
                     width: 100%;
                 }
+
+
 
                 .news-title {
                     font-size: 1.4rem;
@@ -1478,7 +1480,7 @@
 
     .news-image {
         position: relative;
-        height: 280px;
+        height: 250px;
         overflow: hidden;
         background: $gray-200;
 
@@ -1518,7 +1520,7 @@
     }
 
     .news-content {
-        padding: 28px;
+        padding: 20px;
     }
 
     .news-meta {
@@ -1562,10 +1564,11 @@
     }
 
     .btn-read-more {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 12px 24px;
+        margin-left: 250px;
+        gap: 5px;
+        padding: 8px 8px;
         background: $brown-light;
         color: $brown-dark;
         border: none;
@@ -1574,6 +1577,10 @@
         font-weight: $font-weight-semibold;
         cursor: pointer;
         transition: all 0.3s ease;
+
+        .text-read-more {
+            margin-top: 2px;
+        }
 
         .icon {
             font-size: 1.1rem;
@@ -1641,7 +1648,7 @@
 
     // Hero Slider
     .hero-slider {
-        height: 30vh;
+        height: 25vh;
         min-height: 300px;
 
         .slide-content .content-wrapper {
@@ -1905,7 +1912,7 @@
         }
 
         .section-subtitle {
-            font-size: 0.5rem;
+            font-size: 0.9rem;
         }
 
         .btn-view-all {
@@ -1943,11 +1950,15 @@
         }
 
         .news-content {
-            padding: 10px;
+            padding: 5px;
 
             .news-meta {
-                display: none !important;
-                visibility: hidden;
+
+                .news-date {
+                    font-size: 0.8rem;
+                }
+
+
             }
 
             .btn-read-more {
@@ -1965,11 +1976,7 @@
             margin-bottom: 20px;
         }
 
-        .btn-read-more {
-            width: 100%;
-            justify-content: center;
-            padding: 10px 20px;
-        }
+
     }
 
     .filter-status {
@@ -1993,8 +2000,8 @@
 
 @media (max-width: $mobile) {
     .hero-slider {
-        height: 30vh;
-        min-height: 300px;
+        height: 20vh;
+        min-height: 200px;
 
         .slide-content .content-wrapper {
             padding: 0 0.5rem;
@@ -2325,15 +2332,12 @@
         }
 
         .news-content {
-            padding: 16px;
+            padding: 10px;
         }
 
         .news-meta {
             gap: 12px;
-            margin-bottom: 12px;
-            display: none !important;
-            visibility: hidden;
-
+            margin-bottom: 8px;
         }
 
         .news-title {

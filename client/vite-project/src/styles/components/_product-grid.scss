@@ -369,7 +369,7 @@
                 left: $spacing-md;
                 background: linear-gradient(135deg, #FFD700, #FFC107);
                 color: $brown-dark;
-                padding: 6px 14px;
+                padding: 3px 9px;
                 border-radius: 20px;
                 font-size: 0.75rem;
                 font-weight: $font-weight-bold;
@@ -383,7 +383,7 @@
                 right: $spacing-md;
                 background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(10px);
-                padding: 6px 12px;
+                padding: 3px 9px;
                 border-radius: 20px;
                 font-size: 10px;
                 font-weight: $font-weight-bold;
@@ -394,7 +394,7 @@
         }
 
         .product-info {
-            padding: $spacing-lg;
+            padding: $spacing-md;
             display: flex;
             flex-direction: column;
             flex: 1;
@@ -620,17 +620,19 @@
 
             .product-info {
                 .product-name {
-                    font-size: 0.95rem;
+                    font-size: 0.9rem;
                 }
-            }
 
-            .product-footer {
-                .product-price {
-                    .span {
-                        font-size: 0.2rem;
+                .product-footer {
+                    .product-price {
+                        .current-price {
+                            font-size: 1.0rem;
+                        }
                     }
                 }
+
             }
+
         }
     }
 }

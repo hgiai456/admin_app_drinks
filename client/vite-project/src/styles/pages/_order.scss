@@ -3,24 +3,129 @@
 @use 'sass:color';
 
 .order-history-container {
-    max-width: $desktop;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: $spacing-xxl $spacing-lg;
+    padding: $spacing-lg $spacing-md;
     background: $light-color;
-    min-height: 50%;
+    min-height: 30%;
 
-    @media (max-width: $tablet) {
-        padding: $spacing-lg $spacing-md;
+    .pagination {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 32px 20px;
+        margin-top: 20px;
+
+        .pagination-info-text {
+            font-size: 0.9rem;
+            color: $text-muted;
+
+            strong {
+                color: $brown-primary;
+                font-weight: $font-weight-semibold;
+            }
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-numbers {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pagination-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 8px;
+            border: 1.5px solid $gray-200;
+            border-radius: 10px;
+            background: white;
+            color: $admin-text;
+            font-size: 0.9rem;
+            font-weight: $font-weight-semibold;
+            cursor: pointer;
+            transition: all 0.25s ease;
+
+            &:hover:not(:disabled):not(.active) {
+                background: rgba($brown-primary, 0.08);
+                border-color: $brown-primary;
+                color: $brown-primary;
+                transform: translateY(-1px);
+            }
+
+            &.active {
+                background: linear-gradient(135deg, $brown-primary, $brown-dark);
+                color: white;
+                border-color: $brown-primary;
+                box-shadow: 0 4px 12px rgba($brown-primary, 0.3);
+                transform: translateY(-1px);
+            }
+
+            &:disabled {
+                opacity: 0.4;
+                cursor: not-allowed;
+                transform: none;
+            }
+
+            // Arrow buttons
+            &.btn-first,
+            &.btn-last,
+            &.btn-prev,
+            &.btn-next {
+                background: $gray-50;
+
+                svg {
+                    flex-shrink: 0;
+                }
+            }
+        }
     }
 
-    @media (max-width: $mobile) {
-        padding: $spacing-md;
+    .btn-retry,
+    .btn-shop {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        font-weight: $font-weight-semibold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+        margin-top: 16px;
+    }
+
+    .btn-retry {
+        background: rgba($brown-primary, 0.1);
+        color: $brown-primary;
+
+        &:hover {
+            background: $brown-primary;
+            color: white;
+        }
+    }
+
+    .btn-shop {
+        background: linear-gradient(135deg, $brown-primary, $brown-dark);
+        color: white;
+
+        &:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba($brown-primary, 0.3);
+        }
     }
 }
 
-// =============================================
-// ✅ HEADER
-// =============================================
 .order-history-header {
     margin-bottom: $spacing-xxl;
     padding: $spacing-xl;
@@ -655,5 +760,74 @@
 
     50% {
         transform: translateY(-10px);
+    }
+}
+
+@media (max-width: $tablet) {
+    .order-history-container {
+        // ...existing tablet styles...
+
+        .pagination {
+            padding: 24px 16px;
+            gap: 12px;
+
+            .pagination-info-text {
+                font-size: 0.85rem;
+            }
+
+            .pagination-controls {
+                gap: 4px;
+            }
+
+            .pagination-btn {
+                min-width: 36px;
+                height: 36px;
+                font-size: 0.85rem;
+                border-radius: 8px;
+            }
+        }
+    }
+}
+
+@media (max-width: $mobile) {
+    .order-history-container {
+        // ...existing mobile styles...
+
+        .pagination {
+            padding: 20px 12px;
+            gap: 10px;
+
+            .pagination-info-text {
+                font-size: 0.8rem;
+            }
+
+            .pagination-controls {
+                gap: 3px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-numbers {
+                gap: 3px;
+            }
+
+            .pagination-btn {
+                min-width: 34px;
+                height: 34px;
+                font-size: 0.8rem;
+                border-radius: 8px;
+
+                // ✅ Ẩn nút First/Last trên mobile nhỏ
+                &.btn-first,
+                &.btn-last {
+                    display: none;
+                }
+
+                svg {
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+        }
     }
 }

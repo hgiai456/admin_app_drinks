@@ -206,7 +206,7 @@ function NewsDetailPage({
               <div className="news-meta">
                 <div className="meta-item">
                   <span className="meta-icon">
-                    <Calendar size={16} />
+                    <Calendar size={14} />
                   </span>
                   <span className="meta-text">
                     {formatDate(news.createdAt)}

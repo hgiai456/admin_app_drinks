@@ -7,7 +7,7 @@ import Footer from "@components/common/Footer.jsx";
 import Header from "@components/common/Header.jsx";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
-import { scrollToTop, navigation } from "@utils/editorHelpers";
+import { scrollToTop, navigation, formatDate } from "@utils/editorHelpers";
 import { Flame, X, SearchIcon, Calendar } from "lucide-react";
 
 export default function HomePage({
@@ -97,15 +97,6 @@ export default function HomePage({
 
     fetchNews();
   }, []);
-
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
 
   const handleNewsClick = (newsItem) => {
     window.location.hash = `news/${newsItem.id}`;
@@ -737,7 +728,7 @@ export default function HomePage({
       </section>
 
       <BestSellerGrid
-        limit={8}
+        limit={5}
         onProductClick={handleViewProduct}
         onViewMore={() => (window.location.hash = "menu?sort=bestseller")}
         formatPrice={formatPrice}
@@ -799,21 +790,15 @@ export default function HomePage({
                   <div className="news-content">
                     <div className="news-meta">
                       <span className="news-date">
-                        <Calendar size={14} /> {formatDate(item.createdAt)}
+                        <Calendar size={13} className="news-calendar-icon" />{" "}
+                        {formatDate(item.createdAt)}
                       </span>
                     </div>
 
                     <h3 className="news-title">{item.title}</h3>
 
-                    <p className="news-excerpt">
-                      {item.content
-                        ? item.content.replace(/<[^>]*>/g, "").slice(0, 120) +
-                          "..."
-                        : "Đọc thêm để khám phá nội dung thú vị..."}
-                    </p>
-
                     <button className="btn-read-more">
-                      <span>Đọc thêm</span>
+                      <span className="text-read-more">Đọc thêm</span>
                       <span className="icon">→</span>
                     </button>
                   </div>

@@ -4,7 +4,7 @@ import "@styles/components/_product-grid.scss";
 import { navigation } from "@utils/editorHelpers";
 
 export default function BestSellerGrid({
-  limit = 8,
+  limit = 5,
   onProductClick,
   onViewMore,
   formatPrice,
@@ -49,7 +49,7 @@ export default function BestSellerGrid({
     } else {
       setTimeout(() => {
         navigation(`product/${product.id}`);
-      },100);
+      }, 100);
       scrollToTop();
     }
   };
