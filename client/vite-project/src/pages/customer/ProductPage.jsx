@@ -1,11 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ProductService from "@services/product.service.js";
 import CategoryService from "@services/category.service.js";
 import Layout from "@components/common/Layout.jsx";
 import "@styles/pages/_product-page.scss";
 import { formatPrice, scrollToTop } from "@utils/editorHelpers.js";
 
-import { ShoppingCart, X, Search } from "lucide-react";
+import { ShoppingCart, X, Search, ArrowLeft, ArrowRight } from "lucide-react";
 
 export default function ProductPage({
   user,
@@ -26,6 +26,7 @@ export default function ProductPage({
   const [pageSize, setPageSize] = useState(4);
   const [showPageSizeDropdown, setShowPageSizeDropdown] = useState(false);
 
+  const productsGridRef = useRef(null);
   const pageSizeOptions = [
     { value: 4, label: "4 sản phẩm" },
     { value: 8, label: "8 sản phẩm" },
@@ -158,6 +159,17 @@ export default function ProductPage({
 
     fetchProducts();
   }, [page, search, selectedCategory, pageSize]);
+
+  useEffect(() => {
+    if (productsGridRef.current && page > 1) {
+      const yOffset = -100;
+      const element = productsGridRef.current;
+      const y =
+        element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  });
 
   const handlePageSizeChange = (newPageSize) => {
     console.log("📏 Changing page size to:", newPageSize);
@@ -404,12 +416,12 @@ export default function ProductPage({
 
           {/* PRODUCTS GRID */}
           {productsLoading ? (
-            <div className="menu-products-loading">
+            <div className="menu-products-loading" ref={productsGridRef}>
               <div className="menu-loading-spinner">☕</div>
               <p>Đang tải thực đơn...</p>
             </div>
           ) : products.length === 0 ? (
-            <div className="menu-no-products">
+            <div className="menu-no-products " ref={productsGridRef}>
               <div className="menu-no-products-icon">📭</div>
               <h3>Không tìm thấy sản phẩm</h3>
               <p>
@@ -435,6 +447,7 @@ export default function ProductPage({
           ) : (
             <>
               <div
+                ref={productsGridRef}
                 className={`menu-products-grid ${products.length <= 3 ? "menu-few-products" : ""}`}
               >
                 {products.map((product) => (
@@ -507,7 +520,7 @@ export default function ProductPage({
                       disabled={page === 1 || productsLoading}
                       title="Trang trước"
                     >
-                      ⬅️ Trước
+                      <ArrowLeft size={18} />
                     </button>
 
                     <div className="menu-page-numbers">
@@ -541,7 +554,7 @@ export default function ProductPage({
                       disabled={page >= totalPage || productsLoading}
                       title="Trang sau"
                     >
-                      Tiếp ➡️
+                      <ArrowRight size={18} />
                     </button>
                   </div>
                 </div>

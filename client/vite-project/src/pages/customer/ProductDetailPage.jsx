@@ -8,7 +8,16 @@ import "@styles/pages/_productdetail.scss";
 import BestSellerGrid from "@components/common/BestSellerGrid.jsx";
 import { triggerCartRefresh } from "@components/common/UtilityFunction.jsx";
 import { navigation, scrollToTop } from "@utils/editorHelpers.js";
-import { ShoppingCart } from "lucide-react";
+import {
+  ShoppingCart,
+  ShoppingBag,
+  Minus,
+  Plus,
+  Package,
+  ChevronRight,
+  Home,
+  ArrowLeft,
+} from "lucide-react";
 import AlertMessage from "@components/common/AlertMessage.jsx";
 
 export default function ProductDetailPage({
@@ -29,7 +38,7 @@ export default function ProductDetailPage({
       10: "🧋 Trà sữa",
     };
 
-    return categoryMap[categoryId] || "Thức uống";
+    return categoryMap[categoryId];
   };
 
   //State
@@ -62,7 +71,6 @@ export default function ProductDetailPage({
           setError("ID sản phẩm không hợp lệ");
           return;
         }
-        // ===== LOAD DATA =====
         const [productData, allSizesData, productDetailsData] =
           await Promise.all([
             ProductService.getById(id),
@@ -113,13 +121,9 @@ export default function ProductDetailPage({
           };
         });
 
-        console.log("📦 Enriched Product Details:", enrichedProductDetails);
-
-        console.log("🔄 Setting sizes state with:", filteredSizes);
         setSizes(filteredSizes);
         setProductDetails(enrichedProductDetails);
 
-        // Step 5: Auto-select first available size
         if (enrichedProductDetails.length > 0) {
           const firstAvailable = enrichedProductDetails.find(
             (detail) => detail.quantity > 0,
@@ -128,7 +132,6 @@ export default function ProductDetailPage({
 
           setSelectedSize(firstDetail.size_id?.toString());
           setSelectedProductDetail(firstDetail);
-          console.log("✅ Auto-selected size:", firstDetail);
         }
       } catch (error) {
         console.error("❌ Error loading product data:", error);
@@ -152,8 +155,8 @@ export default function ProductDetailPage({
 
   const handleSizeChange = (sizeId) => {
     setSelectedSize(sizeId);
-    setQuantity(1); // Reset quantity
-    setMessage(""); // Clear messages
+    setQuantity(1);
+    setMessage("");
   };
 
   const handleQuantityChange = (newQuantity) => {
@@ -165,6 +168,7 @@ export default function ProductDetailPage({
     setQuantity(newQuantity);
     setMessage("");
   };
+
   const handleAddToCart = async () => {
     try {
       if (!selectedProductDetail) {
@@ -183,9 +187,7 @@ export default function ProductDetailPage({
       setMessage("");
       const userId = user?.id || null;
 
-      // getOrCreatCart -> getOrCreateCart
       const cart = await CartService.getOrCreateCart(userId);
-
       await CartService.addToCart(cart.id, selectedProductDetail.id, quantity);
 
       const guestText = isGuest ? " (khách vãng lai)" : "";
@@ -236,14 +238,6 @@ export default function ProductDetailPage({
     window.history.back();
   };
 
-  const handleGoHome = () => {
-    window.location.hash = "home";
-  };
-
-  const handleGoMenu = () => {
-    window.location.hash = "menu";
-  };
-
   const handleGoToCart = () => {
     window.location.hash = "cart";
   };
@@ -271,7 +265,7 @@ export default function ProductDetailPage({
           <h2>❌ Lỗi</h2>
           <p>{error || "Không tìm thấy sản phẩm"}</p>
           <button onClick={handleGoBack} className="btn-back">
-            ← Quay lại
+            <ArrowLeft size={18} /> Quay lại
           </button>
         </div>
       </Layout>
@@ -280,6 +274,7 @@ export default function ProductDetailPage({
 
   const availableImages = getAvailableImages();
   const discount = calculateDiscount();
+
   return (
     <Layout
       user={user}
@@ -290,6 +285,25 @@ export default function ProductDetailPage({
       onRegister={onRegister}
     >
       <div className="product-detail-container">
+        {/* Breadcrumb */}
+        <nav className="breadcrumb">
+          <button
+            className="breadcrumb-link"
+            onClick={() => (window.location.hash = "home")}
+          >
+            <Home size={14} /> Trang chủ
+          </button>
+          <ChevronRight size={14} className="breadcrumb-separator" />
+          <button
+            className="breadcrumb-link"
+            onClick={() => (window.location.hash = "menu")}
+          >
+            Thực đơn
+          </button>
+          <ChevronRight size={14} className="breadcrumb-separator" />
+          <span className="breadcrumb-current">{product.name}</span>
+        </nav>
+
         <AlertMessage
           message={message}
           type={messageType}
@@ -297,6 +311,7 @@ export default function ProductDetailPage({
         />
 
         <div className="product-detail-content">
+          {/* ===== IMAGE ===== */}
           <div className="product-images">
             <div className="main-image">
               <img
@@ -313,56 +328,61 @@ export default function ProductDetailPage({
             </div>
           </div>
 
+          {/* ===== INFO ===== */}
           <div className="product-info">
+            {/* Category */}
+            <div className="product-category-tag">
+              {getCategoryName(product.category_id)}
+            </div>
+
+            {/* Title */}
             <h1 className="product-title">{product.name}</h1>
 
+            {/* Description */}
             <div className="product-description">
               <p>{product.description}</p>
             </div>
 
+            {/* ✅ PRICING - Gọn gàng */}
             <div className="product-pricing">
               {selectedProductDetail ? (
                 <>
-                  <div className="current-price">
-                    {formatPrice(selectedProductDetail.price)}
-                  </div>
-                  {selectedProductDetail.oldprice &&
-                    selectedProductDetail.oldprice >
-                      selectedProductDetail.price && (
-                      <>
-                        <div className="old-price">
+                  <div className="price-main">
+                    <span className="current-price">
+                      {formatPrice(selectedProductDetail.price)}
+                    </span>
+                    {selectedProductDetail.oldprice &&
+                      selectedProductDetail.oldprice >
+                        selectedProductDetail.price && (
+                        <span className="old-price">
                           {formatPrice(selectedProductDetail.oldprice)}
-                        </div>
-                        <div className="discount-badge">
-                          -{calculateDiscount()}%
-                        </div>
-                      </>
-                    )}
+                        </span>
+                      )}
+                  </div>
+                  {discount > 0 && (
+                    <span className="discount-tag">Giảm {discount}%</span>
+                  )}
                 </>
               ) : (
-                <div className="price-placeholder">👆 Chọn size để xem giá</div>
+                <div className="price-placeholder">Chọn size để xem giá</div>
               )}
             </div>
 
+            {/* ✅ SIZE SELECTOR - Chỉ tên size, không có giá */}
             <div className="size-selector">
-              <h3>📏 Chọn kích thước:</h3>
+              <h3>Kích thước</h3>
 
               {sizes.length === 0 ? (
                 <div className="no-sizes-warning">
-                  <p>⚠️ Đang tải sizes...</p>
+                  <p>Đang tải sizes...</p>
                 </div>
               ) : (
                 <div className="size-options">
                   {sizes.map((size) => {
-                    // Tìm detail tương ứng với size
                     const detail = productDetails.find(
                       (d) => d.size_id === size.id,
                     );
-
-                    if (!detail) {
-                      console.warn(`⚠️ No detail found for size ${size.id}`);
-                      return null; // Skip size này
-                    }
+                    if (!detail) return null;
 
                     const isSelected = selectedSize === size.id?.toString();
                     const isOutOfStock = detail.quantity === 0;
@@ -370,9 +390,7 @@ export default function ProductDetailPage({
                     return (
                       <button
                         key={size.id}
-                        className={`size-option ${
-                          isSelected ? "selected" : ""
-                        } ${isOutOfStock ? "unavailable" : ""}`}
+                        className={`size-option ${isSelected ? "selected" : ""} ${isOutOfStock ? "unavailable" : ""}`}
                         onClick={() => {
                           if (!isOutOfStock) {
                             handleSizeChange(size.id?.toString());
@@ -385,21 +403,11 @@ export default function ProductDetailPage({
                             : `${size.name} - ${formatPrice(detail.price)}`
                         }
                       >
-                        {/* Size Name */}
                         <span className="size-name">{size.name}</span>
-
-                        {/* Price */}
-                        <span className="size-price">
-                          {formatPrice(detail.price)}
-                        </span>
-
-                        {/* Stock Status */}
                         {isOutOfStock && (
                           <span className="stock-status">Hết hàng</span>
                         )}
-
-                        {/* Selected Indicator */}
-                        {isSelected && (
+                        {isSelected && !isOutOfStock && (
                           <span className="selected-indicator">✓</span>
                         )}
                       </button>
@@ -409,17 +417,23 @@ export default function ProductDetailPage({
               )}
             </div>
 
+            {/* ✅ QUANTITY - Gọn hơn */}
             {selectedProductDetail && selectedProductDetail.quantity > 0 && (
               <div className="quantity-selector">
-                <h3>📦 Số lượng:</h3>
+                <div className="quantity-header">
+                  <h3>Số lượng</h3>
+                  <span className="stock-info">
+                    Còn <strong>{selectedProductDetail.quantity}</strong> sản
+                    phẩm
+                  </span>
+                </div>
                 <div className="quantity-controls">
                   <button
                     className="quantity-btn"
                     onClick={() => handleQuantityChange(quantity - 1)}
                     disabled={quantity <= 1}
-                    aria-label="Giảm số lượng"
                   >
-                    −
+                    <Minus size={16} />
                   </button>
                   <input
                     type="number"
@@ -430,20 +444,14 @@ export default function ProductDetailPage({
                     min="1"
                     max={selectedProductDetail.quantity}
                     className="quantity-input"
-                    aria-label="Số lượng"
                   />
                   <button
                     className="quantity-btn"
                     onClick={() => handleQuantityChange(quantity + 1)}
                     disabled={quantity >= selectedProductDetail.quantity}
-                    aria-label="Tăng số lượng"
                   >
-                    +
+                    <Plus size={16} />
                   </button>
-                </div>
-                <div className="stock-info">
-                  Còn lại: <strong>{selectedProductDetail.quantity}</strong> sản
-                  phẩm
                 </div>
               </div>
             )}
@@ -457,6 +465,7 @@ export default function ProductDetailPage({
               </div>
             )}
 
+            {/* ✅ ACTIONS - Gọn gàng */}
             <div className="product-actions">
               <button
                 className="btn-add-to-cart"
@@ -468,7 +477,7 @@ export default function ProductDetailPage({
                 }
               >
                 {addingToCart ? (
-                  <>🔄 Đang thêm...</>
+                  "Đang thêm..."
                 ) : (
                   <>
                     <ShoppingCart size={20} /> Thêm vào giỏ hàng
@@ -477,7 +486,7 @@ export default function ProductDetailPage({
               </button>
 
               <button className="btn-view-cart" onClick={handleGoToCart}>
-                Xem giỏ hàng
+                <ShoppingBag size={20} />
               </button>
             </div>
           </div>
