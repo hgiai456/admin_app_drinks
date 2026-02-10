@@ -8,7 +8,14 @@ import Header from "@components/common/Header.jsx";
 import NewsService from "@services/news.service.js";
 import BestSellerGrid from "@components/common/BestSellerGrid";
 import { scrollToTop, navigation, formatDate } from "@utils/editorHelpers";
-import { Flame, X, SearchIcon, Calendar } from "lucide-react";
+import {
+  Flame,
+  X,
+  SearchIcon,
+  Calendar,
+  ArrowRight,
+  ArrowLeft,
+} from "lucide-react";
 
 export default function HomePage({
   user,
@@ -154,7 +161,6 @@ export default function HomePage({
 
         console.log("✅ Transformed products:", transformedProducts);
 
-        // ✅ SET STATES
         setProducts(transformedProducts);
         setPage(pagination.currentPage || page || 1);
         setTotalPage(pagination.totalPage || 1);
@@ -163,7 +169,6 @@ export default function HomePage({
         console.error("❌ Error fetching products:", error);
         setError("Không thể tải danh sách sản phẩm");
 
-        // ✅ Fallback data
         setProducts([
           {
             id: 1,
@@ -694,7 +699,7 @@ export default function HomePage({
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1 || productsLoading}
                 >
-                  ⬅️
+                  <ArrowLeft size={14} />
                 </button>
 
                 {Array.from({ length: Math.min(5, totalPage) }, (_, i) => {
@@ -719,7 +724,7 @@ export default function HomePage({
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPage || productsLoading}
                 >
-                  ➡️
+                  <ArrowRight size={14} />
                 </button>
               </div>
             </div>

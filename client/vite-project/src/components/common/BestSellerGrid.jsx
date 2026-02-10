@@ -197,7 +197,7 @@ export default function BestSellerGrid({
               onClick={handlePrev}
               aria-label="Previous"
             >
-              <span>‹</span>
+              <span className="carousel-arrow-icon">‹</span>
             </button>
           )}
 
@@ -246,7 +246,6 @@ export default function BestSellerGrid({
                           : ""}
                       </div>
                       <h3 className="product-name">{product.name}</h3>
-
                       <div className="product-footer">
                         <div className="product-price">
                           <span className="current-price">
@@ -269,7 +268,7 @@ export default function BestSellerGrid({
               onClick={handleNext}
               aria-label="Next"
             >
-              <span>›</span>
+              <span className="carousel-arrow-icon">›</span>
             </button>
           )}
         </div>
