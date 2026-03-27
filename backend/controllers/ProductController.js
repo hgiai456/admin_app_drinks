@@ -3,8 +3,8 @@ import db from "../models/index.js";
 const { Op } = Sequelize;
 
 export async function getProducts(req, res) {
-  const { search = "", page = 1 } = req.query;
-  const pageSize = 4;
+  const { search = "", page = 1, limit = 4 } = req.query;
+  const pageSize = parseInt(limit, 10);
   const offset = (page - 1) * pageSize;
 
   let whereClause = {};

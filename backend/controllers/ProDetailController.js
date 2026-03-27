@@ -1,5 +1,7 @@
 import { Sequelize } from "sequelize";
 import db from "../models/index.js";
+import multer from "multer";
+import XLSX from "xlsx";
 const { Op } = Sequelize;
 
 // Lấy danh sách sản phẩm chi tiết
@@ -227,3 +229,5 @@ export async function deleteProDetail(req, res) {
     message: "Không tìm thấy sản phẩm chi tiết.",
   });
 }
+
+

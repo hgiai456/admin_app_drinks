@@ -12,9 +12,11 @@ class BannerService extends BaseService {
   async getPaging(params = { page: 1, search: "" }) {
     try {
       const response = await api.get(this.endpoint, { params });
-      return this.handleResponse(response);
+      return response.data;
     } catch (error) {
-      return this.handleError(error);
+      return new Error(
+        "Lỗi khi tải danh sách banner phân trang: " + error.message,
+      );
     }
   }
 }

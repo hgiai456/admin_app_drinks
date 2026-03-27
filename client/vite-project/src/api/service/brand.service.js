@@ -14,15 +14,12 @@ class BrandService extends BaseService {
 
       const response = await api.get(`${this.endpoint}`);
 
-      console.log("✅ Response status:", response.status);
-      console.log("✅ Response data:", response.data);
-
       const data = response.data;
       const brands = data.data || data.brands || data || [];
 
       return Array.isArray(brands)
         ? brands.map((item) =>
-            Brand?.fromApiResponse ? Brand.fromApiResponse(item) : item
+            Brand?.fromApiResponse ? Brand.fromApiResponse(item) : item,
           )
         : [];
     } catch (error) {
@@ -34,7 +31,7 @@ class BrandService extends BaseService {
   async getPaging({ page = 1, search = "" } = {}) {
     try {
       console.log(
-        `🔗 Gọi API Brands getPaging - page: ${page}, search: "${search}"`
+        `🔗 Gọi API Brands getPaging - page: ${page}, search: "${search}"`,
       );
 
       const params = { page, search };

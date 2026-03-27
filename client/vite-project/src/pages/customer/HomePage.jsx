@@ -132,7 +132,7 @@ export default function HomePage({
           });
         }
 
-        console.log("📦 Raw API response:", response);
+        console.log("API Products:", response);
 
         if (!response || !response.data) {
           setProducts([]);
@@ -159,14 +159,12 @@ export default function HomePage({
           updatedAt: product.updatedAt,
         }));
 
-        console.log("✅ Transformed products:", transformedProducts);
-
         setProducts(transformedProducts);
         setPage(pagination.currentPage || page || 1);
         setTotalPage(pagination.totalPage || 1);
         setTotalItems(pagination.totalItems || 0);
       } catch (error) {
-        console.error("❌ Error fetching products:", error);
+        console.error("Error fetching products:", error);
         setError("Không thể tải danh sách sản phẩm");
 
         setProducts([
@@ -218,22 +216,15 @@ export default function HomePage({
         setLoading(true);
         const response = await BannerService.getAll();
 
-        console.log("📦 Banner API response:", response);
-
         let bannersData = [];
 
         if (response && response.success && Array.isArray(response.data)) {
-          // Case 1: { success: true, data: [...] }
           bannersData = response.data;
         } else if (response && Array.isArray(response.data)) {
-          // Case 2: { data: [...] }
           bannersData = response.data;
         } else if (Array.isArray(response)) {
-          // Case 3: Direct array [...]
           bannersData = response;
         }
-
-        console.log("✅ Banners data:", bannersData);
 
         setBanners(Array.isArray(bannersData) ? bannersData : []);
         setError("");
@@ -274,53 +265,7 @@ export default function HomePage({
   const prevSlide = () =>
     setCurrentSlide((prev) => (prev - 1 + banners.length) % banners.length);
 
-  const handleAddToCart = async (product) => {
-    // try {
-    //   setAddingToCart((prev) => ({ ...prev, [product.id]: true }));
-    //   setMessage("");
-    //   const userId = user?.id || null;
-
-    //   const cart = await CartService.getOrCreateCart(userId);
-    //   const productDetails = await ProductService.getById(product.id);
-
-    //   if (
-    //     !productDetails ||
-    //     !productDetails.sizes ||
-    //     productDetails.sizes.length === 0
-    //   ) {
-    //     setMessage("Sản phẩm không có thông tin chi tiết");
-    //     return;
-    //   }
-
-    //   const availableSize = productDetails.sizes.find(
-    //     (size) => size.quantity > 0,
-    //   );
-
-    //   if (!availableSize) {
-    //     setMessage("❌ Sản phẩm đã hết hàng");
-    //     return;
-    //   }
-
-    //   await CartService.addToCart(cart.id, availableSize.id, 1);
-
-    //   setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
-
-    //   if (isGuest) {
-    //     setMessage(
-    //       `✅ Đã thêm "${product.name}" vào giỏ hàng (khách vãng lai)`,
-    //     );
-    //   } else {
-    //     setMessage(`✅ Đã thêm "${product.name}" vào giỏ hàng`);
-    //   }
-    //   triggerCartRefresh();
-    //   setTimeout(() => setMessage(""), 3000);
-    // } catch (error) {
-    //   console.error("Error adding to cart:", error);
-    //   setMessage("Lỗi khi thêm vào giỏ hàng: " + error.message);
-    // } finally {
-    //   setAddingToCart((prev) => ({ ...prev, [product.id]: false }));
-    // }
-
+  const handleAddToCart = (e, product) => {
     e.stopPropagation();
     handleViewProduct(product);
   };
@@ -341,9 +286,9 @@ export default function HomePage({
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const searchTerm = formData.get("search") || "";
+    e.preventDefault(); //Chặn reload trang khi nhấn nút submit search
+    const formData = new FormData(e.target); //Tạo đôi tượng formData để lấy giá trị từ input search bằng new FormData(e.target)
+    const searchTerm = formData.get("search") || ""; //Lấy giá trị từ input search có name="search" nếu không có trả vè chuỗi rỗng
     setSearch(searchTerm);
     setPage(1); // Reset về trang 1 khi search
   };
@@ -380,7 +325,6 @@ export default function HomePage({
     return categoryMap[categoryId] || "🍽️ Thức uống";
   };
 
-  // ✅ THÊM hàm lấy icon cho category
   const getCategoryIcon = (categoryId) => {
     const iconMap = {
       1: "☕", // Cà phê
@@ -510,7 +454,10 @@ export default function HomePage({
             </p>
 
             <div className="search-bar">
-              <form className="search-form" onSubmit={handleSearchSubmit}>
+              <form
+                className="search-form"
+                onSubmit={(e) => handleSearchSubmit(e)}
+              >
                 <input
                   name="search"
                   className="search-input"
