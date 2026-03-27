@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import BannerService from "@services/banner.service.js";
 import ProductService from "@services/product.service.js";
 import "@styles/pages/_homepage.scss";
@@ -16,6 +16,8 @@ import {
   ArrowRight,
   ArrowLeft,
 } from "lucide-react";
+import useProductSuggestion from "../../hooks/useProductSuggestion";
+import Image from "@components/common/Image";
 
 export default function HomePage({
   user,
@@ -24,6 +26,48 @@ export default function HomePage({
   onLogin,
   onRegister,
 }) {
+  const wrapperRef = useRef(null);
+  //Resolve conflict with search suggestion hook
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const { suggestions = [], loadingSearch } = useProductSuggestion(query);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const onChangeSearch = (e) => {
+    const value = e.target.value;
+    setQuery(value);
+    setOpen(!!value.trim());
+    setActiveIndex(-1);
+    console.log("Query changed:", query);
+    console.log("Suggestions products:", suggestions);
+  };
+
+  const handleSelectSuggestion = (item) => {
+    setQuery(item.name);
+    setOpen(false);
+
+    if (item.id) {
+      navigation(`product/${item.id}`);
+      scrollToTop();
+      return;
+    }
+
+    setSearch(item.name);
+    setPage(1);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const [banners, setBanners] = useState([]);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -287,9 +331,8 @@ export default function HomePage({
 
   const handleSearchSubmit = (e) => {
     e.preventDefault(); //Chặn reload trang khi nhấn nút submit search
-    const formData = new FormData(e.target); //Tạo đôi tượng formData để lấy giá trị từ input search bằng new FormData(e.target)
-    const searchTerm = formData.get("search") || ""; //Lấy giá trị từ input search có name="search" nếu không có trả vè chuỗi rỗng
-    setSearch(searchTerm);
+    setSearch(query.trim()); //Cập nhật state search với giá trị đã trim
+    setOpen(false); //Đóng gợi ý khi submit
     setPage(1); // Reset về trang 1 khi search
   };
 
@@ -453,41 +496,105 @@ export default function HomePage({
               Khám phá những thức uống được yêu thích nhất tại HG Coffee
             </p>
 
-            <div className="search-bar">
-              <form
-                className="search-form"
-                onSubmit={(e) => handleSearchSubmit(e)}
-              >
+            <div className="search-bar" ref={wrapperRef}>
+              <form className="search-form" onSubmit={handleSearchSubmit}>
                 <input
                   name="search"
                   className="search-input"
+                  value={query}
+                  onChange={onChangeSearch}
+                  onFocus={() => query.trim() && setOpen(true)}
+                  onKeyDown={(e) => {
+                    if (!open || suggestions.length === 0) return;
+
+                    if (e.key === "ArrowDown") {
+                      e.preventDefault();
+                      setActiveIndex((prev) =>
+                        prev < suggestions.length - 1 ? prev + 1 : 0,
+                      );
+                    } else if (e.key === "ArrowUp") {
+                      e.preventDefault();
+                      setActiveIndex((prev) =>
+                        prev > 0 ? prev - 1 : suggestions.length - 1,
+                      );
+                    } else if (e.key === "Enter" && activeIndex >= 0) {
+                      e.preventDefault();
+                      handleSelectSuggestion(suggestions[activeIndex]);
+                    } else if (e.key === "Escape") {
+                      setOpen(false);
+                    }
+                  }}
                   placeholder={
                     selectedCategory === "all"
                       ? "Tìm kiếm sản phẩm..."
-                      : `Tìm trong ${getCategoryName(
-                          parseInt(selectedCategory),
-                        ).replace(/^[^\s]+\s/, "")}...`
+                      : `Tìm trong ${getCategoryName(parseInt(selectedCategory)).replace(/^[^\s]+\s/, "")}...`
                   }
-                  defaultValue={search}
+                  autoComplete="off"
                 />
+
                 <button type="submit" className="btn-search">
                   <SearchIcon size={16} className="search-icon" />
                   <p className="search-text">Tìm kiếm</p>
                 </button>
-                {search && (
-                  <button
-                    type="button"
-                    className="btn-clear-search"
-                    onClick={() => {
-                      setSearch("");
-                      setPage(1);
-                    }}
-                    title="Xóa tìm kiếm"
-                  >
-                    <X size={20} />
-                  </button>
-                )}
+
+                <div className="div-clear-search">
+                  {(query || search) && (
+                    <button
+                      type="button"
+                      className="btn-clear-search"
+                      onClick={() => {
+                        setQuery("");
+                        setSearch("");
+                        setPage(1);
+                        setOpen(false);
+                        setActiveIndex(-1);
+                      }}
+                      title="Xóa tìm kiếm"
+                    >
+                      <X size={20} />
+                    </button>
+                  )}
+                </div>
               </form>
+
+              {open && query.trim().length >= 2 && (
+                <div
+                  className={`search-suggest-dropdown ${open ? "open" : ""}`}
+                >
+                  {loadingSearch ? (
+                    <div className="suggest-state">Đang gợi ý...</div>
+                  ) : suggestions.length === 0 ? (
+                    <div className="suggest-state">Không có gợi ý phù hợp</div>
+                  ) : (
+                    suggestions.map((item, index) => (
+                      <button
+                        key={item.id || `${item.name}-${index}`}
+                        type="button"
+                        className={`suggest-item ${activeIndex === index ? "active" : ""}`}
+                        onMouseEnter={() => setActiveIndex(index)}
+                        onClick={() => handleSelectSuggestion(item)}
+                      >
+                        <div className="suggest-info">
+                          <div className="suggest-name">{item.name}</div>
+                          <div className="suggest-price">
+                            {formatPrice(item.product_details?.[0]?.price)}
+                          </div>
+                        </div>
+
+                        <div className="suggest-image">
+                          <Image
+                            src={item.image}
+                            alt={item.name}
+                            width={36}
+                            height={36}
+                            borderRadius={5}
+                          />
+                        </div>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="section-actions">

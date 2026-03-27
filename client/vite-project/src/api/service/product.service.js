@@ -8,18 +8,34 @@ class ProductService extends BaseService {
     super(ENDPOINTS.PRODUCTS.BASE);
   }
 
-  async getAll() {
+  async getAll(search, limit = 8, signal) {
     try {
-      const response = await api.get(this.endpoint);
+      const response = await api.get(this.endpoint, {
+        params: {
+          search,
+          limit,
+        },
+        signal,
+      });
       const data = response.data;
 
       const products = data.data || data.products || data || [];
 
-      return Array.isArray(products)
-        ? products.map((item) =>
-            Product?.fromApiResponse ? Product.fromApiResponse(item) : item,
-          )
-        : [];
+      if (!Array.isArray(products)) {
+        products = [];
+      }
+
+      return products.map((item) => {
+        if (Product?.fromApiResponse) {
+          try {
+            return Product.fromApiResponse(item);
+          } catch (error) {
+            console.error("❌ Error parsing product:", error);
+            return item;
+          }
+        }
+        return item;
+      });
     } catch (error) {
       console.error("❌ Lỗi Products getAll:", error);
       throw new Error("Lỗi khi tải danh sách sản phẩm: " + error.message);

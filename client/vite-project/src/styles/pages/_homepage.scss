@@ -957,8 +957,8 @@
 }
 
 .search-bar {
-    display: flex;
-    justify-content: end;
+    position: relative;
+    display: block;
     margin: 0.2rem 0;
     padding: 1.5rem;
     background: rgba($brown-color, 0.05);
@@ -978,12 +978,15 @@
     .search-form {
         display: flex;
         gap: 0.5rem;
+        position: relative;
+        justify-content: flex-end;
+        z-index: 10;
 
 
         .search-input {
             padding: 0.75rem 1rem;
             border: 2px solid rgba($brown-color, 0.2);
-            border-radius: 25px;
+            border-radius: 5px;
             outline: none;
             min-width: 250px;
             font-size: 0.9rem;
@@ -999,46 +1002,116 @@
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
-            border-radius: 25px;
+            border-radius: 5px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-bottom: 5px;
             display: flex;
             align-items: center;
 
             &:hover {
-                transform: translateY(-2px);
+                transform: translateY(-1px);
                 box-shadow: 0 4px 15px rgba($brown-color, 0.3);
             }
 
             .search-text {
                 margin-left: 3px;
             }
-
-
-
         }
 
-        .btn-clear-search {
-            background: rgba($red-color, 0.1);
-            color: $red-color;
-            border: 1px solid rgba($red-color, 0.3);
-            padding: 0.75rem;
-            border-radius: 50%;
+        .div-clear-search {
             width: 44px;
             height: 44px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
 
-            &:hover {
-                background: $red-color;
-                color: white;
-                transform: scale(1.1);
+            .btn-clear-search {
+                margin-top: 3px;
+                background: rgba($red-color, 0.1);
+                color: $red-color;
+                border: 1px solid rgba($red-color, 0.3);
+                padding: 0.75rem;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+
+                &:hover {
+                    background: $red-color;
+                    color: white;
+                    transform: scale(1.1);
+                }
             }
+        }
+
+    }
+
+
+    .search-suggest-dropdown {
+        position: absolute;
+
+        top: 80%;
+        left: auto;
+        right: 200px;
+        width: auto;
+        min-width: 280px;
+        max-width: calc(100% - 3rem);
+        background: #fff;
+        border: 1px solid #e8edf3;
+        border-radius: 12px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        max-height: 320px;
+        overflow-y: auto;
+        z-index: 9999;
+
+        transform: translateY(-8px) scale(0.98);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.2s ease-out;
+    }
+
+    .search-suggest-dropdown.open {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .suggest-state {
+        padding: 12px 14px;
+        color: #6b7280;
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .suggest-item {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        border: none;
+        background: transparent;
+        padding: 11px 14px;
+        cursor: pointer;
+        text-align: left;
+        transition: background 0.15s ease;
+
+        &:hover,
+        &.active {
+            background: #f8fafc;
+        }
+
+        .suggest-name {
+            font-weight: 500;
+            color: #111827;
+            margin-bottom: 2px;
+        }
+
+        .suggest-price {
+            font-size: 13px;
+            color: #16a34a;
         }
     }
 }
@@ -2172,31 +2245,40 @@
 
     // Search Bar
     .search-bar {
-        padding: 1rem;
-
-        .search-info {
-            font-size: 0.8rem;
-        }
+        position: relative; // mốc định vị dropdown
+        width: 100%;
 
         .search-form {
-            flex-direction: column;
-            gap: 0.5rem;
+            position: relative;
+            z-index: 2;
+        }
 
-            .search-input {
-                font-size: 0.85rem;
-                padding: 0.6rem 0.8rem;
-            }
+        .search-suggest-dropdown {
+            position: absolute;
+            top: calc(100% + 8px); // ngay dưới search
+            left: 0 !important;
+            right: 0 !important; // bám full chiều ngang search-bar
+            width: 100%;
+            margin: 0;
+            transform: translateY(-8px);
+            opacity: 0;
+            visibility: hidden;
 
-            .btn-search {
-                padding: 0.6rem 1rem;
-                font-size: 0.85rem;
+            background: #fff;
+            border: 1px solid #e8edf3;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+            max-height: 320px;
+            overflow-y: auto;
+            z-index: 9999;
 
-            }
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        }
 
-            .btn-clear-search {
-                width: 40px;
-                height: 40px;
-            }
+        .search-suggest-dropdown.open {
+            transform: translateY(0); // hiệu ứng trượt xuống
+            opacity: 1;
+            visibility: visible;
         }
     }
 

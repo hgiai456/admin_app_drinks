@@ -5,10 +5,11 @@ class Product {
     description = "",
     image = "",
     brand_id = 1,
+    price = 0,
     category_id = 0,
     total_buyturn = 0,
     createdAt = null,
-    updatedAt = null
+    updatedAt = null,
   ) {
     this.id = id;
     this.name = name;
@@ -16,10 +17,10 @@ class Product {
     this.image = image;
     this.brand_id = brand_id;
     this.category_id = category_id;
+    this.price = price; // Giá sẽ được lấy từ product_details nếu có
+    this.total_buyturn = total_buyturn;
     this.createdAt = createdAt;
     this.updatedAt = updatedAt;
-    this.total_buyturn = total_buyturn;
-    this.product_details = [];
   }
 
   static fromApiResponse(data) {
@@ -27,13 +28,6 @@ class Product {
       console.error("❌ Data trống trong Product fromApiResponse");
       return null;
     }
-    console.log("🔍 Product.fromApiResponse input:", {
-      id: data.id,
-      name: data.name,
-      hasProductDetails: !!data.product_details,
-      productDetailsLength: data.product_details?.length || 0,
-      firstDetailPrice: data.product_details?.[0]?.price,
-    });
 
     const product = new Product(
       data.id,
@@ -42,16 +36,17 @@ class Product {
       data.image || "",
       data.brand_id || 1,
       data.category_id || 0,
+      data.product_details?.[0]?.price || "",
       data.total_buyturn || 0,
       data.createdAt,
-      data.updatedAt
+      data.updatedAt,
     );
 
     if (data.product_details && Array.isArray(data.product_details)) {
       product.product_details = data.product_details;
       console.log(
         `✅ Preserved product_details for product ${data.id}:`,
-        product.product_details
+        product.product_details,
       );
     } else {
       console.warn(`⚠️ No product_details for product ${data.id}`);
@@ -244,7 +239,7 @@ class Product {
 
   static findByName(list, name) {
     return list.filter((product) =>
-      product.name.toLowerCase().includes(name.toLowerCase())
+      product.name.toLowerCase().includes(name.toLowerCase()),
     );
   }
 
