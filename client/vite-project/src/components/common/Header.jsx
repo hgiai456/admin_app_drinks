@@ -3,6 +3,9 @@ import CartService from "@services/cart.service.js";
 import CartButton from "@components/customer/CartButton";
 import { User, UserPlus, Menu, X } from "lucide-react";
 import "@styles/pages/_header.scss";
+import useScrollHandling from "@hooks/useScrollHandling";
+import classNames from "classnames";
+import { navigation } from "@utils/editorHelpers.js";
 
 export default function Header({
   user,
@@ -17,6 +20,12 @@ export default function Header({
   const [cartItemCount, setCartItemCount] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartLoading, setCartLoading] = useState(false);
+  const { scrollPosition } = useScrollHandling();
+  const [fixedPosition, setFixedPosition] = useState(false);
+
+  useEffect(() => {
+    scrollPosition > 90 ? setFixedPosition(true) : setFixedPosition(false);
+  }, [scrollPosition]);
 
   useEffect(() => {
     loadCartCount();
@@ -107,7 +116,11 @@ export default function Header({
   };
 
   return (
-    <header className="homepage-header">
+    <div
+      className={classNames("homepage-header", {
+        "fixed-top": fixedPosition,
+      })}
+    >
       <div className="header-container">
         {/* Mobile Menu Button */}
         <button
@@ -135,7 +148,7 @@ export default function Header({
             className={`nav-link ${currentPage === "menu" ? "active" : ""}`}
             onClick={(e) => {
               e.preventDefault();
-              window.location.hash = "menu";
+              navigation("menu");
             }}
           >
             MENU
@@ -143,6 +156,10 @@ export default function Header({
           <a
             href="#news"
             className={`nav-link ${currentPage === "news" ? "active" : ""}`}
+            onClick={(e) => {
+              e.preventDefault();
+              navigation("news");
+            }}
           >
             TIN TỨC
           </a>
@@ -292,6 +309,6 @@ export default function Header({
       {isMenuOpen && (
         <div className="mobile-nav-backdrop" onClick={toggleMenu}></div>
       )}
-    </header>
+    </div>
   );
 }

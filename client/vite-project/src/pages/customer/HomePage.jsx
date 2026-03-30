@@ -498,46 +498,41 @@ export default function HomePage({
 
             <div className="search-bar" ref={wrapperRef}>
               <form className="search-form" onSubmit={handleSearchSubmit}>
-                <input
-                  name="search"
-                  className="search-input"
-                  value={query}
-                  onChange={onChangeSearch}
-                  onFocus={() => query.trim() && setOpen(true)}
-                  onKeyDown={(e) => {
-                    if (!open || suggestions.length === 0) return;
+                <div className="search-input-wrapper">
+                  <input
+                    name="search"
+                    className="search-input"
+                    value={query}
+                    onChange={onChangeSearch}
+                    onFocus={() => query.trim() && setOpen(true)}
+                    onKeyDown={(e) => {
+                      if (!open || suggestions.length === 0) return;
 
-                    if (e.key === "ArrowDown") {
-                      e.preventDefault();
-                      setActiveIndex((prev) =>
-                        prev < suggestions.length - 1 ? prev + 1 : 0,
-                      );
-                    } else if (e.key === "ArrowUp") {
-                      e.preventDefault();
-                      setActiveIndex((prev) =>
-                        prev > 0 ? prev - 1 : suggestions.length - 1,
-                      );
-                    } else if (e.key === "Enter" && activeIndex >= 0) {
-                      e.preventDefault();
-                      handleSelectSuggestion(suggestions[activeIndex]);
-                    } else if (e.key === "Escape") {
-                      setOpen(false);
+                      if (e.key === "ArrowDown") {
+                        e.preventDefault();
+                        setActiveIndex((prev) =>
+                          prev < suggestions.length - 1 ? prev + 1 : 0,
+                        );
+                      } else if (e.key === "ArrowUp") {
+                        e.preventDefault();
+                        setActiveIndex((prev) =>
+                          prev > 0 ? prev - 1 : suggestions.length - 1,
+                        );
+                      } else if (e.key === "Enter" && activeIndex >= 0) {
+                        e.preventDefault();
+                        handleSelectSuggestion(suggestions[activeIndex]);
+                      } else if (e.key === "Escape") {
+                        setOpen(false);
+                      }
+                    }}
+                    placeholder={
+                      selectedCategory === "all"
+                        ? "Tìm kiếm sản phẩm..."
+                        : `Tìm trong ${getCategoryName(parseInt(selectedCategory)).replace(/^[^\s]+\s/, "")}...`
                     }
-                  }}
-                  placeholder={
-                    selectedCategory === "all"
-                      ? "Tìm kiếm sản phẩm..."
-                      : `Tìm trong ${getCategoryName(parseInt(selectedCategory)).replace(/^[^\s]+\s/, "")}...`
-                  }
-                  autoComplete="off"
-                />
+                    autoComplete="off"
+                  />
 
-                <button type="submit" className="btn-search">
-                  <SearchIcon size={16} className="search-icon" />
-                  <p className="search-text">Tìm kiếm</p>
-                </button>
-
-                <div className="div-clear-search">
                   {(query || search) && (
                     <button
                       type="button"
@@ -551,50 +546,61 @@ export default function HomePage({
                       }}
                       title="Xóa tìm kiếm"
                     >
-                      <X size={20} />
+                      <X size={16} />
                     </button>
                   )}
+
+                  {open && query.trim().length >= 2 && (
+                    <div
+                      className={`search-suggest-dropdown ${open ? "open" : ""}`}
+                    >
+                      {loadingSearch ? (
+                        <div className="suggest-state">Đang gợi ý...</div>
+                      ) : suggestions.length === 0 ? (
+                        <div className="suggest-state">
+                          Không có gợi ý phù hợp
+                        </div>
+                      ) : (
+                        suggestions.map((item, index) => (
+                          <button
+                            key={item.id || `${item.name}-${index}`}
+                            type="button"
+                            className={`suggest-item ${activeIndex === index ? "active" : ""}`}
+                            onMouseEnter={() => setActiveIndex(index)}
+                            onClick={() => handleSelectSuggestion(item)}
+                          >
+                            <div className="suggest-info">
+                              <div className="suggest-name">{item.name}</div>
+                              <div className="suggest-price">
+                                <p>
+                                  {" "}
+                                  {formatPrice(
+                                    item.product_details?.[0]?.price,
+                                  )}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="suggest-image">
+                              <Image
+                                src={item.image}
+                                alt={item.name}
+                                width={36}
+                                height={36}
+                                borderRadius={5}
+                              />
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  )}
+                  <button type="submit" className="btn-search">
+                    <SearchIcon size={16} className="search-icon" />
+                    <p className="search-text">Tìm kiếm</p>
+                  </button>
                 </div>
               </form>
-
-              {open && query.trim().length >= 2 && (
-                <div
-                  className={`search-suggest-dropdown ${open ? "open" : ""}`}
-                >
-                  {loadingSearch ? (
-                    <div className="suggest-state">Đang gợi ý...</div>
-                  ) : suggestions.length === 0 ? (
-                    <div className="suggest-state">Không có gợi ý phù hợp</div>
-                  ) : (
-                    suggestions.map((item, index) => (
-                      <button
-                        key={item.id || `${item.name}-${index}`}
-                        type="button"
-                        className={`suggest-item ${activeIndex === index ? "active" : ""}`}
-                        onMouseEnter={() => setActiveIndex(index)}
-                        onClick={() => handleSelectSuggestion(item)}
-                      >
-                        <div className="suggest-info">
-                          <div className="suggest-name">{item.name}</div>
-                          <div className="suggest-price">
-                            {formatPrice(item.product_details?.[0]?.price)}
-                          </div>
-                        </div>
-
-                        <div className="suggest-image">
-                          <Image
-                            src={item.image}
-                            alt={item.name}
-                            width={36}
-                            height={36}
-                            borderRadius={5}
-                          />
-                        </div>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
             </div>
 
             <div className="section-actions">
