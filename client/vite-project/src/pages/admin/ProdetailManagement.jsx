@@ -8,6 +8,7 @@ import Prodetail from "@models/prodetail";
 import "@styles/pages/_admin.scss";
 import Modal from "@components/admin/ModelComponent.jsx";
 import { FileText } from "lucide-react";
+import Loading from "../../components/common/Loading";
 
 function ProdetailManagement() {
   const [prodetails, setProdetails] = useState([]);
@@ -355,26 +356,6 @@ function ProdetailManagement() {
     }).format(price);
   };
 
-  // ✅ LOADING STATE
-  if (loadingData) {
-    return (
-      <div className="prodetail-container">
-        <div className="loading-state">
-          <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-          <div
-            style={{
-              fontSize: "14px",
-              color: "#999",
-              marginTop: "8px",
-            }}
-          >
-            Đang tải Products, Sizes, Stores...
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="prodetail-container">
       {/* Message */}
@@ -457,14 +438,8 @@ function ProdetailManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan="10"
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                  }}
-                >
-                  🔄 Đang tải...
+                <td colSpan="8" style={{ padding: "0" }}>
+                  <Loading variant="skeleton" rows={8} cols={8} />
                 </td>
               </tr>
             ) : prodetails.length === 0 ? (

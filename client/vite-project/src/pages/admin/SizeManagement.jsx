@@ -3,6 +3,7 @@ import SizeService from "@services/size.service.js";
 import Modal from "@components/admin/ModelComponent.jsx";
 import "@styles/pages/_admin.scss";
 import { Ruler } from "lucide-react";
+import Loading from "../../components/common/Loading";
 
 function SizeManagement() {
   const [sizes, setSizes] = useState([]);
@@ -274,15 +275,6 @@ function SizeManagement() {
     return "📏";
   };
 
-  // ✅ LOADING STATE
-  if (loadingData) {
-    return (
-      <div className="loading-state">
-        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
-
   // ✅ MAIN RENDER
   return (
     <div className="prodetail-container">
@@ -345,14 +337,8 @@ function SizeManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan="6"
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                  }}
-                >
-                  🔄 Đang tải...
+                <td colSpan="8" style={{ padding: "0" }}>
+                  <Loading variant="skeleton" rows={8} cols={8} />
                 </td>
               </tr>
             ) : sizes.length === 0 ? (

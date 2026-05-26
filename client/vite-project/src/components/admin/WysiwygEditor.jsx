@@ -26,7 +26,7 @@ function WysiwygEditor({
   const quillRef = useRef(null);
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [charCount, setCharCount] = useState(0);
-  const [mounted, setMounted] = useState(false); // 🔥 Track mount state
+  const [mounted, setMounted] = useState(false);
 
   // 🔥 FIX: Đợi component mounted xong mới render ReactQuill
   useEffect(() => {
@@ -57,7 +57,7 @@ function WysiwygEditor({
         matchVisual: false,
       },
     }),
-    []
+    [],
   );
 
   const formats = [

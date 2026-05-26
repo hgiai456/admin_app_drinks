@@ -87,10 +87,10 @@ export default function Header({
       const count = await CartService.getCartItemCount(userId);
       setCartItemCount(count);
       console.log(
-        `📊 Cart count loaded: ${count} (${userId ? "user" : "guest"})`,
+        ` Cart count loaded: ${count} (${userId ? "user" : "guest"})`,
       );
     } catch (error) {
-      console.error("❌ Error loading cart count:", error);
+      console.error(" Error loading cart count:", error);
       setCartItemCount(0);
     } finally {
       setCartLoading(false);

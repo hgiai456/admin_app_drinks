@@ -7,6 +7,7 @@ import "@styles/pages/_admin.scss";
 import "@styles/pages/_order-manager.scss";
 import { ShoppingCart } from "lucide-react";
 import AlertMessage from "@components/common/AlertMessage.jsx";
+import Loading from "../../components/common/Loading";
 
 const getAvailableStatuses = (currentStatus) => {
   const statusFlow = {
@@ -249,14 +250,6 @@ export default function OrderManagement() {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
-
-  if (loadingData) {
-    return (
-      <div className="loading-state">
-        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
 
   const renderDetailModal = () => (
     <div
@@ -569,11 +562,8 @@ export default function OrderManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan="8"
-                  style={{ textAlign: "center", padding: "40px" }}
-                >
-                  🔄 Đang tải...
+                <td colSpan="8" style={{ padding: "0" }}>
+                  <Loading variant="skeleton" rows={8} cols={8} />
                 </td>
               </tr>
             ) : orders.length === 0 ? (

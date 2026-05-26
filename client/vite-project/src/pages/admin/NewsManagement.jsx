@@ -17,6 +17,7 @@ import {
   sanitizeHtml,
   getExcerpt as getHtmlExcerpt,
 } from "@utils/editorHelpers.js";
+import Loading from "../../components/common/Loading";
 
 function NewsManagement() {
   const [newsList, setNewsList] = useState([]);
@@ -336,14 +337,6 @@ function NewsManagement() {
     return getHtmlExcerpt(htmlContent, maxLength);
   };
 
-  if (loadingData) {
-    return (
-      <div className="loading-state">
-        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
-
   // Render Detail Modal
   const renderDetailModal = () => (
     <div className="news-detail-modal">
@@ -446,8 +439,8 @@ function NewsManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan="7" className="loading-cell">
-                  🔄 Đang tải...
+                <td colSpan="8" style={{ padding: "0" }}>
+                  <Loading variant="skeleton" rows={8} cols={8} />
                 </td>
               </tr>
             ) : newsList.length === 0 ? (

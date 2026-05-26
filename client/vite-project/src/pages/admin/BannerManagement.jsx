@@ -6,6 +6,7 @@ import ImagePicker from "@components/admin/ImagePicker";
 import ImageComponent from "@components/common/Image.jsx";
 import Button from "@components/common/Button.jsx";
 import { Image, ImageIcon } from "lucide-react";
+import Loading from "@components/common/Loading.jsx";
 
 function BannerManagement() {
   const [banners, setBanners] = useState([]);
@@ -275,11 +276,7 @@ function BannerManagement() {
   };
 
   if (loadingData) {
-    return (
-      <div className="loading-state">
-        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-      </div>
-    );
+    return <Loading variant="fullpage" text="Đang tải dữ liệu..." size="lg" />;
   }
 
   return (
@@ -344,27 +341,12 @@ function BannerManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan="7"
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                  }}
-                >
-                  🔄 Đang tải...
-                </td>
-              </tr>
-            ) : banners.length === 0 ? (
-              <tr>
-                <td
-                  colSpan="7"
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                    color: "#999",
-                  }}
-                >
-                  🎨 Không có dữ liệu
+                <td>
+                  <Loading
+                    variant="fullpage"
+                    animation="spin"
+                    text="Loading..."
+                  />
                 </td>
               </tr>
             ) : (

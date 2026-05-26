@@ -7,6 +7,7 @@ import ImagePicker from "@components/admin/ImagePicker";
 import ImageComponent from "@components/common/Image.jsx";
 import Button from "@components/common/Button.jsx";
 import { Image, Store } from "lucide-react";
+import Loading from "../../components/common/Loading";
 
 function StoreManagement() {
   const [stores, setStores] = useState([]);
@@ -345,14 +346,6 @@ function StoreManagement() {
     setShowImagePicker(false);
   };
 
-  if (loadingData) {
-    return (
-      <div className="loading-state">
-        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
-
   return (
     <div className="prodetail-container">
       {/* Message Alert */}
@@ -424,7 +417,7 @@ function StoreManagement() {
                     padding: "40px",
                   }}
                 >
-                  🔄 Đang tải...
+                  <Loading variant="skeleton" rows={8} cols={8} />
                 </td>
               </tr>
             ) : stores.length === 0 ? (

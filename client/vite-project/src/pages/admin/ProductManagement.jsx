@@ -8,6 +8,7 @@ import ImagePicker from "../../components/admin/ImagePicker";
 import ImageComponent from "../../components/common/Image.jsx";
 import { Image, Package } from "lucide-react";
 import Button from "@components/common/Button.jsx";
+import Loading from "../../components/common/Loading.jsx";
 
 function ProductManagement() {
   const [products, setProducts] = useState([]);
@@ -290,13 +291,6 @@ function ProductManagement() {
     setForm((prev) => ({ ...prev, image: imagePath }));
     setShowImagePicker(false);
   };
-  if (loadingData) {
-    return (
-      <div className="loading-state">
-        <div className="loading-text">🔄 Đang tải dữ liệu...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="prodetail-container">
@@ -362,14 +356,8 @@ function ProductManagement() {
           <tbody>
             {loading ? (
               <tr>
-                <td
-                  colSpan="8"
-                  style={{
-                    textAlign: "center",
-                    padding: "40px",
-                  }}
-                >
-                  🔄 Đang tải...
+                <td colSpan="8" style={{ padding: "0" }}>
+                  <Loading variant="skeleton" rows={8} cols={8} />
                 </td>
               </tr>
             ) : products.length === 0 ? (
